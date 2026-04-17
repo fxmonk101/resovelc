@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_profiles: {
+        Row: {
+          account_number: string
+          address: string | null
+          business_balance: number
+          business_name: string
+          city: string | null
+          created_at: string
+          ein: string | null
+          employees: number | null
+          id: string
+          industry: string
+          is_verified: boolean
+          monthly_revenue: number | null
+          state: string | null
+          updated_at: string
+          user_id: string
+          zip: string | null
+        }
+        Insert: {
+          account_number?: string
+          address?: string | null
+          business_balance?: number
+          business_name: string
+          city?: string | null
+          created_at?: string
+          ein?: string | null
+          employees?: number | null
+          id?: string
+          industry: string
+          is_verified?: boolean
+          monthly_revenue?: number | null
+          state?: string | null
+          updated_at?: string
+          user_id: string
+          zip?: string | null
+        }
+        Update: {
+          account_number?: string
+          address?: string | null
+          business_balance?: number
+          business_name?: string
+          city?: string | null
+          created_at?: string
+          ein?: string | null
+          employees?: number | null
+          id?: string
+          industry?: string
+          is_verified?: boolean
+          monthly_revenue?: number | null
+          state?: string | null
+          updated_at?: string
+          user_id?: string
+          zip?: string | null
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -41,6 +98,209 @@ export type Database = {
           message?: string
           status?: string
           subject?: string
+        }
+        Relationships: []
+      }
+      credit_card_applications: {
+        Row: {
+          admin_notes: string | null
+          annual_income: number | null
+          card_type: string
+          created_at: string
+          employment_status: string | null
+          id: string
+          reference: string
+          requested_limit: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          annual_income?: number | null
+          card_type: string
+          created_at?: string
+          employment_status?: string | null
+          id?: string
+          reference?: string
+          requested_limit: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          annual_income?: number | null
+          card_type?: string
+          created_at?: string
+          employment_status?: string | null
+          id?: string
+          reference?: string
+          requested_limit?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_cards: {
+        Row: {
+          application_id: string | null
+          available_credit: number
+          card_number: string
+          card_type: string
+          created_at: string
+          credit_limit: number
+          current_balance: number
+          cvv: string
+          expiry: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          available_credit?: number
+          card_number?: string
+          card_type: string
+          created_at?: string
+          credit_limit?: number
+          current_balance?: number
+          cvv?: string
+          expiry?: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string | null
+          available_credit?: number
+          card_number?: string
+          card_type?: string
+          created_at?: string
+          credit_limit?: number
+          current_balance?: number
+          cvv?: string
+          expiry?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_cards_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "credit_card_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grant_applications: {
+        Row: {
+          admin_notes: string | null
+          amount_requested: number
+          approved_amount: number | null
+          created_at: string
+          hardship_description: string | null
+          household_income: number | null
+          household_size: number | null
+          id: string
+          program: string
+          purpose: string
+          reference: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount_requested: number
+          approved_amount?: number | null
+          created_at?: string
+          hardship_description?: string | null
+          household_income?: number | null
+          household_size?: number | null
+          id?: string
+          program: string
+          purpose: string
+          reference?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount_requested?: number
+          approved_amount?: number | null
+          created_at?: string
+          hardship_description?: string | null
+          household_income?: number | null
+          household_size?: number | null
+          id?: string
+          program?: string
+          purpose?: string
+          reference?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      loan_applications: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          annual_income: number | null
+          approved_amount: number | null
+          created_at: string
+          employer: string | null
+          employment_status: string | null
+          id: string
+          interest_rate: number | null
+          loan_type: string
+          purpose: string
+          reference: string
+          status: string
+          term_months: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          annual_income?: number | null
+          approved_amount?: number | null
+          created_at?: string
+          employer?: string | null
+          employment_status?: string | null
+          id?: string
+          interest_rate?: number | null
+          loan_type: string
+          purpose: string
+          reference?: string
+          status?: string
+          term_months: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          annual_income?: number | null
+          approved_amount?: number | null
+          created_at?: string
+          employer?: string | null
+          employment_status?: string | null
+          id?: string
+          interest_rate?: number | null
+          loan_type?: string
+          purpose?: string
+          reference?: string
+          status?: string
+          term_months?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -131,15 +391,43 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_username_available: { Args: { _username: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -266,6 +554,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
