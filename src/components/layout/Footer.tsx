@@ -15,10 +15,10 @@ const COLS = [
   {
     title: "Services",
     links: [
-      { to: "/grants", label: "Personal Banking" },
-      { to: "/grants", label: "Business Banking" },
-      { to: "/grants", label: "Loans" },
-      { to: "/grants", label: "Investments" },
+      { to: "/personal", label: "Personal Banking" },
+      { to: "/business", label: "Business Banking" },
+      { to: "/credit-cards", label: "Credit Cards" },
+      { to: "/loans", label: "Loans & Credit" },
     ],
   },
   {

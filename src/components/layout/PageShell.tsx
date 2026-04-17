@@ -5,7 +5,7 @@ import { Footer } from "./Footer";
 
 export function PageShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col bg-ivory">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <motion.main
         initial={{ opacity: 0, y: 16 }}
