@@ -4,8 +4,7 @@ function Stat({ target, prefix = "", suffix = "", label, decimals = 0 }: { targe
   const { ref, value } = useCountUp(target, 1600, decimals);
   return (
     <div className="text-center">
-      <div className="font-display text-4xl md:text-5xl font-bold text-slate-deep">
-        <span ref={ref}>
+      <div ref={ref} className="font-display text-4xl md:text-5xl font-bold text-slate-deep">
         {prefix}{value.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{suffix}
       </div>
       <div className="text-label text-slate-light mt-2">{label}</div>
