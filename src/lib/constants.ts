@@ -22,9 +22,16 @@ export const STATS = [
   { value: 24, suffix: "/7", label: "Support" },
 ] as const;
 
-export const RATES = [
+export interface Rate {
+  title: string;
+  rate: string;
+  unit: string;
+  badge: string;
+  featured?: boolean;
+}
+export const RATES: Rate[] = [
   { title: "High-Yield Savings", rate: "3.75%", unit: "APY", badge: "Featured", featured: true },
   { title: "18-Month Certificate", rate: "3.65%", unit: "APY", badge: "Savings" },
   { title: "Rewards Credit Card", rate: "4.00%", unit: "APR", badge: "Credit" },
   { title: "Personal Loans", rate: "5.49%", unit: "APR", badge: "Loans" },
-] as const;
+];
