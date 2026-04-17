@@ -10,10 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as PersonalRouteImport } from './routes/personal'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LoansRouteImport } from './routes/loans'
 import { Route as GrantsRouteImport } from './routes/grants'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CreditCardsRouteImport } from './routes/credit-cards'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as BusinessRouteImport } from './routes/business'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -22,9 +26,19 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PersonalRoute = PersonalRouteImport.update({
+  id: '/personal',
+  path: '/personal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoansRoute = LoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GrantsRoute = GrantsRouteImport.update({
@@ -37,9 +51,19 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreditCardsRoute = CreditCardsRouteImport.update({
+  id: '/credit-cards',
+  path: '/credit-cards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessRoute = BusinessRouteImport.update({
+  id: '/business',
+  path: '/business',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -56,29 +80,41 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/business': typeof BusinessRoute
   '/contact': typeof ContactRoute
+  '/credit-cards': typeof CreditCardsRoute
   '/dashboard': typeof DashboardRoute
   '/grants': typeof GrantsRoute
+  '/loans': typeof LoansRoute
   '/login': typeof LoginRoute
+  '/personal': typeof PersonalRoute
   '/register': typeof RegisterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/business': typeof BusinessRoute
   '/contact': typeof ContactRoute
+  '/credit-cards': typeof CreditCardsRoute
   '/dashboard': typeof DashboardRoute
   '/grants': typeof GrantsRoute
+  '/loans': typeof LoansRoute
   '/login': typeof LoginRoute
+  '/personal': typeof PersonalRoute
   '/register': typeof RegisterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/business': typeof BusinessRoute
   '/contact': typeof ContactRoute
+  '/credit-cards': typeof CreditCardsRoute
   '/dashboard': typeof DashboardRoute
   '/grants': typeof GrantsRoute
+  '/loans': typeof LoansRoute
   '/login': typeof LoginRoute
+  '/personal': typeof PersonalRoute
   '/register': typeof RegisterRoute
 }
 export interface FileRouteTypes {
@@ -86,38 +122,54 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/business'
     | '/contact'
+    | '/credit-cards'
     | '/dashboard'
     | '/grants'
+    | '/loans'
     | '/login'
+    | '/personal'
     | '/register'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/business'
     | '/contact'
+    | '/credit-cards'
     | '/dashboard'
     | '/grants'
+    | '/loans'
     | '/login'
+    | '/personal'
     | '/register'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/business'
     | '/contact'
+    | '/credit-cards'
     | '/dashboard'
     | '/grants'
+    | '/loans'
     | '/login'
+    | '/personal'
     | '/register'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  BusinessRoute: typeof BusinessRoute
   ContactRoute: typeof ContactRoute
+  CreditCardsRoute: typeof CreditCardsRoute
   DashboardRoute: typeof DashboardRoute
   GrantsRoute: typeof GrantsRoute
+  LoansRoute: typeof LoansRoute
   LoginRoute: typeof LoginRoute
+  PersonalRoute: typeof PersonalRoute
   RegisterRoute: typeof RegisterRoute
 }
 
@@ -130,11 +182,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/personal': {
+      id: '/personal'
+      path: '/personal'
+      fullPath: '/personal'
+      preLoaderRoute: typeof PersonalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loans': {
+      id: '/loans'
+      path: '/loans'
+      fullPath: '/loans'
+      preLoaderRoute: typeof LoansRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/grants': {
@@ -151,11 +217,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/credit-cards': {
+      id: '/credit-cards'
+      path: '/credit-cards'
+      fullPath: '/credit-cards'
+      preLoaderRoute: typeof CreditCardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/business': {
+      id: '/business'
+      path: '/business'
+      fullPath: '/business'
+      preLoaderRoute: typeof BusinessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -178,12 +258,25 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  BusinessRoute: BusinessRoute,
   ContactRoute: ContactRoute,
+  CreditCardsRoute: CreditCardsRoute,
   DashboardRoute: DashboardRoute,
   GrantsRoute: GrantsRoute,
+  LoansRoute: LoansRoute,
   LoginRoute: LoginRoute,
+  PersonalRoute: PersonalRoute,
   RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
