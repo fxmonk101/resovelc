@@ -1,26 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PageShell } from "@/components/layout/PageShell";
+import { HeroSection } from "@/features/home/HeroSection";
+import { StatsBar } from "@/features/home/StatsBar";
+import { RatesSection } from "@/features/home/RatesSection";
+import { ServicesGrid } from "@/features/home/ServicesGrid";
+import { PromoBanner } from "@/features/home/PromoBanner";
+import { TestimonialsSection } from "@/features/home/TestimonialsSection";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Resolve Case — Banking built for recovery and growth" },
+      { name: "description", content: "Open a high-yield account, recover lost funds, and manage your money with modern banking tools." },
+      { property: "og:title", content: "Resolve Case — Modern Digital Banking" },
+      { property: "og:description", content: "High-yield savings, fund recovery, business banking, and grants — all in one membership." },
+    ],
+  }),
+  component: HomePage,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function HomePage() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <PageShell>
+      <HeroSection />
+      <StatsBar />
+      <RatesSection />
+      <ServicesGrid />
+      <PromoBanner />
+      <TestimonialsSection />
+    </PageShell>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
