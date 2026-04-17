@@ -15,6 +15,14 @@ export const NAV_LINKS = [
   { to: "/contact", label: "Contact" },
 ] as const;
 
+export const SERVICE_LINKS = [
+  { to: "/personal", label: "Personal Banking", desc: "Checking, savings, and money market accounts." },
+  { to: "/business", label: "Business Banking", desc: "Cash flow, payroll, and growth tools." },
+  { to: "/credit-cards", label: "Credit Cards", desc: "Rewards cards with transparent rates." },
+  { to: "/loans", label: "Loans & Credit", desc: "Personal, auto, and home loans." },
+  { to: "/grants", label: "Grants & Aids", desc: "Funding programs for members." },
+] as const;
+
 export const STATS = [
   { value: 50000, suffix: "+", label: "Members" },
   { value: 2.5, prefix: "$", suffix: "B+", label: "Assets", decimals: 1 },
