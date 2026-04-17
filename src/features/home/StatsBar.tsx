@@ -1,11 +1,25 @@
 import { useCountUp } from "@/hooks/useCountUp";
 
-function Stat({ target, prefix = "", suffix = "", label, decimals = 0 }: { target: number; prefix?: string; suffix?: string; label: string; decimals?: number }) {
+type StatProps = {
+  target: number;
+  prefix?: string;
+  suffix?: string;
+  label: string;
+  decimals?: number;
+};
+
+function Stat({ target, prefix = "", suffix = "", label, decimals = 0 }: StatProps) {
   const { ref, value } = useCountUp(target, 1600, decimals);
+  const formatted = value.toLocaleString(undefined, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
   return (
     <div className="text-center">
       <div ref={ref} className="font-display text-4xl md:text-5xl font-bold text-slate-deep">
-        {prefix}{value.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{suffix}
+        {prefix}
+        {formatted}
+        {suffix}
       </div>
       <div className="text-label text-slate-light mt-2">{label}</div>
     </div>
