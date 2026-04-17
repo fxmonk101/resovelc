@@ -20,6 +20,13 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BusinessRouteImport } from './routes/business'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
+import { Route as DashboardPersonalRouteImport } from './routes/dashboard.personal'
+import { Route as DashboardLoansRouteImport } from './routes/dashboard.loans'
+import { Route as DashboardGrantsRouteImport } from './routes/dashboard.grants'
+import { Route as DashboardCardsRouteImport } from './routes/dashboard.cards'
+import { Route as DashboardBusinessRouteImport } from './routes/dashboard.business'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -76,6 +83,41 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardProfileRoute = DashboardProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardPersonalRoute = DashboardPersonalRouteImport.update({
+  id: '/personal',
+  path: '/personal',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardLoansRoute = DashboardLoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardGrantsRoute = DashboardGrantsRouteImport.update({
+  id: '/grants',
+  path: '/grants',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCardsRoute = DashboardCardsRouteImport.update({
+  id: '/cards',
+  path: '/cards',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardBusinessRoute = DashboardBusinessRouteImport.update({
+  id: '/business',
+  path: '/business',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -83,12 +125,19 @@ export interface FileRoutesByFullPath {
   '/business': typeof BusinessRoute
   '/contact': typeof ContactRoute
   '/credit-cards': typeof CreditCardsRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/grants': typeof GrantsRoute
   '/loans': typeof LoansRoute
   '/login': typeof LoginRoute
   '/personal': typeof PersonalRoute
   '/register': typeof RegisterRoute
+  '/dashboard/business': typeof DashboardBusinessRoute
+  '/dashboard/cards': typeof DashboardCardsRoute
+  '/dashboard/grants': typeof DashboardGrantsRoute
+  '/dashboard/loans': typeof DashboardLoansRoute
+  '/dashboard/personal': typeof DashboardPersonalRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -96,12 +145,18 @@ export interface FileRoutesByTo {
   '/business': typeof BusinessRoute
   '/contact': typeof ContactRoute
   '/credit-cards': typeof CreditCardsRoute
-  '/dashboard': typeof DashboardRoute
   '/grants': typeof GrantsRoute
   '/loans': typeof LoansRoute
   '/login': typeof LoginRoute
   '/personal': typeof PersonalRoute
   '/register': typeof RegisterRoute
+  '/dashboard/business': typeof DashboardBusinessRoute
+  '/dashboard/cards': typeof DashboardCardsRoute
+  '/dashboard/grants': typeof DashboardGrantsRoute
+  '/dashboard/loans': typeof DashboardLoansRoute
+  '/dashboard/personal': typeof DashboardPersonalRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -110,12 +165,19 @@ export interface FileRoutesById {
   '/business': typeof BusinessRoute
   '/contact': typeof ContactRoute
   '/credit-cards': typeof CreditCardsRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/grants': typeof GrantsRoute
   '/loans': typeof LoansRoute
   '/login': typeof LoginRoute
   '/personal': typeof PersonalRoute
   '/register': typeof RegisterRoute
+  '/dashboard/business': typeof DashboardBusinessRoute
+  '/dashboard/cards': typeof DashboardCardsRoute
+  '/dashboard/grants': typeof DashboardGrantsRoute
+  '/dashboard/loans': typeof DashboardLoansRoute
+  '/dashboard/personal': typeof DashboardPersonalRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,6 +193,13 @@ export interface FileRouteTypes {
     | '/login'
     | '/personal'
     | '/register'
+    | '/dashboard/business'
+    | '/dashboard/cards'
+    | '/dashboard/grants'
+    | '/dashboard/loans'
+    | '/dashboard/personal'
+    | '/dashboard/profile'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -138,12 +207,18 @@ export interface FileRouteTypes {
     | '/business'
     | '/contact'
     | '/credit-cards'
-    | '/dashboard'
     | '/grants'
     | '/loans'
     | '/login'
     | '/personal'
     | '/register'
+    | '/dashboard/business'
+    | '/dashboard/cards'
+    | '/dashboard/grants'
+    | '/dashboard/loans'
+    | '/dashboard/personal'
+    | '/dashboard/profile'
+    | '/dashboard'
   id:
     | '__root__'
     | '/'
@@ -157,6 +232,13 @@ export interface FileRouteTypes {
     | '/login'
     | '/personal'
     | '/register'
+    | '/dashboard/business'
+    | '/dashboard/cards'
+    | '/dashboard/grants'
+    | '/dashboard/loans'
+    | '/dashboard/personal'
+    | '/dashboard/profile'
+    | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -165,7 +247,7 @@ export interface RootRouteChildren {
   BusinessRoute: typeof BusinessRoute
   ContactRoute: typeof ContactRoute
   CreditCardsRoute: typeof CreditCardsRoute
-  DashboardRoute: typeof DashboardRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   GrantsRoute: typeof GrantsRoute
   LoansRoute: typeof LoansRoute
   LoginRoute: typeof LoginRoute
@@ -252,8 +334,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/profile': {
+      id: '/dashboard/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/personal': {
+      id: '/dashboard/personal'
+      path: '/personal'
+      fullPath: '/dashboard/personal'
+      preLoaderRoute: typeof DashboardPersonalRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/loans': {
+      id: '/dashboard/loans'
+      path: '/loans'
+      fullPath: '/dashboard/loans'
+      preLoaderRoute: typeof DashboardLoansRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/grants': {
+      id: '/dashboard/grants'
+      path: '/grants'
+      fullPath: '/dashboard/grants'
+      preLoaderRoute: typeof DashboardGrantsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/cards': {
+      id: '/dashboard/cards'
+      path: '/cards'
+      fullPath: '/dashboard/cards'
+      preLoaderRoute: typeof DashboardCardsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/business': {
+      id: '/dashboard/business'
+      path: '/business'
+      fullPath: '/dashboard/business'
+      preLoaderRoute: typeof DashboardBusinessRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
+
+interface DashboardRouteChildren {
+  DashboardBusinessRoute: typeof DashboardBusinessRoute
+  DashboardCardsRoute: typeof DashboardCardsRoute
+  DashboardGrantsRoute: typeof DashboardGrantsRoute
+  DashboardLoansRoute: typeof DashboardLoansRoute
+  DashboardPersonalRoute: typeof DashboardPersonalRoute
+  DashboardProfileRoute: typeof DashboardProfileRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardBusinessRoute: DashboardBusinessRoute,
+  DashboardCardsRoute: DashboardCardsRoute,
+  DashboardGrantsRoute: DashboardGrantsRoute,
+  DashboardLoansRoute: DashboardLoansRoute,
+  DashboardPersonalRoute: DashboardPersonalRoute,
+  DashboardProfileRoute: DashboardProfileRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -261,7 +416,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessRoute: BusinessRoute,
   ContactRoute: ContactRoute,
   CreditCardsRoute: CreditCardsRoute,
-  DashboardRoute: DashboardRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   GrantsRoute: GrantsRoute,
   LoansRoute: LoansRoute,
   LoginRoute: LoginRoute,

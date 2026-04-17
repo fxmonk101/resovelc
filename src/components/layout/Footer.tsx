@@ -1,64 +1,70 @@
 import { Link } from "@tanstack/react-router";
-import { Shield, Twitter, Linkedin, Facebook } from "lucide-react";
+import { Landmark, Twitter, Linkedin, Facebook, Lock, ShieldCheck } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 
 const COLS = [
   {
-    title: "Quick Links",
+    title: "Personal",
     links: [
-      { to: "/", label: "Home" },
-      { to: "/about", label: "About" },
-      { to: "/contact", label: "Contact" },
-      { to: "/grants", label: "Grants" },
+      { to: "/personal", label: "Checking & Savings" },
+      { to: "/credit-cards", label: "Credit Cards" },
+      { to: "/loans", label: "Loans & Mortgages" },
+      { to: "/grants", label: "Grants & Aid" },
     ],
   },
   {
-    title: "Services",
+    title: "Business",
     links: [
-      { to: "/personal", label: "Personal Banking" },
       { to: "/business", label: "Business Banking" },
-      { to: "/credit-cards", label: "Credit Cards" },
-      { to: "/loans", label: "Loans & Credit" },
+      { to: "/business", label: "Payroll & Cash Mgmt" },
+      { to: "/loans", label: "SBA & Term Loans" },
+      { to: "/credit-cards", label: "Business Cards" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { to: "/about", label: "About" },
+      { to: "/contact", label: "Contact" },
+      { to: "/about", label: "Leadership" },
+      { to: "/about", label: "Press" },
     ],
   },
   {
     title: "Members",
     links: [
       { to: "/login", label: "Sign In" },
-      { to: "/register", label: "Open Account" },
+      { to: "/register", label: "Open an Account" },
+      { to: "/dashboard", label: "Dashboard" },
       { to: "/contact", label: "Help Center" },
     ],
   },
-  {
-    title: "Legal",
-    links: [
-      { to: "/", label: "Privacy" },
-      { to: "/", label: "Terms" },
-      { to: "/", label: "Disclosures" },
-    ],
-  },
-];
+] as const;
 
 export function Footer() {
   return (
-    <footer className="bg-slate-deep text-white/80 mt-24">
-      <svg viewBox="0 0 1440 60" className="block w-full -mt-px text-slate-deep" preserveAspectRatio="none">
-        <path fill="currentColor" d="M0,32 C360,72 1080,-8 1440,32 L1440,60 L0,60 Z" />
-      </svg>
+    <footer className="bg-navy-deep text-white/80 mt-24">
       <div className="container-page py-16 grid gap-12 md:grid-cols-2 lg:grid-cols-6">
         <div className="lg:col-span-2">
-          <Link to="/" className="flex items-center gap-2 text-white">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-terra">
-              <Shield className="h-5 w-5" strokeWidth={2.2} />
+          <Link to="/" className="flex items-center gap-2.5 text-white">
+            <span className="grid h-9 w-9 place-items-center rounded-lg bg-indigo">
+              <Landmark className="h-5 w-5" strokeWidth={2.2} />
             </span>
-            <span className="font-display text-xl font-bold">{BRAND.name}</span>
+            <div className="flex flex-col leading-none">
+              <span className="font-display text-lg font-bold">{BRAND.name}</span>
+              <span className="text-[10px] uppercase tracking-widest text-white/50">Financial</span>
+            </div>
           </Link>
           <p className="mt-4 text-sm leading-relaxed max-w-xs text-white/60">
-            {BRAND.tagline} A modern banking experience built around recovery, growth, and control.
+            {BRAND.tagline} Founded in {BRAND.founded}. Member-owned. Trusted by 1.2M+ households and businesses across the United States.
           </p>
-          <div className="flex gap-3 mt-6">
+          <div className="mt-5 space-y-1.5 text-xs text-white/50">
+            <div className="flex items-center gap-2"><Lock className="h-3.5 w-3.5" /> 256-bit AES encryption</div>
+            <div className="flex items-center gap-2"><ShieldCheck className="h-3.5 w-3.5" /> {BRAND.fdic}</div>
+          </div>
+          <div className="flex gap-2 mt-6">
             {[Twitter, Linkedin, Facebook].map((Icon, i) => (
-              <a key={i} href="#" className="grid h-9 w-9 place-items-center rounded-full bg-white/5 hover:bg-terra transition" aria-label="social">
+              <a key={i} href="#" className="grid h-9 w-9 place-items-center rounded-full bg-white/5 hover:bg-indigo transition" aria-label="social">
                 <Icon className="h-4 w-4" />
               </a>
             ))}
@@ -71,9 +77,7 @@ export function Footer() {
             <ul className="space-y-2.5 text-sm">
               {col.links.map((l) => (
                 <li key={l.label}>
-                  <Link to={l.to} className="text-white/60 hover:text-terra transition">
-                    {l.label}
-                  </Link>
+                  <Link to={l.to} className="text-white/60 hover:text-indigo-light transition">{l.label}</Link>
                 </li>
               ))}
             </ul>
@@ -82,8 +86,11 @@ export function Footer() {
       </div>
       <div className="border-t border-white/10">
         <div className="container-page py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/50">
-          <p>© {new Date().getFullYear()} {BRAND.name} · Demonstration site · Not a real financial institution.</p>
-          <p className="font-mono">Routing # {BRAND.routing}</p>
+          <p>© {new Date().getFullYear()} {BRAND.legalName} · Demonstration site · Not a real financial institution.</p>
+          <div className="flex gap-4 font-mono">
+            <span>Routing # {BRAND.routing}</span>
+            <span>SWIFT {BRAND.swift}</span>
+          </div>
         </div>
       </div>
     </footer>
