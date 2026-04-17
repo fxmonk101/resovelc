@@ -44,8 +44,8 @@ function LoansDash() {
   const { user } = useAuth();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormVals>({
-    resolver: zodResolver(schema),
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<z.input<typeof schema>>({
+    resolver: zodResolver(schema) as never,
     defaultValues: { loan_type: "Personal Loan", term_months: 36 },
   });
 
@@ -56,8 +56,9 @@ function LoansDash() {
   };
   useEffect(() => { load(); }, [user]);
 
-  const onSubmit = async (vals: FormVals) => {
+  const onSubmit = async (raw: z.input<typeof schema>) => {
     if (!user) return;
+    const vals = schema.parse(raw) as FormVals;
     const { error } = await supabase.from("loan_applications").insert({
       user_id: user.id,
       loan_type: vals.loan_type,

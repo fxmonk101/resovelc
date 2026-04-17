@@ -43,8 +43,8 @@ function GrantsDash() {
   const { user } = useAuth();
   const [grants, setGrants] = useState<Grant[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormVals>({
-    resolver: zodResolver(schema),
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<z.input<typeof schema>>({
+    resolver: zodResolver(schema) as never,
     defaultValues: { program: PROGRAMS[0], household_size: 1 },
   });
 
@@ -55,8 +55,9 @@ function GrantsDash() {
   };
   useEffect(() => { load(); }, [user]);
 
-  const onSubmit = async (vals: FormVals) => {
+  const onSubmit = async (raw: z.input<typeof schema>) => {
     if (!user) return;
+    const vals = schema.parse(raw) as FormVals;
     const { error } = await supabase.from("grant_applications").insert({
       user_id: user.id,
       program: vals.program,

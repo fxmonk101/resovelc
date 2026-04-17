@@ -36,8 +36,8 @@ function BusinessDash() {
   const [loading, setLoading] = useState(true);
   const [done, setDone] = useState(false);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormVals>({
-    resolver: zodResolver(schema),
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<z.input<typeof schema>>({
+    resolver: zodResolver(schema) as never,
   });
 
   useEffect(() => {
@@ -46,8 +46,9 @@ function BusinessDash() {
       .then(({ data }) => { setBiz(data as BusinessProfile | null); setLoading(false); });
   }, [user]);
 
-  const onSubmit = async (vals: FormVals) => {
+  const onSubmit = async (raw: z.input<typeof schema>) => {
     if (!user) return;
+    const vals = schema.parse(raw) as FormVals;
     const { data, error } = await supabase.from("business_profiles").insert({
       user_id: user.id,
       business_name: vals.business_name,

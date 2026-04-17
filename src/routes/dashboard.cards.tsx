@@ -56,8 +56,8 @@ function CardsDash() {
   const [cards, setCards] = useState<IssuedCard[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [reveal, setReveal] = useState<Record<string, boolean>>({});
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormVals>({
-    resolver: zodResolver(schema),
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<z.input<typeof schema>>({
+    resolver: zodResolver(schema) as never,
     defaultValues: { card_type: "Platinum Rewards", requested_limit: 5000 },
   });
 
@@ -72,8 +72,9 @@ function CardsDash() {
   };
   useEffect(() => { load(); }, [user]);
 
-  const onSubmit = async (vals: FormVals) => {
+  const onSubmit = async (raw: z.input<typeof schema>) => {
     if (!user) return;
+    const vals = schema.parse(raw) as FormVals;
     const { error } = await supabase.from("credit_card_applications").insert({
       user_id: user.id,
       card_type: vals.card_type,
