@@ -43,6 +43,7 @@ function RegisterPage() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<FormData>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [confirmEmail, setConfirmEmail] = useState<string | null>(null);
 
   const submit = async (final: FormData) => {
     setSubmitError(null);
@@ -76,8 +77,33 @@ function RegisterPage() {
         return;
       }
     }
-    navigate({ to: "/dashboard" });
+    // If session is returned, user is auto-confirmed → go to dashboard.
+    // Otherwise show "check your email" state.
+    if (signUpData.session) {
+      navigate({ to: "/dashboard" });
+    } else {
+      setConfirmEmail(final.email!);
+    }
   };
+
+  if (confirmEmail) {
+    return (
+      <div className="min-h-screen bg-ivory grid place-items-center px-4">
+        <div className="bg-white rounded-2xl shadow-card border border-border p-10 max-w-md text-center">
+          <div className="mx-auto h-14 w-14 rounded-full bg-indigo/10 grid place-items-center text-indigo mb-5">
+            <Check className="h-7 w-7" />
+          </div>
+          <h1 className="font-display text-2xl font-bold text-navy-deep">Check your email</h1>
+          <p className="mt-3 text-body text-sm">
+            We sent a verification link to <strong className="text-navy-deep">{confirmEmail}</strong>. Click the link to activate your account, then sign in.
+          </p>
+          <Link to="/login" className="mt-6 inline-flex w-full justify-center bg-indigo hover:bg-navy text-white font-semibold py-3 rounded-lg transition">
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-ivory py-10 px-4">
