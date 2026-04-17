@@ -1,11 +1,15 @@
 export const BRAND = {
   name: "Resolve Case",
-  tagline: "Banking that puts you in control.",
+  legalName: "Resolve Case Financial",
+  tagline: "Banking built for trust, growth, and recovery.",
   email: "support@resolvecase.demo",
   phone: "1-800-555-0142",
-  address: "123 Banking Street, Financial District, NY 10001",
-  hours: "Mon–Fri 9AM–5PM · Sat 9AM–1PM",
+  address: "200 Park Avenue, Suite 4500, New York, NY 10166",
+  hours: "Mon–Fri 7AM–10PM ET · Sat–Sun 8AM–8PM ET",
   routing: "251480576",
+  fdic: "FDIC# 58219 (demo)",
+  swift: "RCFNUS33",
+  founded: "2009",
 } as const;
 
 export const NAV_LINKS = [
@@ -16,18 +20,18 @@ export const NAV_LINKS = [
 ] as const;
 
 export const SERVICE_LINKS = [
-  { to: "/personal", label: "Personal Banking", desc: "Checking, savings, and money market accounts." },
-  { to: "/business", label: "Business Banking", desc: "Cash flow, payroll, and growth tools." },
-  { to: "/credit-cards", label: "Credit Cards", desc: "Rewards cards with transparent rates." },
-  { to: "/loans", label: "Loans & Credit", desc: "Personal, auto, and home loans." },
-  { to: "/grants", label: "Grants & Aids", desc: "Funding programs for members." },
+  { to: "/personal", label: "Personal Banking", desc: "Checking, savings, money market & CDs." },
+  { to: "/business", label: "Business Banking", desc: "Cash management, payroll & merchant services." },
+  { to: "/credit-cards", label: "Credit Cards", desc: "Rewards, cashback & low-APR cards." },
+  { to: "/loans", label: "Loans & Credit", desc: "Personal, auto, mortgage & SBA loans." },
+  { to: "/grants", label: "Grants & Aids", desc: "Hardship, education & small-business grants." },
 ] as const;
 
 export const STATS = [
-  { value: 50000, suffix: "+", label: "Members" },
-  { value: 2.5, prefix: "$", suffix: "B+", label: "Assets", decimals: 1 },
+  { value: 1200000, suffix: "+", label: "Members" },
+  { value: 48.5, prefix: "$", suffix: "B", label: "Assets under management", decimals: 1 },
   { value: BRAND.routing, label: "Routing #", isText: true },
-  { value: 24, suffix: "/7", label: "Support" },
+  { value: 24, suffix: "/7", label: "Member support" },
 ] as const;
 
 export interface Rate {
@@ -38,8 +42,8 @@ export interface Rate {
   featured?: boolean;
 }
 export const RATES: Rate[] = [
-  { title: "High-Yield Savings", rate: "3.75%", unit: "APY", badge: "Featured", featured: true },
-  { title: "18-Month Certificate", rate: "3.65%", unit: "APY", badge: "Savings" },
-  { title: "Rewards Credit Card", rate: "4.00%", unit: "APR", badge: "Credit" },
-  { title: "Personal Loans", rate: "5.49%", unit: "APR", badge: "Loans" },
+  { title: "High-Yield Savings", rate: "4.50%", unit: "APY", badge: "Featured", featured: true },
+  { title: "12-Month CD", rate: "5.10%", unit: "APY", badge: "Savings" },
+  { title: "Platinum Rewards Card", rate: "17.49%", unit: "APR", badge: "Credit" },
+  { title: "Personal Loans (from)", rate: "6.99%", unit: "APR", badge: "Loans" },
 ];
