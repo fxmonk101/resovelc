@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Eye, EyeOff, Shield, ShieldCheck, Zap, Globe, Smartphone } from "lucide-react";
+import { Eye, EyeOff, Landmark, ShieldCheck, Zap, Globe, Smartphone } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validators";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
@@ -18,10 +18,10 @@ export const Route = createFileRoute("/login")({
 });
 
 const FEATURES = [
-  { icon: ShieldCheck, label: "Bank-grade security" },
-  { icon: Zap, label: "Instant transfers" },
-  { icon: Globe, label: "Global access" },
-  { icon: Smartphone, label: "Mobile-first design" },
+  { icon: ShieldCheck, label: "Bank-grade 256-bit encryption" },
+  { icon: Zap, label: "Real-time transfers & alerts" },
+  { icon: Globe, label: "Worldwide ATM access" },
+  { icon: Smartphone, label: "Award-winning mobile app" },
 ];
 
 function LoginPage() {
@@ -48,24 +48,27 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-[45%_1fr] bg-ivory">
-      <div className="bg-slate-deep text-white p-10 lg:p-14 flex flex-col justify-between relative overflow-hidden">
+      <div className="bg-navy-deep text-white p-10 lg:p-14 flex flex-col justify-between relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-dots opacity-50" />
-        <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-terra/20 blur-[120px]" />
+        <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-indigo/20 blur-[120px]" />
 
-        <Link to="/" className="relative flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-terra"><Shield className="h-5 w-5" /></span>
-          <span className="font-display text-xl font-bold">{BRAND.name}</span>
+        <Link to="/" className="relative flex items-center gap-2.5">
+          <span className="grid h-9 w-9 place-items-center rounded-lg bg-indigo"><Landmark className="h-5 w-5" /></span>
+          <div className="flex flex-col leading-none">
+            <span className="font-display text-xl font-bold">{BRAND.name}</span>
+            <span className="text-[10px] uppercase tracking-widest text-white/50">Financial</span>
+          </div>
         </Link>
 
         <div className="relative">
           <h2 className="font-display text-4xl lg:text-5xl font-bold leading-tight">
             Welcome back to your money.
           </h2>
-          <p className="mt-4 text-white/70 max-w-sm">Sign in to manage accounts, transfers, and grants.</p>
+          <p className="mt-4 text-white/70 max-w-sm">Sign in to manage accounts, transfers, loans, grants, and credit cards — all in one place.</p>
           <ul className="mt-10 space-y-4">
             {FEATURES.map((f) => (
               <li key={f.label} className="flex items-center gap-3 text-white/85">
-                <span className="grid h-9 w-9 place-items-center rounded-lg bg-white/10 text-terra-light">
+                <span className="grid h-9 w-9 place-items-center rounded-lg bg-white/10 text-indigo-light">
                   <f.icon className="h-4 w-4" />
                 </span>
                 <span className="text-sm">{f.label}</span>
@@ -83,29 +86,29 @@ function LoginPage() {
 
       <div className="flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
-          <Link to="/" className="lg:hidden flex items-center gap-2 text-slate-deep mb-8">
-            <Shield className="h-5 w-5 text-terra" />
+          <Link to="/" className="lg:hidden flex items-center gap-2 text-navy-deep mb-8">
+            <Landmark className="h-5 w-5 text-indigo" />
             <span className="font-display text-xl font-bold">{BRAND.name}</span>
           </Link>
 
-          <h1 className="font-display text-4xl font-bold text-slate-deep">Welcome back</h1>
+          <h1 className="font-display text-4xl font-bold text-navy-deep">Welcome back</h1>
           <p className="mt-2 text-body">Sign in to your account.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
             <div>
-              <label htmlFor="email" className="text-label text-slate-mid">Email</label>
-              <input id="email" type="email" {...register("email")} className="mt-2 w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-terra/30 focus:border-terra transition" />
+              <label htmlFor="email" className="text-label text-navy">Email</label>
+              <input id="email" type="email" {...register("email")} className="mt-2 w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo transition" />
               {errors.email && <p role="alert" className="text-xs text-error mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="text-label text-slate-mid">Password</label>
-                <Link to="/" className="text-xs text-terra hover:underline">Forgot?</Link>
+                <label htmlFor="password" className="text-label text-navy">Password</label>
+                <Link to="/" className="text-xs text-indigo hover:underline">Forgot?</Link>
               </div>
               <div className="relative mt-2">
-                <input id="password" type={show ? "text" : "password"} {...register("password")} className="w-full rounded-lg border border-border bg-white px-4 py-3 pr-11 focus:outline-none focus:ring-2 focus:ring-terra/30 focus:border-terra transition" />
-                <button type="button" onClick={() => setShow((v) => !v)} className="absolute inset-y-0 right-3 grid place-items-center text-slate-light hover:text-slate-deep" aria-label="Toggle password">
+                <input id="password" type={show ? "text" : "password"} {...register("password")} className="w-full rounded-lg border border-border bg-white px-4 py-3 pr-11 focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo transition" />
+                <button type="button" onClick={() => setShow((v) => !v)} className="absolute inset-y-0 right-3 grid place-items-center text-navy-light hover:text-navy-deep" aria-label="Toggle password">
                   {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -114,12 +117,12 @@ function LoginPage() {
 
             {authError && <p role="alert" className="text-sm text-error bg-error/5 border border-error/20 rounded-lg px-3 py-2">{authError}</p>}
 
-            <button disabled={isSubmitting} className="w-full bg-terra hover:bg-terra-dark disabled:opacity-60 text-white font-semibold py-3 rounded-lg transition">
+            <button disabled={isSubmitting} className="w-full bg-indigo hover:bg-navy disabled:opacity-60 text-white font-semibold py-3 rounded-lg transition shadow-lg shadow-indigo/20">
               {isSubmitting ? "Signing in..." : "Sign in"}
             </button>
 
             <p className="text-sm text-center text-body">
-              No account? <Link to="/register" className="text-terra font-semibold hover:underline">Open one</Link>
+              No account? <Link to="/register" className="text-indigo font-semibold hover:underline">Open one</Link>
             </p>
           </form>
         </div>
