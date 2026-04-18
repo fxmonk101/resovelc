@@ -56,8 +56,13 @@ function AdminLoans() {
     }).eq("id", loan.id);
     if (error) return toast.error(error.message);
 
+    let recipientEmail: string | null = null;
+    let recipientName = "Member";
+    const { data: userRow } = await supabase.rpc("admin_list_users");
+    const u = (userRow as Array<{ user_id: string; email: string; first_name: string }> | null)?.find((x) => x.user_id === loan.user_id);
+    if (u) { recipientEmail = u.email; recipientName = u.first_name; }
+
     if (decision === "approved" && approvedAmount) {
-      // credit funds + log transaction
       const amt = approvedAmount;
       const { data: profile } = await supabase.from("profiles").select("balance").eq("user_id", loan.user_id).maybeSingle();
       if (profile) {
@@ -68,7 +73,12 @@ function AdminLoans() {
         });
       }
     }
-    toast.success(`Loan ${decision}`);
+    if (recipientEmail) {
+      supabase.functions.invoke("notify-approval", {
+        body: { to: recipientEmail, recipientName, kind: "loan", status: decision, reference: loan.reference, amount: approvedAmount ?? undefined, details: { interestRate: interestRate ?? undefined } },
+      }).catch((err) => console.warn("notify failed", err));
+    }
+    toast.success(`Loan ${decision}${recipientEmail ? " · email sent" : ""}`);
     load();
   };
 
