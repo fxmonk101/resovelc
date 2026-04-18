@@ -53,32 +53,22 @@ function RegisterPage() {
       password: final.password!,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { first_name: final.firstName, last_name: final.lastName },
+        data: {
+          first_name: final.firstName,
+          last_name: final.lastName,
+          middle_name: final.middleName || null,
+          username: final.username,
+          phone: final.phone || null,
+          country: final.country || null,
+          account_type: final.accountType || "Checking Account",
+        },
       },
     });
     if (error) {
       setSubmitError(error.message);
       return;
     }
-    if (signUpData.user) {
-      const { error: profileError } = await supabase.from("profiles").insert({
-        user_id: signUpData.user.id,
-        first_name: final.firstName!,
-        last_name: final.lastName!,
-        middle_name: final.middleName || null,
-        username: final.username!,
-        phone: final.phone || null,
-        country: final.country || null,
-        currency: final.currency || "USD",
-        account_type: final.accountType || "Checking Account",
-      });
-      if (profileError) {
-        setSubmitError("Account created but profile failed: " + profileError.message);
-        return;
-      }
-    }
-    // If session is returned, user is auto-confirmed → go to dashboard.
-    // Otherwise show "check your email" state.
+    // Profile + role rows are created automatically by the on_auth_user_created trigger.
     if (signUpData.session) {
       navigate({ to: "/dashboard" });
     } else {
