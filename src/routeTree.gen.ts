@@ -18,15 +18,23 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CreditCardsRouteImport } from './routes/credit-cards'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BusinessRouteImport } from './routes/business'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
 import { Route as DashboardPersonalRouteImport } from './routes/dashboard.personal'
 import { Route as DashboardLoansRouteImport } from './routes/dashboard.loans'
 import { Route as DashboardGrantsRouteImport } from './routes/dashboard.grants'
 import { Route as DashboardCardsRouteImport } from './routes/dashboard.cards'
 import { Route as DashboardBusinessRouteImport } from './routes/dashboard.business'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminLoansRouteImport } from './routes/admin.loans'
+import { Route as AdminGrantsRouteImport } from './routes/admin.grants'
+import { Route as AdminFundsRouteImport } from './routes/admin.funds'
+import { Route as AdminCardsRouteImport } from './routes/admin.cards'
+import { Route as AdminAdminsRouteImport } from './routes/admin.admins'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -73,6 +81,11 @@ const BusinessRoute = BusinessRouteImport.update({
   path: '/business',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -87,6 +100,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const DashboardProfileRoute = DashboardProfileRouteImport.update({
   id: '/profile',
@@ -118,10 +136,41 @@ const DashboardBusinessRoute = DashboardBusinessRouteImport.update({
   path: '/business',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoansRoute = AdminLoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGrantsRoute = AdminGrantsRouteImport.update({
+  id: '/grants',
+  path: '/grants',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFundsRoute = AdminFundsRouteImport.update({
+  id: '/funds',
+  path: '/funds',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCardsRoute = AdminCardsRouteImport.update({
+  id: '/cards',
+  path: '/cards',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminsRoute = AdminAdminsRouteImport.update({
+  id: '/admins',
+  path: '/admins',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/business': typeof BusinessRoute
   '/contact': typeof ContactRoute
   '/credit-cards': typeof CreditCardsRoute
@@ -131,12 +180,19 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/personal': typeof PersonalRoute
   '/register': typeof RegisterRoute
+  '/admin/admins': typeof AdminAdminsRoute
+  '/admin/cards': typeof AdminCardsRoute
+  '/admin/funds': typeof AdminFundsRoute
+  '/admin/grants': typeof AdminGrantsRoute
+  '/admin/loans': typeof AdminLoansRoute
+  '/admin/users': typeof AdminUsersRoute
   '/dashboard/business': typeof DashboardBusinessRoute
   '/dashboard/cards': typeof DashboardCardsRoute
   '/dashboard/grants': typeof DashboardGrantsRoute
   '/dashboard/loans': typeof DashboardLoansRoute
   '/dashboard/personal': typeof DashboardPersonalRoute
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -150,18 +206,26 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/personal': typeof PersonalRoute
   '/register': typeof RegisterRoute
+  '/admin/admins': typeof AdminAdminsRoute
+  '/admin/cards': typeof AdminCardsRoute
+  '/admin/funds': typeof AdminFundsRoute
+  '/admin/grants': typeof AdminGrantsRoute
+  '/admin/loans': typeof AdminLoansRoute
+  '/admin/users': typeof AdminUsersRoute
   '/dashboard/business': typeof DashboardBusinessRoute
   '/dashboard/cards': typeof DashboardCardsRoute
   '/dashboard/grants': typeof DashboardGrantsRoute
   '/dashboard/loans': typeof DashboardLoansRoute
   '/dashboard/personal': typeof DashboardPersonalRoute
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/business': typeof BusinessRoute
   '/contact': typeof ContactRoute
   '/credit-cards': typeof CreditCardsRoute
@@ -171,12 +235,19 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/personal': typeof PersonalRoute
   '/register': typeof RegisterRoute
+  '/admin/admins': typeof AdminAdminsRoute
+  '/admin/cards': typeof AdminCardsRoute
+  '/admin/funds': typeof AdminFundsRoute
+  '/admin/grants': typeof AdminGrantsRoute
+  '/admin/loans': typeof AdminLoansRoute
+  '/admin/users': typeof AdminUsersRoute
   '/dashboard/business': typeof DashboardBusinessRoute
   '/dashboard/cards': typeof DashboardCardsRoute
   '/dashboard/grants': typeof DashboardGrantsRoute
   '/dashboard/loans': typeof DashboardLoansRoute
   '/dashboard/personal': typeof DashboardPersonalRoute
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -184,6 +255,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/business'
     | '/contact'
     | '/credit-cards'
@@ -193,12 +265,19 @@ export interface FileRouteTypes {
     | '/login'
     | '/personal'
     | '/register'
+    | '/admin/admins'
+    | '/admin/cards'
+    | '/admin/funds'
+    | '/admin/grants'
+    | '/admin/loans'
+    | '/admin/users'
     | '/dashboard/business'
     | '/dashboard/cards'
     | '/dashboard/grants'
     | '/dashboard/loans'
     | '/dashboard/personal'
     | '/dashboard/profile'
+    | '/admin/'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -212,17 +291,25 @@ export interface FileRouteTypes {
     | '/login'
     | '/personal'
     | '/register'
+    | '/admin/admins'
+    | '/admin/cards'
+    | '/admin/funds'
+    | '/admin/grants'
+    | '/admin/loans'
+    | '/admin/users'
     | '/dashboard/business'
     | '/dashboard/cards'
     | '/dashboard/grants'
     | '/dashboard/loans'
     | '/dashboard/personal'
     | '/dashboard/profile'
+    | '/admin'
     | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/business'
     | '/contact'
     | '/credit-cards'
@@ -232,18 +319,26 @@ export interface FileRouteTypes {
     | '/login'
     | '/personal'
     | '/register'
+    | '/admin/admins'
+    | '/admin/cards'
+    | '/admin/funds'
+    | '/admin/grants'
+    | '/admin/loans'
+    | '/admin/users'
     | '/dashboard/business'
     | '/dashboard/cards'
     | '/dashboard/grants'
     | '/dashboard/loans'
     | '/dashboard/personal'
     | '/dashboard/profile'
+    | '/admin/'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BusinessRoute: typeof BusinessRoute
   ContactRoute: typeof ContactRoute
   CreditCardsRoute: typeof CreditCardsRoute
@@ -320,6 +415,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -340,6 +442,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/dashboard/profile': {
       id: '/dashboard/profile'
@@ -383,8 +492,72 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBusinessRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/loans': {
+      id: '/admin/loans'
+      path: '/loans'
+      fullPath: '/admin/loans'
+      preLoaderRoute: typeof AdminLoansRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/grants': {
+      id: '/admin/grants'
+      path: '/grants'
+      fullPath: '/admin/grants'
+      preLoaderRoute: typeof AdminGrantsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/funds': {
+      id: '/admin/funds'
+      path: '/funds'
+      fullPath: '/admin/funds'
+      preLoaderRoute: typeof AdminFundsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/cards': {
+      id: '/admin/cards'
+      path: '/cards'
+      fullPath: '/admin/cards'
+      preLoaderRoute: typeof AdminCardsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/admins': {
+      id: '/admin/admins'
+      path: '/admins'
+      fullPath: '/admin/admins'
+      preLoaderRoute: typeof AdminAdminsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminAdminsRoute: typeof AdminAdminsRoute
+  AdminCardsRoute: typeof AdminCardsRoute
+  AdminFundsRoute: typeof AdminFundsRoute
+  AdminGrantsRoute: typeof AdminGrantsRoute
+  AdminLoansRoute: typeof AdminLoansRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAdminsRoute: AdminAdminsRoute,
+  AdminCardsRoute: AdminCardsRoute,
+  AdminFundsRoute: AdminFundsRoute,
+  AdminGrantsRoute: AdminGrantsRoute,
+  AdminLoansRoute: AdminLoansRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface DashboardRouteChildren {
   DashboardBusinessRoute: typeof DashboardBusinessRoute
@@ -413,6 +586,7 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   BusinessRoute: BusinessRoute,
   ContactRoute: ContactRoute,
   CreditCardsRoute: CreditCardsRoute,
