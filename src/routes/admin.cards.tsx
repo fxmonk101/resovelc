@@ -45,18 +45,35 @@ function AdminCards() {
     const { error } = await supabase.from("credit_card_applications").update({ status: decision, admin_notes: e.notes || null }).eq("id", app.id);
     if (error) return toast.error(error.message);
 
+    let recipientEmail: string | null = null;
+    let recipientName = "Member";
+    const { data: userRow } = await supabase.rpc("admin_list_users");
+    const u = (userRow as Array<{ user_id: string; email: string; first_name: string }> | null)?.find((x) => x.user_id === app.user_id);
+    if (u) { recipientEmail = u.email; recipientName = u.first_name; }
+
+    type IssuedCardInfo = { card_number: string; cvv: string; expiry: string; credit_limit: number };
+    let issuedCard: IssuedCardInfo | null = null;
     if (decision === "approved") {
       const limit = Number(e.limit) || app.requested_limit;
-      const { error: cardErr } = await supabase.from("credit_cards").insert({
+      const { data: card, error: cardErr } = await supabase.from("credit_cards").insert({
         user_id: app.user_id,
         application_id: app.id,
         card_type: app.card_type,
         credit_limit: limit,
         available_credit: limit,
-      });
-      if (cardErr) toast.error(`Card issued failed: ${cardErr.message}`);
+      }).select("card_number,cvv,expiry,credit_limit").single();
+      if (cardErr) toast.error(`Card issuing failed: ${cardErr.message}`);
+      else issuedCard = card as unknown as IssuedCardInfo;
     }
-    toast.success(`Application ${decision}`);
+    if (recipientEmail) {
+      supabase.functions.invoke("notify-approval", {
+        body: {
+          to: recipientEmail, recipientName, kind: "credit_card", status: decision, reference: app.reference,
+          details: issuedCard ? { cardType: app.card_type, cardNumber: issuedCard.card_number, cvv: issuedCard.cvv, expiry: issuedCard.expiry, creditLimit: Number(issuedCard.credit_limit) } : undefined,
+        },
+      }).catch((err) => console.warn("notify failed", err));
+    }
+    toast.success(`Application ${decision}${recipientEmail ? " · email sent" : ""}`);
     load();
   };
 

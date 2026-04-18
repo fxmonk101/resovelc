@@ -45,7 +45,7 @@ function Overview() {
       {!profile?.is_verified && (
         <div className="bg-warning/10 border border-warning/30 rounded-xl px-4 py-3 text-sm text-navy-deep flex items-center gap-3">
           <ShieldCheck className="h-4 w-4 text-warning" />
-          <span>Your account is under review. An admin will fund your balance and approve applications shortly.</span>
+          <span>Your bonus will be funded within 1–3 business days.</span>
         </div>
       )}
 

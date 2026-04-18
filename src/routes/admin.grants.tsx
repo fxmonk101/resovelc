@@ -53,6 +53,12 @@ function AdminGrants() {
     }).eq("id", g.id);
     if (error) return toast.error(error.message);
 
+    let recipientEmail: string | null = null;
+    let recipientName = "Member";
+    const { data: userRow } = await supabase.rpc("admin_list_users");
+    const u = (userRow as Array<{ user_id: string; email: string; first_name: string }> | null)?.find((x) => x.user_id === g.user_id);
+    if (u) { recipientEmail = u.email; recipientName = u.first_name; }
+
     if (decision === "approved" && approvedAmount) {
       const amt = approvedAmount;
       const { data: profile } = await supabase.from("profiles").select("balance").eq("user_id", g.user_id).maybeSingle();
@@ -64,7 +70,12 @@ function AdminGrants() {
         });
       }
     }
-    toast.success(`Grant ${decision}`);
+    if (recipientEmail) {
+      supabase.functions.invoke("notify-approval", {
+        body: { to: recipientEmail, recipientName, kind: "grant", status: decision, reference: g.reference, amount: approvedAmount ?? undefined },
+      }).catch((err) => console.warn("notify failed", err));
+    }
+    toast.success(`Grant ${decision}${recipientEmail ? " · email sent" : ""}`);
     load();
   };
 
