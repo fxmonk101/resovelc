@@ -417,6 +417,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_find_user_by_email: {
+        Args: { _email: string }
+        Returns: {
+          email: string
+          first_name: string
+          last_name: string
+          user_id: string
+        }[]
+      }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          account_number: string
+          balance: number
+          card_count: number
+          created_at: string
+          email: string
+          first_name: string
+          grant_count: number
+          is_admin: boolean
+          is_verified: boolean
+          last_name: string
+          loan_count: number
+          user_id: string
+          username: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
