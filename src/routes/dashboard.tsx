@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tansta
 import { useEffect, useState } from "react";
 import {
   Bell, Briefcase, CreditCard, Gift, HandCoins, LayoutDashboard,
-  Landmark, LogOut, Settings as SettingsIcon, User as UserIcon, Wallet, Menu, X,
+  Landmark, LogOut, Settings as SettingsIcon, ShieldCheck, User as UserIcon, Wallet, Menu,
 } from "lucide-react";
 import { useAuth, signOut } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,7 @@ function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [profile, setProfile] = useState<{ first_name: string; last_name: string } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -38,6 +39,8 @@ function DashboardLayout() {
     if (!user) return;
     supabase.from("profiles").select("first_name,last_name").eq("user_id", user.id).maybeSingle()
       .then(({ data }) => setProfile(data));
+    supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle()
+      .then(({ data }) => setIsAdmin(!!data));
   }, [user]);
 
   useEffect(() => { setOpen(false); }, [location.pathname]);
