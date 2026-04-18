@@ -77,6 +77,11 @@ function DashboardLayout() {
           ))}
         </nav>
         <div className="p-3 border-t border-white/10 space-y-1">
+          {isAdmin && (
+            <Link to="/admin" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm bg-gold-500/15 text-gold-400 hover:bg-gold-500/25 transition font-semibold">
+              <ShieldCheck className="h-4 w-4" /> Admin Console
+            </Link>
+          )}
           <Link to="/dashboard/profile" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/70 hover:bg-white/5 hover:text-white">
             <SettingsIcon className="h-4 w-4" /> Settings
           </Link>
