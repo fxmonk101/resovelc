@@ -42,22 +42,23 @@ function AdminLoans() {
   useEffect(() => { load(); }, [filter]);
 
   const setEdit = (id: string, patch: Partial<{ amount: string; rate: string; notes: string }>) => {
-    setEditing((p) => ({ ...p, [id]: { amount: "", rate: "", notes: "", ...p[id], ...patch } }));
+    setEditing((p) => ({ ...p, [id]: { ...{ amount: "", rate: "", notes: "" }, ...p[id], ...patch } }));
   };
 
   const decide = async (loan: Loan, decision: "approved" | "rejected") => {
     const e = editing[loan.id] ?? { amount: "", rate: "", notes: "" };
-    const update: Record<string, unknown> = { status: decision, admin_notes: e.notes || null };
-    if (decision === "approved") {
-      update.approved_amount = Number(e.amount) || loan.amount;
-      update.interest_rate = Number(e.rate) || 7.99;
-    }
-    const { error } = await supabase.from("loan_applications").update(update).eq("id", loan.id);
+    const approvedAmount = decision === "approved" ? (Number(e.amount) || loan.amount) : null;
+    const interestRate = decision === "approved" ? (Number(e.rate) || 7.99) : null;
+    const { error } = await supabase.from("loan_applications").update({
+      status: decision,
+      admin_notes: e.notes || null,
+      ...(decision === "approved" ? { approved_amount: approvedAmount, interest_rate: interestRate } : {}),
+    }).eq("id", loan.id);
     if (error) return toast.error(error.message);
 
-    if (decision === "approved") {
+    if (decision === "approved" && approvedAmount) {
       // credit funds + log transaction
-      const amt = Number(update.approved_amount);
+      const amt = approvedAmount;
       const { data: profile } = await supabase.from("profiles").select("balance").eq("user_id", loan.user_id).maybeSingle();
       if (profile) {
         await supabase.from("profiles").update({ balance: Number(profile.balance) + amt }).eq("user_id", loan.user_id);

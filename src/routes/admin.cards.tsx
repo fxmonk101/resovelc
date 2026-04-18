@@ -37,13 +37,12 @@ function AdminCards() {
   useEffect(() => { load(); }, [filter]);
 
   const setEdit = (id: string, patch: Partial<{ limit: string; notes: string }>) => {
-    setEditing((p) => ({ ...p, [id]: { limit: "", notes: "", ...p[id], ...patch } }));
+    setEditing((p) => ({ ...p, [id]: { ...{ limit: "", notes: "" }, ...p[id], ...patch } }));
   };
 
   const decide = async (app: CardApp, decision: "approved" | "rejected") => {
     const e = editing[app.id] ?? { limit: "", notes: "" };
-    const update: Record<string, unknown> = { status: decision, admin_notes: e.notes || null };
-    const { error } = await supabase.from("credit_card_applications").update(update).eq("id", app.id);
+    const { error } = await supabase.from("credit_card_applications").update({ status: decision, admin_notes: e.notes || null }).eq("id", app.id);
     if (error) return toast.error(error.message);
 
     if (decision === "approved") {

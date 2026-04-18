@@ -40,19 +40,21 @@ function AdminGrants() {
   useEffect(() => { load(); }, [filter]);
 
   const setEdit = (id: string, patch: Partial<{ amount: string; notes: string }>) => {
-    setEditing((p) => ({ ...p, [id]: { amount: "", notes: "", ...p[id], ...patch } }));
+    setEditing((p) => ({ ...p, [id]: { ...{ amount: "", notes: "" }, ...p[id], ...patch } }));
   };
 
   const decide = async (g: Grant, decision: "approved" | "rejected") => {
     const e = editing[g.id] ?? { amount: "", notes: "" };
-    const update: Record<string, unknown> = { status: decision, admin_notes: e.notes || null };
-    if (decision === "approved") update.approved_amount = Number(e.amount) || g.amount_requested;
-
-    const { error } = await supabase.from("grant_applications").update(update).eq("id", g.id);
+    const approvedAmount = decision === "approved" ? (Number(e.amount) || g.amount_requested) : null;
+    const { error } = await supabase.from("grant_applications").update({
+      status: decision,
+      admin_notes: e.notes || null,
+      ...(decision === "approved" ? { approved_amount: approvedAmount } : {}),
+    }).eq("id", g.id);
     if (error) return toast.error(error.message);
 
-    if (decision === "approved") {
-      const amt = Number(update.approved_amount);
+    if (decision === "approved" && approvedAmount) {
+      const amt = approvedAmount;
       const { data: profile } = await supabase.from("profiles").select("balance").eq("user_id", g.user_id).maybeSingle();
       if (profile) {
         await supabase.from("profiles").update({ balance: Number(profile.balance) + amt }).eq("user_id", g.user_id);
