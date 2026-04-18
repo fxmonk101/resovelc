@@ -51,7 +51,8 @@ function AdminCards() {
     const u = (userRow as Array<{ user_id: string; email: string; first_name: string }> | null)?.find((x) => x.user_id === app.user_id);
     if (u) { recipientEmail = u.email; recipientName = u.first_name; }
 
-    let issuedCard: { card_number: string; cvv: string; expiry: string; credit_limit: number } | null = null;
+    type IssuedCardInfo = { card_number: string; cvv: string; expiry: string; credit_limit: number };
+    let issuedCard: IssuedCardInfo | null = null;
     if (decision === "approved") {
       const limit = Number(e.limit) || app.requested_limit;
       const { data: card, error: cardErr } = await supabase.from("credit_cards").insert({
@@ -62,7 +63,7 @@ function AdminCards() {
         available_credit: limit,
       }).select("card_number,cvv,expiry,credit_limit").single();
       if (cardErr) toast.error(`Card issuing failed: ${cardErr.message}`);
-      else issuedCard = card as typeof issuedCard;
+      else issuedCard = card as unknown as IssuedCardInfo;
     }
     if (recipientEmail) {
       supabase.functions.invoke("notify-approval", {
