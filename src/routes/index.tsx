@@ -6,6 +6,8 @@ import { RatesSection } from "@/features/home/RatesSection";
 import { ServicesGrid } from "@/features/home/ServicesGrid";
 import { PromoBanner } from "@/features/home/PromoBanner";
 import { TestimonialsSection } from "@/features/home/TestimonialsSection";
+import { TrustSection } from "@/features/home/TrustSection";
+import { FaqSection } from "@/features/home/FaqSection";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,10 +26,12 @@ function HomePage() {
     <PageShell>
       <HeroSection />
       <StatsBar />
+      <TrustSection />
       <RatesSection />
       <ServicesGrid />
       <PromoBanner />
       <TestimonialsSection />
+      <FaqSection />
     </PageShell>
   );
 }

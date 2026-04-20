@@ -1,10 +1,25 @@
 import { Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { ArrowRight, TrendingUp, ShieldCheck } from "lucide-react";
-import heroImg from "@/assets/hero-banking.jpg";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
+import { ArrowRight, TrendingUp, ShieldCheck, Lock } from "lucide-react";
+import hero1 from "@/assets/hero-banking-1.jpg";
+import hero2 from "@/assets/hero-banking-2.jpg";
+import hero3 from "@/assets/hero-banking-3.jpg";
+
+const SLIDES = [
+  { img: hero1, kicker: "Personal Banking", caption: "Premium service. Real people." },
+  { img: hero2, kicker: "Mobile First", caption: "Bank anywhere, in seconds." },
+  { img: hero3, kicker: "Home Loans", caption: "Mortgages built around your life." },
+];
 
 export function HeroSection() {
-  const words = "Banking built for recovery, growth, and clarity.".split(" ");
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % SLIDES.length), 5000);
+    return () => clearInterval(t);
+  }, []);
+  const words = "Banking built for trust, growth, and clarity.".split(" ");
+  const slide = SLIDES[idx];
   return (
     <section className="relative bg-slate-deep text-white overflow-hidden">
       <div className="absolute inset-0 bg-grid-dots opacity-60" />
@@ -18,7 +33,7 @@ export function HeroSection() {
             className="inline-flex items-center gap-2 text-label text-terra-light bg-terra/10 border border-terra/30 rounded-full px-4 py-1.5"
           >
             <ShieldCheck className="h-3.5 w-3.5" />
-            Demonstration site · Not a real bank
+            FDIC Insured · Member FDIC
           </motion.span>
           <h1 className="mt-6 font-display text-5xl lg:text-7xl font-bold leading-[1.05] tracking-tight">
             {words.map((w, i) => (
@@ -39,8 +54,8 @@ export function HeroSection() {
             transition={{ delay: 0.6 }}
             className="mt-6 text-lg text-white/70 max-w-xl leading-relaxed"
           >
-            Open an account in minutes. Earn high-yield interest, recover lost funds,
-            and manage your money with tools designed for real life.
+            Open an account in minutes. Earn high-yield interest, finance your home,
+            and manage every dollar with bank-grade tools designed for real life.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -55,6 +70,11 @@ export function HeroSection() {
               Learn more
             </Link>
           </motion.div>
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-white/60">
+            <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" /> 256-bit AES encryption</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Equal Housing Lender</span>
+            <span className="inline-flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5" /> $0 monthly fees</span>
+          </div>
         </div>
 
         <motion.div
@@ -63,13 +83,34 @@ export function HeroSection() {
           transition={{ delay: 0.4, duration: 0.7 }}
           className="relative hidden lg:block"
         >
-          <div
-            className="aspect-[4/5] rounded-3xl bg-cover bg-center shadow-elevated ring-1 ring-white/10"
-            style={{
-              backgroundImage: `url(${heroImg})`,
-              clipPath: "polygon(8% 0, 100% 0, 92% 100%, 0% 100%)",
-            }}
-          />
+          <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-elevated ring-1 ring-white/10">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.02 }}
+                transition={{ duration: 0.9, ease: "easeOut" }}
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${slide.img})` }}
+              />
+            </AnimatePresence>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+            <div className="absolute bottom-6 left-6 right-6">
+              <div className="text-label text-terra-light">{slide.kicker}</div>
+              <div className="font-display text-2xl font-bold mt-1">{slide.caption}</div>
+              <div className="mt-4 flex gap-1.5">
+                {SLIDES.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setIdx(i)}
+                    aria-label={`Slide ${i + 1}`}
+                    className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-terra" : "w-4 bg-white/40"}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}

@@ -78,9 +78,9 @@ function LoginPage() {
         </div>
 
         <div className="relative bg-white/10 backdrop-blur rounded-2xl p-5 border border-white/10 max-w-xs">
-          <div className="text-label text-white/60">Available balance</div>
-          <div className="font-display text-3xl font-bold mt-1">$12,847.50</div>
-          <div className="text-xs text-success mt-1">+$420 this month</div>
+          <div className="text-label text-white/60">FDIC Insured</div>
+          <div className="font-display text-xl font-bold mt-1">Your deposits are protected</div>
+          <div className="text-xs text-white/60 mt-1">Up to $250,000 per depositor</div>
         </div>
       </div>
 

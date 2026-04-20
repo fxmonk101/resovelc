@@ -37,7 +37,7 @@ export function Navbar() {
       <div className="hidden md:block bg-black/20 border-b border-white/5">
         <div className="container-page flex h-8 items-center justify-between text-[11px] text-white/60">
           <div className="flex items-center gap-4">
-            <span>{BRAND.fdic} · Member-owned since {BRAND.founded}</span>
+            <span>{BRAND.fdic} · Trusted since {BRAND.founded}</span>
           </div>
           <div className="flex items-center gap-4">
             <a href={`tel:${BRAND.phone}`} className="hover:text-white">{BRAND.phone}</a>

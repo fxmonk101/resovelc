@@ -30,7 +30,7 @@ export const Route = createFileRoute("/personal")({
           { icon: Wallet, title: "Free Checking", desc: "No monthly fees, no minimums, unlimited transactions." },
           { icon: PiggyBank, title: "High-Yield Savings", desc: "Earn up to 3.75% APY on your savings balance." },
           { icon: Smartphone, title: "Mobile First", desc: "Deposit checks, send money, and pay bills from your phone." },
-          { icon: ShieldCheck, title: "Demo-grade Security", desc: "Bank-level encryption and biometric login." },
+          { icon: ShieldCheck, title: "Bank-Grade Security", desc: "256-bit encryption, biometric login, and 24/7 fraud monitoring." },
           { icon: Zap, title: "Instant Transfers", desc: "Move money between accounts in real time." },
           { icon: BarChart3, title: "Smart Budgeting", desc: "Auto-categorized spending and goal tracking." },
         ]}

@@ -41,7 +41,7 @@ export function PromoBanner() {
           <Link to="/register" className="inline-flex mt-8 bg-terra hover:bg-terra-dark text-white font-semibold px-7 py-3.5 rounded-lg transition">
             Claim Your Bonus
           </Link>
-          <p className="text-xs text-muted-foreground mt-4">*Demo offer. Terms apply. Not a real promotion.</p>
+          <p className="text-xs text-muted-foreground mt-4">*Limited-time offer. Terms and conditions apply. Bonus credited within 90 days of qualifying activity.</p>
         </div>
       </div>
     </section>
