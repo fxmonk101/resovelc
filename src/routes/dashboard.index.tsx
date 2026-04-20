@@ -260,6 +260,8 @@ function Overview() {
           </div>
         </div>
       </div>
+
+      <MoneyActions mode={action} onClose={() => setAction(null)} onDone={loadAll} />
     </div>
   );
 }
