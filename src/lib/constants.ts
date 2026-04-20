@@ -2,7 +2,7 @@ export const BRAND = {
   name: "Resolve Case",
   legalName: "Resolve Case Financial",
   tagline: "Banking built for trust, growth, and recovery.",
-  email: "support@resolvecase.demo",
+  email: "support@resolvecase.com",
   phone: "1-800-555-0142",
   address: "200 Park Avenue, Suite 4500, New York, NY 10166",
   hours: "Mon–Fri 7AM–10PM ET · Sat–Sun 8AM–8PM ET",
