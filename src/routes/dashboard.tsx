@@ -7,6 +7,7 @@ import {
 import { useAuth, signOut } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
+import { UserMenu } from "@/features/dashboard/UserMenu";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Resolve Case" }] }),
@@ -27,7 +28,7 @@ function DashboardLayout() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [profile, setProfile] = useState<{ first_name: string; last_name: string } | null>(null);
+  const [profile, setProfile] = useState<{ first_name: string; last_name: string; avatar_url: string | null } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -37,7 +38,7 @@ function DashboardLayout() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("first_name,last_name").eq("user_id", user.id).maybeSingle()
+    supabase.from("profiles").select("first_name,last_name,avatar_url").eq("user_id", user.id).maybeSingle()
       .then(({ data }) => setProfile(data));
     supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle()
       .then(({ data }) => setIsAdmin(!!data));
@@ -50,6 +51,7 @@ function DashboardLayout() {
   if (loading || !user) return <div className="min-h-screen grid place-items-center text-navy-light">Loading…</div>;
 
   const initials = `${profile?.first_name?.[0] ?? ""}${profile?.last_name?.[0] ?? ""}`.toUpperCase() || "U";
+  const fullName = `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim() || "Member";
 
   return (
     <div className="min-h-screen flex bg-ivory">
@@ -111,9 +113,15 @@ function DashboardLayout() {
               <Bell className="h-4 w-4" />
               <span className="absolute top-1.5 right-2 h-2 w-2 rounded-full bg-indigo" />
             </button>
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-indigo text-white text-sm font-semibold">
-              {initials}
-            </div>
+            <UserMenu
+              userId={user.id}
+              email={user.email ?? ""}
+              fullName={fullName}
+              initials={initials}
+              avatarUrl={profile?.avatar_url ?? null}
+              isAdmin={isAdmin}
+              onAvatarUpdated={(url) => setProfile((p) => p ? { ...p, avatar_url: url } : p)}
+            />
           </div>
         </header>
 

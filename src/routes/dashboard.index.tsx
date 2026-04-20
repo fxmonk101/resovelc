@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowDownLeft, ArrowUpRight, Briefcase, CreditCard, Eye, EyeOff,
@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
+import { MoneyActions } from "@/features/dashboard/MoneyActions";
+import { KycCard } from "@/features/dashboard/KycCard";
 
 export const Route = createFileRoute("/dashboard/")({
   component: Overview,
@@ -36,10 +38,10 @@ function Overview() {
   const [counts, setCounts] = useState({ loans: 0, grants: 0, cards: 0 });
   const [txs, setTxs] = useState<Tx[]>([]);
   const [hide, setHide] = useState(false);
+  const [action, setAction] = useState<"deposit" | "transfer" | "paybill" | null>(null);
 
-  useEffect(() => {
+  const loadAll = useCallback(async () => {
     if (!user) return;
-    (async () => {
       const [{ data: p }, { count: lc }, { count: gc }, { count: cc }, { data: t }] = await Promise.all([
         supabase.from("profiles").select("first_name,account_type,account_number,balance,currency,is_verified").eq("user_id", user.id).maybeSingle(),
         supabase.from("loan_applications").select("*", { count: "exact", head: true }).eq("user_id", user.id),
@@ -50,8 +52,9 @@ function Overview() {
       setProfile(p as Profile | null);
       setCounts({ loans: lc ?? 0, grants: gc ?? 0, cards: cc ?? 0 });
       setTxs((t as Tx[]) ?? []);
-    })();
   }, [user]);
+
+  useEffect(() => { loadAll(); }, [loadAll]);
 
   const masked = profile?.account_number ? `••••${profile.account_number.slice(-4)}` : "••••----";
   const balance = Number(profile?.balance ?? 0);
@@ -65,12 +68,7 @@ function Overview() {
 
   return (
     <div className="p-4 lg:p-8 space-y-6 max-w-7xl mx-auto">
-      {!profile?.is_verified && (
-        <div className="bg-warning/10 border border-warning/30 rounded-xl px-4 py-3 text-sm text-navy-deep flex items-center gap-3">
-          <ShieldCheck className="h-4 w-4 text-warning" />
-          <span>Your bonus will be funded within 1–3 business days.</span>
-        </div>
-      )}
+      <KycCard />
 
       {/* Top: Balance + spending chart */}
       <div className="grid lg:grid-cols-3 gap-5">
@@ -96,16 +94,16 @@ function Overview() {
               <span>+2.4% vs last month</span>
             </div>
             <div className="mt-6 flex flex-wrap gap-2">
-              <button className="inline-flex items-center gap-2 bg-white text-navy-deep hover:bg-white/90 px-4 py-2.5 rounded-lg font-semibold text-sm transition">
+              <button onClick={() => setAction("deposit")} className="inline-flex items-center gap-2 bg-white text-navy-deep hover:bg-white/90 px-4 py-2.5 rounded-lg font-semibold text-sm transition">
                 <Plus className="h-4 w-4" /> Deposit
               </button>
-              <button className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur px-4 py-2.5 rounded-lg font-semibold text-sm transition border border-white/20">
+              <button onClick={() => setAction("transfer")} className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur px-4 py-2.5 rounded-lg font-semibold text-sm transition border border-white/20">
                 <Send className="h-4 w-4" /> Transfer
               </button>
-              <button className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur px-4 py-2.5 rounded-lg font-semibold text-sm transition border border-white/20">
+              <button onClick={() => setAction("paybill")} className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur px-4 py-2.5 rounded-lg font-semibold text-sm transition border border-white/20">
                 <FileText className="h-4 w-4" /> Pay bills
               </button>
-              <button className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur px-4 py-2.5 rounded-lg font-semibold text-sm transition border border-white/20">
+              <button onClick={() => setAction("deposit")} className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur px-4 py-2.5 rounded-lg font-semibold text-sm transition border border-white/20">
                 <Smartphone className="h-4 w-4" /> Mobile deposit
               </button>
             </div>
@@ -262,6 +260,8 @@ function Overview() {
           </div>
         </div>
       </div>
+
+      <MoneyActions mode={action} onClose={() => setAction(null)} onDone={loadAll} />
     </div>
   );
 }

@@ -25,12 +25,25 @@ export function HeroSection() {
   const words = "Banking built for trust, growth, and clarity.".split(" ");
   const slide = SLIDES[idx];
   return (
-    <section className="relative bg-slate-deep text-white overflow-hidden">
-      <div className="absolute inset-0 bg-grid-dots opacity-60" />
-      <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-terra/20 blur-[120px]" />
-      <div className="absolute -bottom-32 -left-32 h-[400px] w-[400px] rounded-full bg-amber-sand/10 blur-[100px]" />
-      <div className="container-page relative grid lg:grid-cols-2 gap-12 py-24 lg:py-32 items-center min-h-[calc(100vh-4rem)]">
-        <div>
+    <section className="relative bg-slate-deep text-white overflow-hidden min-h-[88vh]">
+      {/* Full-width rotating background slider */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={idx}
+          initial={{ opacity: 0, scale: 1.06 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.02 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${slide.img})` }}
+        />
+      </AnimatePresence>
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-deep/95 via-slate-deep/75 to-slate-deep/40" />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-deep/80 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-grid-dots opacity-30" />
+
+      <div className="container-page relative py-24 lg:py-36 min-h-[88vh] flex items-center">
+        <div className="max-w-3xl">
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -79,73 +92,25 @@ export function HeroSection() {
             <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Equal Housing Lender</span>
             <span className="inline-flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5" /> $0 monthly fees</span>
           </div>
-        </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.7 }}
-          className="relative hidden lg:block"
-        >
-          <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-elevated ring-1 ring-white/10">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.02 }}
-                transition={{ duration: 0.9, ease: "easeOut" }}
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${slide.img})` }}
-              />
-            </AnimatePresence>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6">
+          {/* Slide caption + dots */}
+          <div className="mt-12 flex items-center gap-6">
+            <div>
               <div className="text-label text-terra-light">{slide.kicker}</div>
-              <div className="font-display text-2xl font-bold mt-1">{slide.caption}</div>
-              <div className="mt-4 flex gap-1.5">
-                {SLIDES.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setIdx(i)}
-                    aria-label={`Slide ${i + 1}`}
-                    className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-terra" : "w-4 bg-white/40"}`}
-                  />
-                ))}
-              </div>
+              <div className="font-display text-xl font-bold mt-1">{slide.caption}</div>
+            </div>
+            <div className="flex gap-1.5">
+              {SLIDES.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setIdx(i)}
+                  aria-label={`Slide ${i + 1}`}
+                  className={`h-1.5 rounded-full transition-all ${i === idx ? "w-10 bg-terra" : "w-5 bg-white/30 hover:bg-white/50"}`}
+                />
+              ))}
             </div>
           </div>
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1 }}
-            className="absolute -left-6 bottom-12 bg-card text-card-foreground rounded-2xl p-5 shadow-elevated w-60 border border-border"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-label text-muted-foreground">Members</span>
-              <TrendingUp className="h-4 w-4 text-success" />
-            </div>
-            <div className="font-display text-3xl font-bold mt-2">50,247</div>
-            <div className="text-xs text-success mt-1">+12.4% this quarter</div>
-            <svg viewBox="0 0 100 30" className="mt-3 w-full h-8">
-              <polyline
-                points="0,25 15,20 30,22 45,15 60,18 75,8 90,10 100,3"
-                fill="none"
-                stroke="oklch(0.68 0.14 35)"
-                strokeWidth="2"
-              />
-            </svg>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.2 }}
-            className="absolute -right-4 top-12 bg-card text-card-foreground rounded-2xl p-4 shadow-elevated border border-border"
-          >
-            <div className="text-label text-muted-foreground">APY</div>
-            <div className="font-display text-2xl font-bold text-terra">3.75%</div>
-          </motion.div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
