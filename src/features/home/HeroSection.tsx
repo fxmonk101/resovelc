@@ -5,17 +5,21 @@ import { ArrowRight, TrendingUp, ShieldCheck, Lock } from "lucide-react";
 import hero1 from "@/assets/hero-banking-1.jpg";
 import hero2 from "@/assets/hero-banking-2.jpg";
 import hero3 from "@/assets/hero-banking-3.jpg";
+import hero4 from "@/assets/hero-banking-4.jpg";
+import hero5 from "@/assets/hero-banking-5.jpg";
 
 const SLIDES = [
   { img: hero1, kicker: "Personal Banking", caption: "Premium service. Real people." },
   { img: hero2, kicker: "Mobile First", caption: "Bank anywhere, in seconds." },
   { img: hero3, kicker: "Home Loans", caption: "Mortgages built around your life." },
+  { img: hero4, kicker: "Business Banking", caption: "Fuel your business growth." },
+  { img: hero5, kicker: "Wealth Planning", caption: "Retire on your own terms." },
 ];
 
 export function HeroSection() {
   const [idx, setIdx] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % SLIDES.length), 5000);
+    const t = setInterval(() => setIdx((i) => (i + 1) % SLIDES.length), 4500);
     return () => clearInterval(t);
   }, []);
   const words = "Banking built for trust, growth, and clarity.".split(" ");

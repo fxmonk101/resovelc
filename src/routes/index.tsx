@@ -8,6 +8,10 @@ import { PromoBanner } from "@/features/home/PromoBanner";
 import { TestimonialsSection } from "@/features/home/TestimonialsSection";
 import { TrustSection } from "@/features/home/TrustSection";
 import { FaqSection } from "@/features/home/FaqSection";
+import { AwardsBar } from "@/features/home/AwardsBar";
+import { AppShowcase } from "@/features/home/AppShowcase";
+import { SecurityShowcase } from "@/features/home/SecurityShowcase";
+import { PressBar } from "@/features/home/PressBar";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,11 +29,15 @@ function HomePage() {
   return (
     <PageShell>
       <HeroSection />
+      <AwardsBar />
       <StatsBar />
       <TrustSection />
       <RatesSection />
       <ServicesGrid />
+      <SecurityShowcase />
+      <AppShowcase />
       <PromoBanner />
+      <PressBar />
       <TestimonialsSection />
       <FaqSection />
     </PageShell>
