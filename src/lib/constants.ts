@@ -7,7 +7,7 @@ export const BRAND = {
   address: "200 Park Avenue, Suite 4500, New York, NY 10166",
   hours: "Mon–Fri 7AM–10PM ET · Sat–Sun 8AM–8PM ET",
   routing: "251480576",
-  fdic: "FDIC# 58219 (demo)",
+  fdic: "FDIC Insured · Member FDIC",
   swift: "RCFNUS33",
   founded: "2009",
 } as const;
