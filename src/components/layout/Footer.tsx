@@ -86,7 +86,7 @@ export function Footer() {
       </div>
       <div className="border-t border-white/10">
         <div className="container-page py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/50">
-          <p>© {new Date().getFullYear()} {BRAND.legalName} · Demonstration site · Not a real financial institution.</p>
+          <p>© {new Date().getFullYear()} {BRAND.legalName} · Member FDIC · Equal Housing Lender</p>
           <div className="flex gap-4 font-mono">
             <span>Routing # {BRAND.routing}</span>
             <span>SWIFT {BRAND.swift}</span>
