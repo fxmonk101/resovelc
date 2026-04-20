@@ -247,6 +247,60 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_submissions: {
+        Row: {
+          address_line: string
+          admin_notes: string | null
+          city: string
+          created_at: string
+          date_of_birth: string
+          full_legal_name: string
+          id: string
+          id_document_url: string | null
+          selfie_url: string | null
+          ssn_last4: string
+          state: string
+          status: string
+          updated_at: string
+          user_id: string
+          zip: string
+        }
+        Insert: {
+          address_line: string
+          admin_notes?: string | null
+          city: string
+          created_at?: string
+          date_of_birth: string
+          full_legal_name: string
+          id?: string
+          id_document_url?: string | null
+          selfie_url?: string | null
+          ssn_last4: string
+          state: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          zip: string
+        }
+        Update: {
+          address_line?: string
+          admin_notes?: string | null
+          city?: string
+          created_at?: string
+          date_of_birth?: string
+          full_legal_name?: string
+          id?: string
+          id_document_url?: string | null
+          selfie_url?: string | null
+          ssn_last4?: string
+          state?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          zip?: string
+        }
+        Relationships: []
+      }
       loan_applications: {
         Row: {
           admin_notes: string | null
@@ -308,6 +362,7 @@ export type Database = {
         Row: {
           account_number: string
           account_type: string
+          avatar_url: string | null
           balance: number
           country: string | null
           created_at: string
@@ -325,6 +380,7 @@ export type Database = {
         Insert: {
           account_number?: string
           account_type?: string
+          avatar_url?: string | null
           balance?: number
           country?: string | null
           created_at?: string
@@ -342,6 +398,7 @@ export type Database = {
         Update: {
           account_number?: string
           account_type?: string
+          avatar_url?: string | null
           balance?: number
           country?: string | null
           created_at?: string
@@ -452,6 +509,18 @@ export type Database = {
         Returns: boolean
       }
       is_username_available: { Args: { _username: string }; Returns: boolean }
+      user_pay_bill: {
+        Args: { _amount: number; _memo: string; _payee: string }
+        Returns: Json
+      }
+      user_request_deposit: {
+        Args: { _amount: number; _method: string }
+        Returns: Json
+      }
+      user_transfer_funds: {
+        Args: { _amount: number; _memo: string; _to_account: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user"
