@@ -2,16 +2,18 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Eye, EyeOff, Landmark, ShieldCheck, Zap, Globe, Smartphone } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, Zap, Globe, Smartphone } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validators";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
+import logo from "@/assets/resolva-logo.png";
+import shield from "@/assets/resolva-shield.png";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Sign in — Resolve Case" },
-      { name: "description", content: "Sign in to your Resolve Case account." },
+      { title: "Sign in — Resolva Bank" },
+      { name: "description", content: "Sign in to your Resolva Bank account." },
     ],
   }),
   component: LoginPage,
@@ -52,12 +54,8 @@ function LoginPage() {
         <div className="absolute inset-0 bg-grid-dots opacity-50" />
         <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-indigo/20 blur-[120px]" />
 
-        <Link to="/" className="relative flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-indigo"><Landmark className="h-5 w-5" /></span>
-          <div className="flex flex-col leading-none">
-            <span className="font-display text-xl font-bold">{BRAND.name}</span>
-            <span className="text-[10px] uppercase tracking-widest text-white/50">Financial</span>
-          </div>
+        <Link to="/" className="relative flex items-center">
+          <img src={logo} alt={BRAND.name} className="h-10 brightness-0 invert" />
         </Link>
 
         <div className="relative">
@@ -86,9 +84,9 @@ function LoginPage() {
 
       <div className="flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
-          <Link to="/" className="lg:hidden flex items-center gap-2 text-navy-deep mb-8">
-            <Landmark className="h-5 w-5 text-indigo" />
-            <span className="font-display text-xl font-bold">{BRAND.name}</span>
+          <Link to="/" className="lg:hidden flex items-center gap-2 mb-8">
+            <img src={shield} alt="" className="h-8 w-8 object-contain" />
+            <span className="font-display text-xl font-bold text-navy-deep">{BRAND.name}</span>
           </Link>
 
           <h1 className="font-display text-4xl font-bold text-navy-deep">Welcome back</h1>
