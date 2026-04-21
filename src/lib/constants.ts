@@ -1,14 +1,14 @@
 export const BRAND = {
-  name: "Resolve Case",
-  legalName: "Resolve Case Financial",
+  name: "Resolva Bank",
+  legalName: "Resolva Bank, N.A.",
   tagline: "Banking built for trust, growth, and recovery.",
-  email: "support@resolvecase.com",
-  phone: "1-800-555-0142",
+  email: "support@resolvabank.com",
+  phone: "1-800-RESOLVA",
   address: "200 Park Avenue, Suite 4500, New York, NY 10166",
   hours: "Mon–Fri 7AM–10PM ET · Sat–Sun 8AM–8PM ET",
   routing: "251480576",
   fdic: "FDIC Insured · Member FDIC",
-  swift: "RCFNUS33",
+  swift: "RSLVUS33",
   founded: "2009",
 } as const;
 

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Landmark, Twitter, Linkedin, Facebook, Lock, ShieldCheck } from "lucide-react";
+import { Twitter, Linkedin, Facebook, Lock, ShieldCheck } from "lucide-react";
 import { BRAND } from "@/lib/constants";
+import shield from "@/assets/resolva-shield.png";
 
 const COLS = [
   {
@@ -47,12 +48,10 @@ export function Footer() {
       <div className="container-page py-16 grid gap-12 md:grid-cols-2 lg:grid-cols-6">
         <div className="lg:col-span-2">
           <Link to="/" className="flex items-center gap-2.5 text-white">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-indigo">
-              <Landmark className="h-5 w-5" strokeWidth={2.2} />
-            </span>
+            <img src={shield} alt="" className="h-10 w-10 object-contain" />
             <div className="flex flex-col leading-none">
-              <span className="font-display text-lg font-bold">{BRAND.name}</span>
-              <span className="text-[10px] uppercase tracking-widest text-white/50">Financial</span>
+              <span className="font-display text-xl font-bold">{BRAND.name}</span>
+              <span className="text-[10px] uppercase tracking-widest text-white/50">Member FDIC · Est. {BRAND.founded}</span>
             </div>
           </Link>
           <p className="mt-4 text-sm leading-relaxed max-w-xs text-white/60">

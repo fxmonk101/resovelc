@@ -55,6 +55,11 @@
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
 
+  /* Resolva Bank brand red */
+  --color-brand-red: var(--brand-red);
+  --color-brand-red-light: var(--brand-red-light);
+  --color-brand-red-dark: var(--brand-red-dark);
+
   /* Aliases for legacy class names so older components keep working */
   --color-slate-deep: var(--navy-deep);
   --color-slate-mid: var(--navy);
@@ -72,12 +77,15 @@
 :root {
   --radius: 0.75rem;
 
-  /* Midnight Indigo banking palette */
-  --navy-deep: oklch(0.20 0.05 260);
-  --navy: oklch(0.32 0.09 265);
-  --navy-light: oklch(0.55 0.06 260);
-  --indigo: oklch(0.55 0.18 265);
-  --indigo-light: oklch(0.75 0.13 265);
+  /* Resolva Bank — Patriotic blue (#012169) + red palette */
+  --navy-deep: oklch(0.22 0.13 265);   /* #012169 deep */
+  --navy: oklch(0.30 0.16 265);        /* primary blue */
+  --navy-light: oklch(0.55 0.13 260);
+  --indigo: oklch(0.34 0.18 265);      /* #012169 */
+  --indigo-light: oklch(0.55 0.18 265);
+  --brand-red: oklch(0.55 0.22 27);    /* #C8102E vibrant */
+  --brand-red-light: oklch(0.66 0.20 27);
+  --brand-red-dark: oklch(0.45 0.22 27);
   --gold: oklch(0.78 0.13 85);
   --gold-light: oklch(0.88 0.09 85);
   --ivory: oklch(0.985 0.003 250);
@@ -103,8 +111,8 @@
   --secondary-foreground: var(--navy-deep);
   --muted: var(--ivory-dark);
   --muted-foreground: var(--navy-light);
-  --accent: var(--gold);
-  --accent-foreground: var(--navy-deep);
+  --accent: var(--brand-red);
+  --accent-foreground: oklch(1 0 0);
   --destructive: var(--error);
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.92 0.008 260);
