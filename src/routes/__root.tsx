@@ -60,6 +60,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <div id="resolva-preloader" aria-hidden="true">
+          <img src="/preloader.png" alt="" width="96" height="96" />
+          <div className="rb-bar"><span /></div>
+        </div>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.addEventListener('load',function(){var p=document.getElementById('resolva-preloader');if(!p)return;setTimeout(function(){p.classList.add('rb-hide');setTimeout(function(){p.remove();},500);},350);});`,
+          }}
+        />
         {children}
         <Scripts />
       </body>
