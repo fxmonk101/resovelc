@@ -21,7 +21,7 @@ interface Payload {
 
 function buildEmail(p: Payload) {
   const name = p.recipientName || "Member";
-  const brand = "Resolve Case";
+  const brand = "Resolva Bank";
   const isApproved = p.status === "approved";
   const subjectMap = {
     loan: isApproved ? "Your loan has been approved" : "Update on your loan application",

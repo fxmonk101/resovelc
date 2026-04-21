@@ -7,8 +7,6 @@ import hero2 from "@/assets/hero-banking-2.jpg";
 import hero3 from "@/assets/hero-banking-3.jpg";
 import hero4 from "@/assets/hero-banking-4.jpg";
 import hero5 from "@/assets/hero-banking-5.jpg";
-import logo from "@/assets/resolva-logo.png";
-
 const SLIDES = [
   { img: hero1, kicker: "Personal Banking", caption: "Premium service. Real people." },
   { img: hero2, kicker: "Mobile First", caption: "Bank anywhere, in seconds." },
@@ -45,14 +43,6 @@ export function HeroSection() {
 
       <div className="container-page relative py-24 lg:py-36 min-h-[88vh] flex items-center">
         <div className="max-w-3xl">
-          <motion.img
-            src={logo}
-            alt="Resolva Bank"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="h-12 lg:h-14 mb-6 brightness-0 invert"
-          />
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

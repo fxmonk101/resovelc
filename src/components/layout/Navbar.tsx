@@ -5,7 +5,6 @@ import { NAV_LINKS, SERVICE_LINKS, BRAND } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/resolva-logo.png";
-import shield from "@/assets/resolva-shield.png";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -25,37 +24,34 @@ export function Navbar() {
     setServicesOpen(false);
   }, [location.pathname]);
 
-  // Always-solid navy bar so it reads well on every background
+  // White header so the brand-color logo reads cleanly; subtle shadow on scroll
   const headerCls = cn(
-    "fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-navy-deep text-white",
-    scrolled ? "shadow-elevated border-b border-white/10" : "border-b border-white/5"
+    "fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white text-navy-deep",
+    scrolled ? "shadow-elevated border-b border-border" : "border-b border-border/60"
   );
 
-  const linkCls = "text-sm font-medium text-white/80 hover:text-white transition-colors";
+  const linkCls = "text-sm font-medium text-navy-deep/75 hover:text-navy-deep transition-colors";
 
   return (
     <header className={headerCls}>
-      {/* Top utility bar */}
-      <div className="hidden md:block bg-black/20 border-b border-white/5">
-        <div className="container-page flex h-8 items-center justify-between text-[11px] text-white/60">
+      {/* Top utility bar — patriotic red, the secondary brand color */}
+      <div className="hidden md:block bg-brand-red text-white border-b border-brand-red-dark/40">
+        <div className="container-page flex h-8 items-center justify-between text-[11px]">
           <div className="flex items-center gap-4">
-            <span>{BRAND.fdic} · Trusted since {BRAND.founded}</span>
+            <span className="text-white/95">{BRAND.fdic} · Trusted since {BRAND.founded}</span>
           </div>
           <div className="flex items-center gap-4">
-            <a href={`tel:${BRAND.phone}`} className="hover:text-white">{BRAND.phone}</a>
-            <span className="text-white/30">|</span>
-            <span>{BRAND.hours}</span>
+            <a href={`tel:${BRAND.phone}`} className="hover:text-white text-white/95">{BRAND.phone}</a>
+            <span className="text-white/40">|</span>
+            <span className="text-white/95">{BRAND.hours}</span>
           </div>
         </div>
       </div>
 
       <div className="container-page flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-white" aria-label="Resolva Bank home">
-          <img src={shield} alt="" className="h-9 w-9 object-contain" />
-          <div className="flex flex-col leading-none">
-            <span className="font-display text-xl font-bold tracking-tight">{BRAND.name}</span>
-            <span className="text-[10px] uppercase tracking-widest text-white/50">FDIC Member · Est. {BRAND.founded}</span>
-          </div>
+        <Link to="/" className="flex items-center gap-2 text-navy-deep" aria-label="Resolva Bank home">
+          <img src={logo} alt="Resolva Bank" className="h-10 lg:h-11 w-auto object-contain" />
+          <span className="sr-only">{BRAND.name}</span>
         </Link>
 
         <nav className="hidden lg:flex items-center gap-7">
@@ -90,7 +86,7 @@ export function Navbar() {
 
         <div className="hidden lg:flex items-center gap-3">
           <ThemeToggle />
-          <Link to="/login" className="text-sm font-medium text-white/95 hover:text-white px-4 py-2 rounded-lg border border-white/20 hover:bg-white/10 transition">
+          <Link to="/login" className="text-sm font-medium text-navy-deep hover:text-indigo px-4 py-2 rounded-lg border border-border hover:bg-ivory transition">
             Sign in
           </Link>
           <Link to="/register" className="text-sm font-semibold bg-brand-red hover:bg-brand-red-dark text-white px-5 py-2 rounded-lg transition shadow-lg shadow-brand-red/30">
@@ -100,7 +96,7 @@ export function Navbar() {
 
         <div className="lg:hidden flex items-center gap-2">
           <ThemeToggle />
-          <button className="text-white p-2" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
+          <button className="text-navy-deep p-2" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
