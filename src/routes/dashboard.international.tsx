@@ -47,10 +47,10 @@ function InternationalPage() {
       _swift_bic: form.swift_bic.trim().toUpperCase(),
       _iban: form.iban.trim().toUpperCase(),
       _country: form.country,
-      _recipient_address: form.recipient_address || null,
+      _recipient_address: form.recipient_address || "",
       _currency: form.currency,
       _amount: amt,
-      _purpose: form.purpose || null,
+      _purpose: form.purpose || "",
     });
     setBusy(false);
     if (error) { setErr(error.message); return; }

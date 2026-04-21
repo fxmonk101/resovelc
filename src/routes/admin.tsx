@@ -1,14 +1,15 @@
 import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  ShieldCheck, Users, HandCoins, Gift, CreditCard, Wallet, LogOut, Menu, Landmark, UserCog,
+  ShieldCheck, Users, HandCoins, Gift, CreditCard, Wallet, LogOut, Menu, UserCog,
 } from "lucide-react";
 import { useAuth, signOut } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
+import shield from "@/assets/resolva-shield.png";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin Console — Resolve Case" }] }),
+  head: () => ({ meta: [{ title: "Admin Console — Resolva Bank" }] }),
   component: AdminLayout,
 });
 
@@ -63,10 +64,10 @@ function AdminLayout() {
     <div className="min-h-screen flex bg-ivory">
       <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:sticky inset-y-0 left-0 z-40 w-64 bg-navy-deep text-white flex flex-col transition-transform lg:top-0 lg:h-screen`}>
         <Link to="/" className="flex items-center gap-2.5 px-6 py-5 border-b border-white/10">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-gold-500"><Landmark className="h-5 w-5 text-navy-deep" /></span>
+          <img src={shield} alt="" className="h-9 w-9 object-contain" />
           <div className="flex flex-col leading-none">
             <span className="font-display text-lg font-bold">{BRAND.name}</span>
-            <span className="text-[10px] uppercase tracking-widest text-gold-400">Admin Console</span>
+            <span className="text-[10px] uppercase tracking-widest text-brand-red-light">Admin Console</span>
           </div>
         </Link>
         <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">

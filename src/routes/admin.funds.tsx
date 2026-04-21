@@ -56,14 +56,14 @@ function AdminFunds() {
     const signed = direction === "credit" ? amt : -amt;
 
     if (target === "balance") {
-      const newBal = Number(selected.balance) + signed;
-      if (newBal < 0) return toast.error("Insufficient funds");
-      const { error } = await supabase.from("profiles").update({ balance: newBal }).eq("user_id", selected.user_id);
-      if (error) return toast.error(error.message);
-      await supabase.from("transactions").insert({
-        user_id: selected.user_id, amount: signed, type: direction === "credit" ? "admin_credit" : "admin_debit",
-        description: desc || `Admin ${direction} to checking`,
+      // Use atomic RPC so we always add to the LATEST balance (no stale overwrites)
+      const { error } = await supabase.rpc("admin_adjust_balance", {
+        _user_id: selected.user_id,
+        _amount: amt,
+        _description: desc || `Admin ${direction} to checking`,
+        _direction: direction,
       });
+      if (error) return toast.error(error.message);
     } else {
       const card = cards.find((c) => c.id === target);
       if (!card) return;
