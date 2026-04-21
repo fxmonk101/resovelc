@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
-import { ChevronDown, Menu, Landmark, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { NAV_LINKS, SERVICE_LINKS, BRAND } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/resolva-logo.png";
+import shield from "@/assets/resolva-shield.png";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -48,13 +50,11 @@ export function Navbar() {
       </div>
 
       <div className="container-page flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5 text-white">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-indigo">
-            <Landmark className="h-5 w-5 text-white" strokeWidth={2.2} />
-          </span>
+        <Link to="/" className="flex items-center gap-2 text-white" aria-label="Resolva Bank home">
+          <img src={shield} alt="" className="h-9 w-9 object-contain" />
           <div className="flex flex-col leading-none">
-            <span className="font-display text-lg font-bold tracking-tight">{BRAND.name}</span>
-            <span className="text-[10px] uppercase tracking-widest text-white/50">Financial</span>
+            <span className="font-display text-xl font-bold tracking-tight">{BRAND.name}</span>
+            <span className="text-[10px] uppercase tracking-widest text-white/50">FDIC Member · Est. {BRAND.founded}</span>
           </div>
         </Link>
 
@@ -90,10 +90,10 @@ export function Navbar() {
 
         <div className="hidden lg:flex items-center gap-3">
           <ThemeToggle />
-          <Link to="/login" className="text-sm font-medium text-white/90 hover:text-white px-4 py-2 rounded-lg border border-white/20 hover:bg-white/10 transition">
+          <Link to="/login" className="text-sm font-medium text-white/95 hover:text-white px-4 py-2 rounded-lg border border-white/20 hover:bg-white/10 transition">
             Sign in
           </Link>
-          <Link to="/register" className="text-sm font-semibold bg-indigo hover:bg-indigo-light text-white px-5 py-2 rounded-lg transition shadow-lg shadow-indigo/20">
+          <Link to="/register" className="text-sm font-semibold bg-brand-red hover:bg-brand-red-dark text-white px-5 py-2 rounded-lg transition shadow-lg shadow-brand-red/30">
             Open Account
           </Link>
         </div>
@@ -122,7 +122,7 @@ export function Navbar() {
             ))}
             <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10 mt-2">
               <Link to="/login" className="text-center py-2.5 rounded-lg border border-white/20 text-white text-sm">Sign in</Link>
-              <Link to="/register" className="text-center py-2.5 rounded-lg bg-indigo text-white font-semibold text-sm">Open</Link>
+              <Link to="/register" className="text-center py-2.5 rounded-lg bg-brand-red text-white font-semibold text-sm">Open</Link>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { Award, Star, TrendingUp, ShieldCheck } from "lucide-react";
 
 const AWARDS = [
-  { icon: Award, title: "Forbes 2025", desc: "Best Banks in America" },
+  { icon: Award, title: "Forbes 2019", desc: "Best Banks in America" },
   { icon: Star, title: "J.D. Power", desc: "#1 in Customer Satisfaction" },
   { icon: TrendingUp, title: "Bankrate", desc: "Best High-Yield Savings" },
   { icon: ShieldCheck, title: "BBB", desc: "A+ Accredited Business" },

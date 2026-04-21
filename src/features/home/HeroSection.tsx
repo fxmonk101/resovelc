@@ -7,6 +7,7 @@ import hero2 from "@/assets/hero-banking-2.jpg";
 import hero3 from "@/assets/hero-banking-3.jpg";
 import hero4 from "@/assets/hero-banking-4.jpg";
 import hero5 from "@/assets/hero-banking-5.jpg";
+import logo from "@/assets/resolva-logo.png";
 
 const SLIDES = [
   { img: hero1, kicker: "Personal Banking", caption: "Premium service. Real people." },
@@ -38,16 +39,24 @@ export function HeroSection() {
           style={{ backgroundImage: `url(${slide.img})` }}
         />
       </AnimatePresence>
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-deep/95 via-slate-deep/75 to-slate-deep/40" />
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-deep/80 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-navy-deep/95 via-navy-deep/80 to-navy-deep/40" />
+      <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/85 via-transparent to-transparent" />
       <div className="absolute inset-0 bg-grid-dots opacity-30" />
 
       <div className="container-page relative py-24 lg:py-36 min-h-[88vh] flex items-center">
         <div className="max-w-3xl">
+          <motion.img
+            src={logo}
+            alt="Resolva Bank"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="h-12 lg:h-14 mb-6 brightness-0 invert"
+          />
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 text-label text-terra-light bg-terra/10 border border-terra/30 rounded-full px-4 py-1.5"
+            className="inline-flex items-center gap-2 text-label text-white bg-brand-red border border-brand-red rounded-full px-4 py-1.5"
           >
             <ShieldCheck className="h-3.5 w-3.5" />
             FDIC Insured · Member FDIC
@@ -61,7 +70,7 @@ export function HeroSection() {
                 transition={{ delay: 0.1 + i * 0.05 }}
                 className="inline-block mr-3"
               >
-                {w === "clarity." ? <span className="text-terra">{w}</span> : w}
+                {w === "clarity." ? <span className="text-brand-red-light">{w}</span> : w}
               </motion.span>
             ))}
           </h1>
@@ -80,7 +89,7 @@ export function HeroSection() {
             transition={{ delay: 0.8 }}
             className="mt-8 flex flex-wrap gap-3"
           >
-            <Link to="/register" className="inline-flex items-center gap-2 bg-terra hover:bg-terra-dark px-7 py-3.5 rounded-lg font-semibold transition shadow-elevated">
+            <Link to="/register" className="inline-flex items-center gap-2 bg-brand-red hover:bg-brand-red-dark px-7 py-3.5 rounded-lg font-semibold transition shadow-elevated">
               Open an Account <ArrowRight className="h-4 w-4" />
             </Link>
             <Link to="/about" className="inline-flex items-center px-7 py-3.5 rounded-lg border border-white/30 hover:bg-white/10 font-semibold transition">
@@ -96,7 +105,7 @@ export function HeroSection() {
           {/* Slide caption + dots */}
           <div className="mt-12 flex items-center gap-6">
             <div>
-              <div className="text-label text-terra-light">{slide.kicker}</div>
+              <div className="text-label text-brand-red-light">{slide.kicker}</div>
               <div className="font-display text-xl font-bold mt-1">{slide.caption}</div>
             </div>
             <div className="flex gap-1.5">
@@ -105,7 +114,7 @@ export function HeroSection() {
                   key={i}
                   onClick={() => setIdx(i)}
                   aria-label={`Slide ${i + 1}`}
-                  className={`h-1.5 rounded-full transition-all ${i === idx ? "w-10 bg-terra" : "w-5 bg-white/30 hover:bg-white/50"}`}
+                  className={`h-1.5 rounded-full transition-all ${i === idx ? "w-10 bg-brand-red" : "w-5 bg-white/30 hover:bg-white/50"}`}
                 />
               ))}
             </div>

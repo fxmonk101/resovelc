@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { Check, ShieldCheck } from "lucide-react";
 
 const PERKS = [
   "Open with no minimum deposit",
-  "Direct deposit within 60 days",
-  "Bonus credited after 90 days",
+  "FDIC insured up to $250,000 per depositor",
+  "$0 monthly maintenance fees",
+  "24/7 fraud monitoring & zero-liability protection",
 ];
 
 export function PromoBanner() {
@@ -14,34 +15,34 @@ export function PromoBanner() {
         <div
           className="aspect-[5/4] rounded-3xl bg-cover bg-center shadow-elevated"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=900&q=80')",
+            backgroundImage: "url('https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=1200&q=80')",
             clipPath: "polygon(0 0, 100% 8%, 100% 100%, 0 92%)",
           }}
         />
         <div>
-          <span className="inline-block bg-terra text-white font-display text-2xl font-bold px-5 py-2 rounded-lg shadow-hover">
-            $200 BONUS*
+          <span className="inline-flex items-center gap-2 bg-brand-red/10 text-brand-red border border-brand-red/30 font-semibold text-xs uppercase tracking-wider px-4 py-1.5 rounded-full">
+            <ShieldCheck className="h-3.5 w-3.5" /> Member FDIC
           </span>
           <h2 className="font-display text-4xl md:text-5xl font-bold mt-5 text-foreground">
-            Earn $200 when you open an account
+            Banking you can trust — for every season of life
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Make banking work harder for you. Open a new checking account and meet a few simple requirements.
+            From your first paycheck to your retirement plan, Resolva Bank protects what you've earned. Your deposits are FDIC insured, your data is encrypted, and your accounts are monitored 24/7.
           </p>
           <ul className="mt-6 space-y-3">
             {PERKS.map((p) => (
               <li key={p} className="flex items-start gap-3">
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-terra/10 text-terra mt-0.5">
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-brand-red/10 text-brand-red mt-0.5">
                   <Check className="h-3.5 w-3.5" strokeWidth={3} />
                 </span>
                 <span className="text-foreground">{p}</span>
               </li>
             ))}
           </ul>
-          <Link to="/register" className="inline-flex mt-8 bg-terra hover:bg-terra-dark text-white font-semibold px-7 py-3.5 rounded-lg transition">
-            Claim Your Bonus
+          <Link to="/register" className="inline-flex mt-8 bg-brand-red hover:bg-brand-red-dark text-white font-semibold px-7 py-3.5 rounded-lg transition">
+            Open an Account
           </Link>
-          <p className="text-xs text-muted-foreground mt-4">*Limited-time offer. Terms and conditions apply. Bonus credited within 90 days of qualifying activity.</p>
+          <p className="text-xs text-muted-foreground mt-4">All deposits insured up to $250,000 per depositor by the Federal Deposit Insurance Corporation.</p>
         </div>
       </div>
     </section>

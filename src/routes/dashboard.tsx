@@ -1,16 +1,18 @@
 import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  Bell, Briefcase, CreditCard, Gift, HandCoins, LayoutDashboard,
-  Landmark, LogOut, Settings as SettingsIcon, ShieldCheck, User as UserIcon, Wallet, Menu,
+  Briefcase, CreditCard, Gift, HandCoins, LayoutDashboard, Globe2,
+  LogOut, Settings as SettingsIcon, ShieldCheck, User as UserIcon, Wallet, Menu,
 } from "lucide-react";
 import { useAuth, signOut } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
 import { UserMenu } from "@/features/dashboard/UserMenu";
+import { NotificationBell } from "@/features/dashboard/NotificationBell";
+import shield from "@/assets/resolva-shield.png";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Resolve Case" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Resolva Bank" }] }),
   component: DashboardLayout,
 });
 
@@ -21,6 +23,7 @@ const NAV: { to: string; label: string; icon: React.ComponentType<{ className?: 
   { to: "/dashboard/cards", label: "Credit Cards", icon: CreditCard },
   { to: "/dashboard/loans", label: "Loans", icon: HandCoins },
   { to: "/dashboard/grants", label: "Grants", icon: Gift },
+  { to: "/dashboard/international", label: "International Wire", icon: Globe2 },
   { to: "/dashboard/profile", label: "Profile", icon: UserIcon },
 ];
 
@@ -58,7 +61,7 @@ function DashboardLayout() {
       {/* Sidebar */}
       <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:sticky inset-y-0 left-0 z-40 w-64 bg-navy-deep text-white flex flex-col transition-transform lg:top-0 lg:h-screen`}>
         <Link to="/" className="flex items-center gap-2.5 px-6 py-5 border-b border-white/10">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-indigo"><Landmark className="h-5 w-5" /></span>
+          <img src={shield} alt="" className="h-9 w-9 object-contain" />
           <div className="flex flex-col leading-none">
             <span className="font-display text-lg font-bold">{BRAND.name}</span>
             <span className="text-[10px] uppercase tracking-widest text-white/50">Member</span>
@@ -109,10 +112,7 @@ function DashboardLayout() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button className="grid h-9 w-9 place-items-center rounded-full hover:bg-ivory-dark text-navy-deep relative" aria-label="Notifications">
-              <Bell className="h-4 w-4" />
-              <span className="absolute top-1.5 right-2 h-2 w-2 rounded-full bg-indigo" />
-            </button>
+            <NotificationBell userId={user.id} />
             <UserMenu
               userId={user.id}
               email={user.email ?? ""}
