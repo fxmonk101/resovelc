@@ -103,21 +103,21 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="lg:hidden bg-navy-deep border-t border-white/10 max-h-[calc(100vh-4rem)] overflow-y-auto">
+        <div className="lg:hidden bg-white border-t border-border max-h-[calc(100vh-4rem)] overflow-y-auto">
           <div className="container-page py-4 flex flex-col gap-1">
             {NAV_LINKS.map((link) => (
-              <Link key={link.to} to={link.to} className="text-white/90 py-2.5 px-2 rounded hover:bg-white/5 text-sm">
+              <Link key={link.to} to={link.to} className="text-navy-deep/90 py-2.5 px-2 rounded hover:bg-ivory text-sm">
                 {link.label}
               </Link>
             ))}
-            <div className="text-label text-white/40 px-2 pt-3 pb-1">Services</div>
+            <div className="text-label text-navy-light px-2 pt-3 pb-1">Services</div>
             {SERVICE_LINKS.map((s) => (
-              <Link key={s.to} to={s.to} className="text-white/80 py-2.5 px-2 rounded hover:bg-white/5 text-sm">
+              <Link key={s.to} to={s.to} className="text-navy-deep/80 py-2.5 px-2 rounded hover:bg-ivory text-sm">
                 {s.label}
               </Link>
             ))}
-            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10 mt-2">
-              <Link to="/login" className="text-center py-2.5 rounded-lg border border-white/20 text-white text-sm">Sign in</Link>
+            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-border mt-2">
+              <Link to="/login" className="text-center py-2.5 rounded-lg border border-border text-navy-deep text-sm">Sign in</Link>
               <Link to="/register" className="text-center py-2.5 rounded-lg bg-brand-red text-white font-semibold text-sm">Open</Link>
             </div>
           </div>
