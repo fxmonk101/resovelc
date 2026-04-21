@@ -247,6 +247,69 @@ export type Database = {
         }
         Relationships: []
       }
+      international_transfers: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          currency: string
+          exchange_rate: number
+          fee: number
+          iban_or_account: string
+          id: string
+          purpose: string | null
+          recipient_address: string | null
+          recipient_bank: string
+          recipient_country: string
+          recipient_name: string
+          reference: string
+          status: string
+          swift_bic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          created_at?: string
+          currency?: string
+          exchange_rate?: number
+          fee?: number
+          iban_or_account: string
+          id?: string
+          purpose?: string | null
+          recipient_address?: string | null
+          recipient_bank: string
+          recipient_country: string
+          recipient_name: string
+          reference?: string
+          status?: string
+          swift_bic: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          created_at?: string
+          currency?: string
+          exchange_rate?: number
+          fee?: number
+          iban_or_account?: string
+          id?: string
+          purpose?: string | null
+          recipient_address?: string | null
+          recipient_bank?: string
+          recipient_country?: string
+          recipient_name?: string
+          reference?: string
+          status?: string
+          swift_bic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       kyc_submissions: {
         Row: {
           address_line: string
@@ -254,9 +317,13 @@ export type Database = {
           city: string
           created_at: string
           date_of_birth: string
+          document_type: string
           full_legal_name: string
           id: string
+          id_back_url: string | null
           id_document_url: string | null
+          passport_info_url: string | null
+          proof_of_address_url: string | null
           selfie_url: string | null
           ssn_last4: string
           state: string
@@ -271,9 +338,13 @@ export type Database = {
           city: string
           created_at?: string
           date_of_birth: string
+          document_type?: string
           full_legal_name: string
           id?: string
+          id_back_url?: string | null
           id_document_url?: string | null
+          passport_info_url?: string | null
+          proof_of_address_url?: string | null
           selfie_url?: string | null
           ssn_last4: string
           state: string
@@ -288,9 +359,13 @@ export type Database = {
           city?: string
           created_at?: string
           date_of_birth?: string
+          document_type?: string
           full_legal_name?: string
           id?: string
+          id_back_url?: string | null
           id_document_url?: string | null
+          passport_info_url?: string | null
+          proof_of_address_url?: string | null
           selfie_url?: string | null
           ssn_last4?: string
           state?: string
@@ -354,6 +429,39 @@ export type Database = {
           status?: string
           term_months?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          id: string
+          link: string | null
+          read: boolean
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          category?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean
+          title?: string
           user_id?: string
         }
         Relationships: []
@@ -474,6 +582,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_adjust_balance: {
+        Args: {
+          _amount: number
+          _description: string
+          _direction: string
+          _user_id: string
+        }
+        Returns: Json
+      }
       admin_find_user_by_email: {
         Args: { _email: string }
         Returns: {
@@ -501,6 +618,16 @@ export type Database = {
           username: string
         }[]
       }
+      emit_notification: {
+        Args: {
+          _body: string
+          _category?: string
+          _link?: string
+          _title: string
+          _user_id: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -515,6 +642,20 @@ export type Database = {
       }
       user_request_deposit: {
         Args: { _amount: number; _method: string }
+        Returns: Json
+      }
+      user_submit_international_transfer: {
+        Args: {
+          _amount: number
+          _country: string
+          _currency: string
+          _iban: string
+          _purpose: string
+          _recipient_address: string
+          _recipient_bank: string
+          _recipient_name: string
+          _swift_bic: string
+        }
         Returns: Json
       }
       user_transfer_funds: {
