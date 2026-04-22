@@ -114,7 +114,7 @@ function KycModal({ onClose, onDone }: { onClose: () => void; onDone: (k: Kyc) =
       const id_document_url = idFront ? await upload(idFront, "id-front") : null;
       const id_back_url = idBack ? await upload(idBack, "id-back") : null;
       const passport_info_url = passportPage ? await upload(passportPage, "passport") : null;
-      const selfie_url = await upload(selfie, "selfie");
+      const selfie_url = await upload(selfie!, "selfie");
       const { error } = await supabase.from("kyc_submissions").upsert({
         user_id: user.id, ...form, document_type: docType,
         id_document_url, id_back_url, passport_info_url, selfie_url, status: "pending",
