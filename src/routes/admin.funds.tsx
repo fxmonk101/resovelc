@@ -163,15 +163,21 @@ function AdminFunds() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-navy-deep">Direction</label>
-                    <div className="mt-1 grid grid-cols-2 gap-2">
-                      <button onClick={() => setDirection("credit")} className={`h-10 rounded-md text-sm font-medium inline-flex items-center justify-center gap-1.5 ${direction === "credit" ? "bg-emerald-600 text-white" : "border border-border text-navy"}`}>
-                        <ArrowDownLeft className="h-4 w-4" />Credit (+)
+                    <label className="text-xs font-medium text-navy-deep">Action</label>
+                    <div className="mt-1 grid grid-cols-3 gap-2">
+                      <button onClick={() => setMode("credit")} className={`h-10 rounded-md text-xs font-medium inline-flex items-center justify-center gap-1 ${mode === "credit" ? "bg-emerald-600 text-white" : "border border-border text-navy"}`}>
+                        <ArrowDownLeft className="h-3.5 w-3.5" />Credit (+)
                       </button>
-                      <button onClick={() => setDirection("debit")} className={`h-10 rounded-md text-sm font-medium inline-flex items-center justify-center gap-1.5 ${direction === "debit" ? "bg-destructive text-white" : "border border-border text-navy"}`}>
-                        <ArrowUpRight className="h-4 w-4" />Debit (−)
+                      <button onClick={() => setMode("debit")} className={`h-10 rounded-md text-xs font-medium inline-flex items-center justify-center gap-1 ${mode === "debit" ? "bg-destructive text-white" : "border border-border text-navy"}`}>
+                        <ArrowUpRight className="h-3.5 w-3.5" />Debit (−)
+                      </button>
+                      <button onClick={() => setMode("set")} disabled={target !== "balance"} className={`h-10 rounded-md text-xs font-medium inline-flex items-center justify-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed ${mode === "set" ? "bg-indigo text-white" : "border border-border text-navy"}`} title={target !== "balance" ? "Only for checking balance" : "Replace balance with exact amount"}>
+                        <Equal className="h-3.5 w-3.5" />Set exact
                       </button>
                     </div>
+                    {mode === "set" && (
+                      <p className="text-[11px] text-navy-light mt-1.5">Replaces the current balance with the exact amount entered below.</p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-medium text-navy-deep">Amount (USD)</label>
