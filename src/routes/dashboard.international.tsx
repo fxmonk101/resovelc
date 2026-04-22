@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/dashboard/international")({
-  head: () => ({ meta: [{ title: "International Wire — Resolva Bank" }] }),
+  head: () => ({ meta: [{ title: "International Wire — Resolva Credix" }] }),
   component: InternationalPage,
 });
 

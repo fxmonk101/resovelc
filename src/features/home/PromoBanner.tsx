@@ -27,7 +27,7 @@ export function PromoBanner() {
             Banking you can trust — for every season of life
           </h2>
           <p className="mt-4 text-muted-foreground">
-            From your first paycheck to your retirement plan, Resolva Bank protects what you've earned. Your deposits are FDIC insured, your data is encrypted, and your accounts are monitored 24/7.
+            From your first paycheck to your retirement plan, Resolva Credix protects what you've earned. Your deposits are FDIC insured, your data is encrypted, and your accounts are monitored 24/7.
           </p>
           <ul className="mt-6 space-y-3">
             {PERKS.map((p) => (

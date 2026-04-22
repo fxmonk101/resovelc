@@ -4,7 +4,7 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { NAV_LINKS, SERVICE_LINKS, BRAND } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/resolva-logo.png";
+import logo from "@/assets/logo-credix.png";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -49,8 +49,8 @@ export function Navbar() {
       </div>
 
       <div className="container-page flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-navy-deep" aria-label="Resolva Bank home">
-          <img src={logo} alt="Resolva Bank" className="h-10 lg:h-11 w-auto object-contain" />
+        <Link to="/" className="flex items-center gap-2 text-navy-deep" aria-label="Resolva Credix home">
+          <img src={logo} alt="Resolva Credix" className="h-10 lg:h-11 w-auto object-contain" />
           <span className="sr-only">{BRAND.name}</span>
         </Link>
 
