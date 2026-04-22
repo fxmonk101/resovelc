@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search } from "lucide-react";
+import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search, Equal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -28,7 +28,7 @@ function AdminFunds() {
 
   const [amount, setAmount] = useState("");
   const [desc, setDesc] = useState("");
-  const [direction, setDirection] = useState<"credit" | "debit">("credit");
+  const [mode, setMode] = useState<"credit" | "debit" | "set">("credit");
   const [target, setTarget] = useState<string>("balance"); // "balance" or card id
 
   const loadUsers = async () => {
@@ -53,18 +53,29 @@ function AdminFunds() {
     if (!selected) return;
     const amt = Number(amount);
     if (!amt || amt <= 0) return toast.error("Enter a positive amount");
-    const signed = direction === "credit" ? amt : -amt;
 
     if (target === "balance") {
-      // Use atomic RPC so we always add to the LATEST balance (no stale overwrites)
-      const { error } = await supabase.rpc("admin_adjust_balance", {
-        _user_id: selected.user_id,
-        _amount: amt,
-        _description: desc || `Admin ${direction} to checking`,
-        _direction: direction,
-      });
-      if (error) return toast.error(error.message);
+      if (mode === "set") {
+        const { error } = await supabase.rpc("admin_set_balance", {
+          _user_id: selected.user_id,
+          _new_balance: amt,
+          _description: desc || `Admin set balance to $${amt}`,
+        });
+        if (error) return toast.error(error.message);
+      } else {
+        // Use atomic RPC so we always add to the LATEST balance (no stale overwrites)
+        const { error } = await supabase.rpc("admin_adjust_balance", {
+          _user_id: selected.user_id,
+          _amount: amt,
+          _description: desc || `Admin ${mode} to checking`,
+          _direction: mode,
+        });
+        if (error) return toast.error(error.message);
+      }
     } else {
+      if (mode === "set") return toast.error("Set-exact mode is only available for checking balances");
+      const direction = mode;
+      const signed = direction === "credit" ? amt : -amt;
       const card = cards.find((c) => c.id === target);
       if (!card) return;
       // For credit cards: "credit" = load funds onto card (increase available_credit beyond limit not allowed; instead reduce current_balance and increase available_credit)
