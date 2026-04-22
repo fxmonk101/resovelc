@@ -153,8 +153,10 @@ export type Database = {
           credit_limit: number
           current_balance: number
           cvv: string
+          daily_limit: number | null
           expiry: string
           id: string
+          is_virtual: boolean
           status: string
           user_id: string
         }
@@ -167,8 +169,10 @@ export type Database = {
           credit_limit?: number
           current_balance?: number
           cvv?: string
+          daily_limit?: number | null
           expiry?: string
           id?: string
+          is_virtual?: boolean
           status?: string
           user_id: string
         }
@@ -181,8 +185,10 @@ export type Database = {
           credit_limit?: number
           current_balance?: number
           cvv?: string
+          daily_limit?: number | null
           expiry?: string
           id?: string
+          is_virtual?: boolean
           status?: string
           user_id?: string
         }
