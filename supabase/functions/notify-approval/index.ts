@@ -21,7 +21,7 @@ interface Payload {
 
 function buildEmail(p: Payload) {
   const name = p.recipientName || "Member";
-  const brand = "Resolva Bank";
+  const brand = "Resolva Credix";
   const isApproved = p.status === "approved";
   const subjectMap = {
     loan: isApproved ? "Your loan has been approved" : "Update on your loan application",
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
       method: "POST",
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "Resolva Bank <onboarding@resend.dev>",
+        from: "Resolva Credix <onboarding@resend.dev>",
         to: [payload.to],
         subject,
         html,
