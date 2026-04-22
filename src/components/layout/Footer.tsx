@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Twitter, Linkedin, Facebook, Lock, ShieldCheck } from "lucide-react";
 import { BRAND } from "@/lib/constants";
-import shield from "@/assets/resolva-shield.png";
+import logo from "@/assets/logo-credix.png";
 
 const COLS = [
   {
@@ -48,9 +48,9 @@ export function Footer() {
       <div className="container-page py-16 grid gap-12 md:grid-cols-2 lg:grid-cols-6">
         <div className="lg:col-span-2">
           <Link to="/" className="flex items-center gap-2.5 text-white">
-            <img src={shield} alt="" className="h-10 w-10 object-contain" />
+            <img src={logo} alt={BRAND.name} className="h-10 w-auto object-contain brightness-0 invert" />
             <div className="flex flex-col leading-none">
-              <span className="font-display text-xl font-bold">{BRAND.name}</span>
+              <span className="sr-only">{BRAND.name}</span>
               <span className="text-[10px] uppercase tracking-widest text-white/50">Member FDIC · Est. {BRAND.founded}</span>
             </div>
           </Link>

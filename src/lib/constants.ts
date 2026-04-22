@@ -1,14 +1,14 @@
 export const BRAND = {
-  name: "Resolva Bank",
-  legalName: "Resolva Bank, N.A.",
+  name: "Resolva Credix",
+  legalName: "Resolva Credix, N.A.",
   tagline: "Banking built for trust, growth, and recovery.",
-  email: "support@resolvabank.com",
-  phone: "1-800-RESOLVA",
+  email: "support@resolvacredix.com",
+  phone: "1-800-CREDIX",
   address: "200 Park Avenue, Suite 4500, New York, NY 10166",
   hours: "Mon–Fri 7AM–10PM ET · Sat–Sun 8AM–8PM ET",
   routing: "251480576",
   fdic: "FDIC Insured · Member FDIC",
-  swift: "RSLVUS33",
+  swift: "RCDXUS33",
   founded: "2009",
 } as const;
 
