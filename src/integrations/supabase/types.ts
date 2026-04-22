@@ -618,6 +618,10 @@ export type Database = {
           username: string
         }[]
       }
+      admin_set_balance: {
+        Args: { _description: string; _new_balance: number; _user_id: string }
+        Returns: Json
+      }
       emit_notification: {
         Args: {
           _body: string
