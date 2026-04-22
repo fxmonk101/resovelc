@@ -1,5 +1,7 @@
 # SPA fallback for Hostinger (Apache). Routes all unknown paths to index.html
 # so client-side routing (TanStack Router) handles them.
+DirectoryIndex index.html
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
