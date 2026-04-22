@@ -6,14 +6,13 @@ import { Eye, EyeOff, ShieldCheck, Zap, Globe, Smartphone } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validators";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
-import logo from "@/assets/resolva-logo.png";
-import shield from "@/assets/resolva-shield.png";
+import logo from "@/assets/logo-credix.png";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Sign in — Resolva Bank" },
-      { name: "description", content: "Sign in to your Resolva Bank account." },
+      { title: "Sign in — Resolva Credix" },
+      { name: "description", content: "Sign in to your Resolva Credix account." },
     ],
   }),
   component: LoginPage,
@@ -55,7 +54,7 @@ function LoginPage() {
         <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-indigo/20 blur-[120px]" />
 
         <Link to="/" className="relative flex items-center">
-          <img src={logo} alt={BRAND.name} className="h-10 brightness-0 invert" />
+          <img src={logo} alt={BRAND.name} className="h-10 w-auto brightness-0 invert" />
         </Link>
 
         <div className="relative">
@@ -85,8 +84,7 @@ function LoginPage() {
       <div className="flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
           <Link to="/" className="lg:hidden flex items-center gap-2 mb-8">
-            <img src={shield} alt="" className="h-8 w-8 object-contain" />
-            <span className="font-display text-xl font-bold text-navy-deep">{BRAND.name}</span>
+            <img src={logo} alt={BRAND.name} className="h-8 w-auto object-contain" />
           </Link>
 
           <h1 className="font-display text-4xl font-bold text-navy-deep">Welcome back</h1>

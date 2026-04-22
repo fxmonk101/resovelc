@@ -83,7 +83,10 @@ function KycModal({ onClose, onDone }: { onClose: () => void; onDone: (k: Kyc) =
     full_legal_name: "", date_of_birth: "", ssn_last4: "",
     address_line: "", city: "", state: "", zip: "",
   });
-  const [idDoc, setIdDoc] = useState<File | null>(null);
+  const [docType, setDocType] = useState<"national_id" | "drivers_license" | "passport">("drivers_license");
+  const [idFront, setIdFront] = useState<File | null>(null);
+  const [idBack, setIdBack] = useState<File | null>(null);
+  const [passportPage, setPassportPage] = useState<File | null>(null);
   const [selfie, setSelfie] = useState<File | null>(null);
 
   const upload = async (file: File, kind: string) => {
@@ -100,10 +103,21 @@ function KycModal({ onClose, onDone }: { onClose: () => void; onDone: (k: Kyc) =
     setBusy(true); setErr(""); setOk("");
     try {
       if (!/^\d{4}$/.test(form.ssn_last4)) throw new Error("SSN last 4 must be 4 digits");
-      const id_document_url = idDoc ? await upload(idDoc, "id") : null;
-      const selfie_url = selfie ? await upload(selfie, "selfie") : null;
+      if (docType === "passport") {
+        if (!passportPage) throw new Error("Please upload your passport information page");
+      } else {
+        if (!idFront) throw new Error("Please upload the front of your ID");
+        if (!idBack) throw new Error("Please upload the back of your ID");
+      }
+      if (!selfie) throw new Error("Please upload a selfie holding your ID");
+
+      const id_document_url = idFront ? await upload(idFront, "id-front") : null;
+      const id_back_url = idBack ? await upload(idBack, "id-back") : null;
+      const passport_info_url = passportPage ? await upload(passportPage, "passport") : null;
+      const selfie_url = await upload(selfie!, "selfie");
       const { error } = await supabase.from("kyc_submissions").upsert({
-        user_id: user.id, ...form, id_document_url, selfie_url, status: "pending",
+        user_id: user.id, ...form, document_type: docType,
+        id_document_url, id_back_url, passport_info_url, selfie_url, status: "pending",
       }, { onConflict: "user_id" });
       if (error) throw error;
       setOk("Submitted. We'll review within 1–2 business days.");
@@ -141,9 +155,32 @@ function KycModal({ onClose, onDone }: { onClose: () => void; onDone: (k: Kyc) =
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4 pt-2">
-            <FileInput label="Government ID (front)" file={idDoc} onChange={setIdDoc} />
-            <FileInput label="Selfie holding ID" file={selfie} onChange={setSelfie} />
+          <div className="pt-2">
+            <span className="text-xs font-semibold text-navy-deep uppercase tracking-wide">Document type</span>
+            <div className="mt-1.5 grid grid-cols-3 gap-2">
+              {([
+                { v: "national_id", label: "National ID" },
+                { v: "drivers_license", label: "Driver's license" },
+                { v: "passport", label: "Passport" },
+              ] as const).map((opt) => (
+                <button key={opt.v} type="button" onClick={() => setDocType(opt.v)}
+                  className={`h-10 rounded-lg border text-xs font-semibold transition ${docType === opt.v ? "bg-indigo text-white border-indigo" : "border-border text-navy hover:border-indigo"}`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            {docType === "passport" ? (
+              <FileInput label="Passport information page" file={passportPage} onChange={setPassportPage} />
+            ) : (
+              <>
+                <FileInput label={`${docType === "national_id" ? "National ID" : "Driver's license"} — front`} file={idFront} onChange={setIdFront} />
+                <FileInput label={`${docType === "national_id" ? "National ID" : "Driver's license"} — back`} file={idBack} onChange={setIdBack} />
+              </>
+            )}
+            <FileInput label="Selfie holding your document" file={selfie} onChange={setSelfie} />
           </div>
 
           {err && <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2 text-sm text-destructive flex items-center gap-2"><AlertCircle className="h-4 w-4" />{err}</div>}

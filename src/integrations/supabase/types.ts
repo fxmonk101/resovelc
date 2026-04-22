@@ -153,8 +153,10 @@ export type Database = {
           credit_limit: number
           current_balance: number
           cvv: string
+          daily_limit: number | null
           expiry: string
           id: string
+          is_virtual: boolean
           status: string
           user_id: string
         }
@@ -167,8 +169,10 @@ export type Database = {
           credit_limit?: number
           current_balance?: number
           cvv?: string
+          daily_limit?: number | null
           expiry?: string
           id?: string
+          is_virtual?: boolean
           status?: string
           user_id: string
         }
@@ -181,8 +185,10 @@ export type Database = {
           credit_limit?: number
           current_balance?: number
           cvv?: string
+          daily_limit?: number | null
           expiry?: string
           id?: string
+          is_virtual?: boolean
           status?: string
           user_id?: string
         }
@@ -617,6 +623,10 @@ export type Database = {
           user_id: string
           username: string
         }[]
+      }
+      admin_set_balance: {
+        Args: { _description: string; _new_balance: number; _user_id: string }
+        Returns: Json
       }
       emit_notification: {
         Args: {

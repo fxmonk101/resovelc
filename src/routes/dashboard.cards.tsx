@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreditCard, Clock, CheckCircle2, XCircle, Wifi } from "lucide-react";
+import { CreditCard, Clock, CheckCircle2, XCircle, Wifi, Lock, Unlock, Sparkles, Settings2, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/cards")({
   component: CardsDash,
@@ -38,6 +39,8 @@ interface IssuedCard {
   available_credit: number;
   current_balance: number;
   status: string;
+  daily_limit: number | null;
+  is_virtual: boolean;
 }
 
 const statusBadge = (s: string) => {
@@ -56,6 +59,9 @@ function CardsDash() {
   const [cards, setCards] = useState<IssuedCard[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [reveal, setReveal] = useState<Record<string, boolean>>({});
+  const [busyCard, setBusyCard] = useState<string | null>(null);
+  const [limitDraft, setLimitDraft] = useState<Record<string, string>>({});
+  const [creatingVirtual, setCreatingVirtual] = useState(false);
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<z.input<typeof schema>>({
     resolver: zodResolver(schema) as never,
     defaultValues: { card_type: "Platinum Rewards", requested_limit: 5000 },
@@ -71,6 +77,78 @@ function CardsDash() {
     setCards((c as IssuedCard[]) ?? []);
   };
   useEffect(() => { load(); }, [user]);
+
+  const toggleFreeze = async (c: IssuedCard) => {
+    setBusyCard(c.id);
+    const next = c.status === "frozen" ? "active" : "frozen";
+    const { error } = await supabase.from("credit_cards").update({ status: next }).eq("id", c.id);
+    setBusyCard(null);
+    if (error) return toast.error(error.message);
+    toast.success(next === "frozen" ? "Card frozen" : "Card unfrozen");
+    load();
+  };
+
+  const saveLimit = async (c: IssuedCard) => {
+    const v = limitDraft[c.id];
+    const n = v === "" || v == null ? null : Number(v);
+    if (n != null && (Number.isNaN(n) || n < 0)) return toast.error("Enter a valid limit");
+    setBusyCard(c.id);
+    const { error } = await supabase.from("credit_cards").update({ daily_limit: n }).eq("id", c.id);
+    setBusyCard(null);
+    if (error) return toast.error(error.message);
+    toast.success("Daily limit updated");
+    load();
+  };
+
+  const createVirtual = async () => {
+    if (!user) return;
+    const physical = cards.find((c) => !c.is_virtual);
+    if (!physical) return toast.error("Apply for a card first");
+    setCreatingVirtual(true);
+    const { error } = await supabase.from("credit_cards").insert({
+      user_id: user.id,
+      application_id: null,
+      card_type: `${physical.card_type} · Virtual`,
+      credit_limit: Math.min(2000, Number(physical.credit_limit)),
+      available_credit: Math.min(2000, Number(physical.credit_limit)),
+      is_virtual: true,
+    });
+    setCreatingVirtual(false);
+    if (error) return toast.error(error.message);
+    toast.success("Virtual card created");
+    load();
+  };
+
+  const downloadStatement = async (c: IssuedCard) => {
+    if (!user) return;
+    const { data: txs } = await supabase
+      .from("transactions").select("*").eq("user_id", user.id)
+      .order("created_at", { ascending: false }).limit(100);
+    const { jsPDF } = await import("jspdf");
+    const doc = new jsPDF();
+    doc.setFontSize(18); doc.setTextColor(15, 27, 61);
+    doc.text(`${BRAND.name} — Card Statement`, 14, 18);
+    doc.setFontSize(10); doc.setTextColor(80);
+    doc.text(`${c.card_type} ending ${c.card_number.slice(-4)}`, 14, 26);
+    doc.text(`Generated ${new Date().toLocaleString()}`, 14, 32);
+    doc.setFontSize(11); doc.setTextColor(15, 27, 61);
+    doc.text(`Limit: $${Number(c.credit_limit).toLocaleString()}`, 14, 42);
+    doc.text(`Balance: $${Number(c.current_balance).toLocaleString()}`, 70, 42);
+    doc.text(`Available: $${Number(c.available_credit).toLocaleString()}`, 130, 42);
+    doc.setDrawColor(220); doc.line(14, 48, 196, 48);
+    doc.setFontSize(9); doc.setTextColor(100);
+    doc.text("Date", 14, 55); doc.text("Description", 50, 55); doc.text("Amount", 175, 55, { align: "right" });
+    let y = 62; doc.setTextColor(20);
+    (txs ?? []).forEach((t) => {
+      if (y > 280) { doc.addPage(); y = 20; }
+      doc.text(new Date(t.created_at).toLocaleDateString(), 14, y);
+      doc.text(String(t.description).slice(0, 60), 50, y);
+      const amt = Number(t.amount);
+      doc.text(`${amt >= 0 ? "+" : "-"}$${Math.abs(amt).toFixed(2)}`, 196, y, { align: "right" });
+      y += 6;
+    });
+    doc.save(`statement-${c.card_number.slice(-4)}.pdf`);
+  };
 
   const onSubmit = async (raw: z.input<typeof schema>) => {
     if (!user) return;
@@ -100,13 +178,26 @@ function CardsDash() {
       {/* Issued cards */}
       {cards.length > 0 && (
         <div>
-          <h2 className="font-display text-xl font-bold text-navy-deep mb-3">Your cards</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display text-xl font-bold text-navy-deep">Your cards</h2>
+            <button onClick={createVirtual} disabled={creatingVirtual} className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo hover:text-indigo-dark disabled:opacity-50">
+              {creatingVirtual ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Create virtual card
+            </button>
+          </div>
           <div className="grid md:grid-cols-2 gap-5">
             {cards.map((c) => {
               const isRevealed = reveal[c.id];
+              const isFrozen = c.status === "frozen";
               return (
-                <div key={c.id} className="gradient-navy text-white rounded-2xl p-6 relative overflow-hidden shadow-elevated aspect-[1.586/1] max-w-md">
+                <div key={c.id} className={`gradient-navy text-white rounded-2xl p-6 relative overflow-hidden shadow-elevated aspect-[1.586/1] max-w-md transition ${isFrozen ? "grayscale opacity-80" : ""}`}>
                   <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-gold/20 blur-3xl" />
+                  {c.is_virtual && (
+                    <span className="absolute top-3 right-3 text-[9px] uppercase tracking-widest bg-white/15 backdrop-blur px-2 py-0.5 rounded-full">Virtual</span>
+                  )}
+                  {isFrozen && (
+                    <span className="absolute top-3 left-3 text-[9px] uppercase tracking-widest bg-white/20 backdrop-blur px-2 py-0.5 rounded-full inline-flex items-center gap-1"><Lock className="h-2.5 w-2.5" />Frozen</span>
+                  )}
                   <div className="relative flex flex-col h-full justify-between">
                     <div className="flex items-start justify-between">
                       <div>
@@ -142,10 +233,34 @@ function CardsDash() {
           </div>
           <div className="mt-3 grid md:grid-cols-2 gap-3">
             {cards.map((c) => (
-              <div key={c.id + "-stats"} className="bg-white border border-border rounded-xl p-4 text-sm">
-                <div className="flex justify-between"><span className="text-navy-light">Available</span><span className="font-semibold text-navy-deep">${Number(c.available_credit).toLocaleString()}</span></div>
-                <div className="flex justify-between mt-1"><span className="text-navy-light">Balance</span><span className="font-semibold text-navy-deep">${Number(c.current_balance).toLocaleString()}</span></div>
-                <div className="flex justify-between mt-1"><span className="text-navy-light">Limit</span><span className="font-semibold text-navy-deep">${Number(c.credit_limit).toLocaleString()}</span></div>
+              <div key={c.id + "-ctrl"} className="bg-white border border-border rounded-xl p-4 text-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="font-semibold text-navy-deep">•••• {c.card_number.slice(-4)}</div>
+                  <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${c.status === "frozen" ? "bg-warning/15 text-warning" : "bg-success/15 text-success"}`}>{c.status}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div><div className="text-navy-light">Available</div><div className="font-semibold text-navy-deep">${Number(c.available_credit).toLocaleString()}</div></div>
+                  <div><div className="text-navy-light">Balance</div><div className="font-semibold text-navy-deep">${Number(c.current_balance).toLocaleString()}</div></div>
+                  <div><div className="text-navy-light">Limit</div><div className="font-semibold text-navy-deep">${Number(c.credit_limit).toLocaleString()}</div></div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Settings2 className="h-3.5 w-3.5 text-navy-light" />
+                  <input
+                    type="number" min={0} step="50" placeholder={c.daily_limit ? `Daily limit $${c.daily_limit}` : "Set daily limit"}
+                    value={limitDraft[c.id] ?? (c.daily_limit?.toString() ?? "")}
+                    onChange={(e) => setLimitDraft((d) => ({ ...d, [c.id]: e.target.value }))}
+                    className="flex-1 h-8 px-2 rounded-md border border-border text-xs"
+                  />
+                  <button onClick={() => saveLimit(c)} disabled={busyCard === c.id} className="h-8 px-3 rounded-md bg-indigo text-white text-xs font-semibold disabled:opacity-50">Save</button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => toggleFreeze(c)} disabled={busyCard === c.id} className={`flex-1 h-8 rounded-md text-xs font-semibold inline-flex items-center justify-center gap-1.5 disabled:opacity-50 ${c.status === "frozen" ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-warning/15 text-warning hover:bg-warning/25"}`}>
+                    {c.status === "frozen" ? <><Unlock className="h-3.5 w-3.5" />Unfreeze</> : <><Lock className="h-3.5 w-3.5" />Freeze card</>}
+                  </button>
+                  <button onClick={() => downloadStatement(c)} className="flex-1 h-8 rounded-md text-xs font-semibold border border-border text-navy hover:bg-ivory">
+                    Download statement
+                  </button>
+                </div>
               </div>
             ))}
           </div>

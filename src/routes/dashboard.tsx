@@ -9,10 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
 import { UserMenu } from "@/features/dashboard/UserMenu";
 import { NotificationBell } from "@/features/dashboard/NotificationBell";
-import shield from "@/assets/resolva-shield.png";
+import logo from "@/assets/logo-credix.png";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Resolva Bank" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Resolva Credix" }] }),
   component: DashboardLayout,
 });
 
@@ -61,11 +61,8 @@ function DashboardLayout() {
       {/* Sidebar */}
       <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:sticky inset-y-0 left-0 z-40 w-64 bg-navy-deep text-white flex flex-col transition-transform lg:top-0 lg:h-screen`}>
         <Link to="/" className="flex items-center gap-2.5 px-6 py-5 border-b border-white/10">
-          <img src={shield} alt="" className="h-9 w-9 object-contain" />
-          <div className="flex flex-col leading-none">
-            <span className="font-display text-lg font-bold">{BRAND.name}</span>
-            <span className="text-[10px] uppercase tracking-widest text-white/50">Member</span>
-          </div>
+          <img src={logo} alt={BRAND.name} className="h-9 w-auto object-contain brightness-0 invert" />
+          <span className="sr-only">{BRAND.name}</span>
         </Link>
         <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
           {NAV.map((it) => (

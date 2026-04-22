@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search } from "lucide-react";
+import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search, Equal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -28,7 +28,7 @@ function AdminFunds() {
 
   const [amount, setAmount] = useState("");
   const [desc, setDesc] = useState("");
-  const [direction, setDirection] = useState<"credit" | "debit">("credit");
+  const [mode, setMode] = useState<"credit" | "debit" | "set">("credit");
   const [target, setTarget] = useState<string>("balance"); // "balance" or card id
 
   const loadUsers = async () => {
@@ -53,18 +53,29 @@ function AdminFunds() {
     if (!selected) return;
     const amt = Number(amount);
     if (!amt || amt <= 0) return toast.error("Enter a positive amount");
-    const signed = direction === "credit" ? amt : -amt;
 
     if (target === "balance") {
-      // Use atomic RPC so we always add to the LATEST balance (no stale overwrites)
-      const { error } = await supabase.rpc("admin_adjust_balance", {
-        _user_id: selected.user_id,
-        _amount: amt,
-        _description: desc || `Admin ${direction} to checking`,
-        _direction: direction,
-      });
-      if (error) return toast.error(error.message);
+      if (mode === "set") {
+        const { error } = await supabase.rpc("admin_set_balance", {
+          _user_id: selected.user_id,
+          _new_balance: amt,
+          _description: desc || `Admin set balance to $${amt}`,
+        });
+        if (error) return toast.error(error.message);
+      } else {
+        // Use atomic RPC so we always add to the LATEST balance (no stale overwrites)
+        const { error } = await supabase.rpc("admin_adjust_balance", {
+          _user_id: selected.user_id,
+          _amount: amt,
+          _description: desc || `Admin ${mode} to checking`,
+          _direction: mode,
+        });
+        if (error) return toast.error(error.message);
+      }
     } else {
+      if (mode === "set") return toast.error("Set-exact mode is only available for checking balances");
+      const direction = mode;
+      const signed = direction === "credit" ? amt : -amt;
       const card = cards.find((c) => c.id === target);
       if (!card) return;
       // For credit cards: "credit" = load funds onto card (increase available_credit beyond limit not allowed; instead reduce current_balance and increase available_credit)
@@ -152,15 +163,21 @@ function AdminFunds() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-navy-deep">Direction</label>
-                    <div className="mt-1 grid grid-cols-2 gap-2">
-                      <button onClick={() => setDirection("credit")} className={`h-10 rounded-md text-sm font-medium inline-flex items-center justify-center gap-1.5 ${direction === "credit" ? "bg-emerald-600 text-white" : "border border-border text-navy"}`}>
-                        <ArrowDownLeft className="h-4 w-4" />Credit (+)
+                    <label className="text-xs font-medium text-navy-deep">Action</label>
+                    <div className="mt-1 grid grid-cols-3 gap-2">
+                      <button onClick={() => setMode("credit")} className={`h-10 rounded-md text-xs font-medium inline-flex items-center justify-center gap-1 ${mode === "credit" ? "bg-emerald-600 text-white" : "border border-border text-navy"}`}>
+                        <ArrowDownLeft className="h-3.5 w-3.5" />Credit (+)
                       </button>
-                      <button onClick={() => setDirection("debit")} className={`h-10 rounded-md text-sm font-medium inline-flex items-center justify-center gap-1.5 ${direction === "debit" ? "bg-destructive text-white" : "border border-border text-navy"}`}>
-                        <ArrowUpRight className="h-4 w-4" />Debit (−)
+                      <button onClick={() => setMode("debit")} className={`h-10 rounded-md text-xs font-medium inline-flex items-center justify-center gap-1 ${mode === "debit" ? "bg-destructive text-white" : "border border-border text-navy"}`}>
+                        <ArrowUpRight className="h-3.5 w-3.5" />Debit (−)
+                      </button>
+                      <button onClick={() => setMode("set")} disabled={target !== "balance"} className={`h-10 rounded-md text-xs font-medium inline-flex items-center justify-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed ${mode === "set" ? "bg-indigo text-white" : "border border-border text-navy"}`} title={target !== "balance" ? "Only for checking balance" : "Replace balance with exact amount"}>
+                        <Equal className="h-3.5 w-3.5" />Set exact
                       </button>
                     </div>
+                    {mode === "set" && (
+                      <p className="text-[11px] text-navy-light mt-1.5">Replaces the current balance with the exact amount entered below.</p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-medium text-navy-deep">Amount (USD)</label>

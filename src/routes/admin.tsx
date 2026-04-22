@@ -6,10 +6,10 @@ import {
 import { useAuth, signOut } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
-import shield from "@/assets/resolva-shield.png";
+import logo from "@/assets/logo-credix.png";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin Console — Resolva Bank" }] }),
+  head: () => ({ meta: [{ title: "Admin Console — Resolva Credix" }] }),
   component: AdminLayout,
 });
 
@@ -64,9 +64,9 @@ function AdminLayout() {
     <div className="min-h-screen flex bg-ivory">
       <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:sticky inset-y-0 left-0 z-40 w-64 bg-navy-deep text-white flex flex-col transition-transform lg:top-0 lg:h-screen`}>
         <Link to="/" className="flex items-center gap-2.5 px-6 py-5 border-b border-white/10">
-          <img src={shield} alt="" className="h-9 w-9 object-contain" />
+          <img src={logo} alt={BRAND.name} className="h-9 w-auto object-contain brightness-0 invert" />
           <div className="flex flex-col leading-none">
-            <span className="font-display text-lg font-bold">{BRAND.name}</span>
+            <span className="sr-only">{BRAND.name}</span>
             <span className="text-[10px] uppercase tracking-widest text-brand-red-light">Admin Console</span>
           </div>
         </Link>
