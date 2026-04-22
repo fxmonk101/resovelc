@@ -10,6 +10,7 @@ import path from "node:path";
 export default defineConfig({
   configFile: false,
   plugins: [react(), tailwindcss(), tsconfigPaths()],
+  publicDir: path.resolve(process.cwd(), "public"),
   resolve: {
     alias: {
       "@": path.resolve(process.cwd(), "src"),
