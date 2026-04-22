@@ -9,6 +9,9 @@ import path from "node:path";
 
 export default defineConfig({
   configFile: false,
+  // Hostinger deployments are commonly served from a subfolder (or behind a Node app),
+  // so we must use relative asset URLs to avoid `/assets/...` 403/404 issues.
+  base: "./",
   plugins: [react(), tailwindcss(), tsconfigPaths()],
   publicDir: path.resolve(process.cwd(), "public"),
   resolve: {
@@ -20,7 +23,8 @@ export default defineConfig({
     "process.env.NODE_ENV": JSON.stringify("production"),
   },
   build: {
-    outDir: "dist-static",
+    // Hostinger guides and many panels expect a `dist/` folder.
+    outDir: "dist",
     emptyOutDir: true,
     sourcemap: false,
     rollupOptions: {
