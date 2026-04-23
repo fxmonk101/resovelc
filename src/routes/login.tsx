@@ -30,29 +30,23 @@ function LoginPage() {
   const onSubmit = async (data: LoginInput) => {
     setAuthError(null);
     let email = data.identifier.trim();
-    // If the identifier doesn't look like an email, treat it as a username and resolve to email.
+    // If the identifier doesn't look like an email, treat it as a username and resolve to its email.
     if (!email.includes("@")) {
-      const username = email;
-      const { data: profile, error: lookupError } = await supabase
-        .from("profiles")
-        .select("user_id")
-        .eq("username", username)
-        .maybeSingle();
-      if (lookupError || !profile) {
+      const { data: resolved, error: lookupError } = await supabase.rpc("get_email_for_username", {
+        _username: email,
+      });
+      if (lookupError || !resolved) {
         setAuthError("Incorrect username or password.");
         return;
       }
-      // Use a Supabase RPC to look up email is not available client-side; instead, sign in via username -> email mapping in user metadata is not exposed.
-      // Fallback: ask the user to use their email if username lookup can't resolve to an email here.
-      setAuthError("Please sign in with your email address. Username sign-in is coming soon.");
-      return;
+      email = resolved as string;
     }
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password: data.password,
     });
     if (error) {
-      setAuthError(error.message === "Invalid login credentials" ? "Incorrect email or password." : error.message);
+      setAuthError(error.message === "Invalid login credentials" ? "Incorrect email/username or password." : error.message);
       return;
     }
     navigate({ to: "/dashboard" });
