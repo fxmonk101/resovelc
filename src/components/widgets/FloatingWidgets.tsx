@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowUp, MessageCircle, X, Mail, Phone, Send } from "lucide-react";
+import { ArrowUp, MessageCircle, X, Mail, Phone, Send, MessageSquare } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 
 export function FloatingWidgets() {
@@ -63,6 +63,13 @@ export function FloatingWidgets() {
               <span className="grid h-9 w-9 place-items-center rounded-full bg-indigo/10 text-indigo"><Phone className="h-4 w-4" /></span>
               <div className="min-w-0">
                 <div className="text-xs text-navy-light">Call us</div>
+                <div className="text-sm font-semibold text-navy-deep">{BRAND.phone}</div>
+              </div>
+            </a>
+            <a href={`sms:${BRAND.phone.replace(/[^0-9+]/g, "")}?&body=${encodeURIComponent("Hi Resolva Credix, I need help with ")}`} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-ivory transition">
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-indigo/10 text-indigo"><MessageSquare className="h-4 w-4" /></span>
+              <div className="min-w-0">
+                <div className="text-xs text-navy-light">Text us</div>
                 <div className="text-sm font-semibold text-navy-deep">{BRAND.phone}</div>
               </div>
             </a>
