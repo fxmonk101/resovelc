@@ -29,7 +29,7 @@ export function FloatingWidgets() {
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Back to top"
-          className="fixed bottom-24 right-5 z-40 grid h-11 w-11 place-items-center rounded-full bg-navy-deep text-white shadow-lg hover:bg-navy transition"
+          className="fixed bottom-24 left-5 z-40 grid h-11 w-11 place-items-center rounded-full bg-navy-deep text-white shadow-lg hover:bg-navy transition"
         >
           <ArrowUp className="h-5 w-5" />
         </button>
@@ -39,14 +39,14 @@ export function FloatingWidgets() {
       <button
         onClick={() => setChatOpen((v) => !v)}
         aria-label={chatOpen ? "Close chat" : "Open chat"}
-        className="fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-indigo text-white shadow-xl hover:bg-indigo-dark transition"
+        className="fixed bottom-5 left-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-indigo text-white shadow-xl hover:bg-indigo-dark transition"
       >
         {chatOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
 
       {/* Chat panel */}
       {chatOpen && (
-        <div className="fixed bottom-24 right-5 z-40 w-[calc(100vw-2.5rem)] max-w-sm rounded-2xl bg-white border border-border shadow-2xl overflow-hidden">
+        <div className="fixed bottom-24 left-5 z-40 w-[calc(100vw-2.5rem)] max-w-sm rounded-2xl bg-white border border-border shadow-2xl overflow-hidden">
           <div className="bg-gradient-to-br from-indigo to-navy-deep p-4 text-white">
             <div className="font-display text-base font-bold">Resolva Credix Support</div>
             <div className="text-xs opacity-90 mt-0.5">We typically reply within a few hours · {BRAND.hours.split("·")[0].trim()}</div>
