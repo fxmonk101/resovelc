@@ -8,6 +8,7 @@ import { z } from "zod";
 import { registerStep1, registerStep2, registerStep3, registerStep4 } from "@/lib/validators";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
+import logo from "@/assets/resolva-logo.png";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -98,8 +99,8 @@ function RegisterPage() {
   return (
     <div className="min-h-screen bg-ivory py-10 px-4">
       <div className="max-w-2xl mx-auto">
-        <Link to="/" className="flex items-center gap-2 text-slate-deep mb-8">
-          <Shield className="h-5 w-5 text-terra" />
+        <Link to="/" className="flex items-center gap-3 text-slate-deep mb-8">
+          <img src={logo} alt={BRAND.name} className="h-10 w-auto" />
           <span className="font-display text-xl font-bold">{BRAND.name}</span>
         </Link>
 
