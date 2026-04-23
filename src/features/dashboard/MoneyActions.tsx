@@ -9,8 +9,8 @@ type Mode = "deposit" | "transfer" | "paybill" | null;
 export function MoneyActions({ mode, onClose, onDone }: { mode: Mode; onClose: () => void; onDone: () => void }) {
   if (!mode) return null;
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 backdrop-blur-sm p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-elevated w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-elevated w-full max-w-md max-h-[90vh] flex flex-col my-4" onClick={(e) => e.stopPropagation()}>
         {mode === "deposit" && <DepositForm onClose={onClose} onDone={onDone} />}
         {mode === "transfer" && <TransferForm onClose={onClose} onDone={onDone} />}
         {mode === "paybill" && <PayBillForm onClose={onClose} onDone={onDone} />}
@@ -22,14 +22,14 @@ export function MoneyActions({ mode, onClose, onDone }: { mode: Mode; onClose: (
 function Shell({ title, subtitle, onClose, children }: { title: string; subtitle: string; onClose: () => void; children: ReactNode }) {
   return (
     <>
-      <div className="flex items-start justify-between p-6 border-b border-border">
+      <div className="flex items-start justify-between p-6 border-b border-border shrink-0">
         <div>
           <h2 className="font-display text-xl font-bold text-navy-deep">{title}</h2>
           <p className="text-sm text-navy-light mt-1">{subtitle}</p>
         </div>
         <button onClick={onClose} className="text-navy-light hover:text-navy-deep" aria-label="Close"><X className="h-5 w-5" /></button>
       </div>
-      <div className="p-6">{children}</div>
+      <div className="p-6 overflow-y-auto flex-1">{children}</div>
     </>
   );
 }
