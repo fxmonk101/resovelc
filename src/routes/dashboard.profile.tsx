@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { User, Mail, Phone, Globe, ShieldCheck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { User, Mail, Phone, Globe, ShieldCheck, Camera, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/profile")({
   component: ProfilePage,
@@ -19,11 +20,14 @@ interface Profile {
   account_type: string;
   account_number: string;
   is_verified: boolean;
+  avatar_url: string | null;
 }
 
 function ProfilePage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -31,13 +35,50 @@ function ProfilePage() {
       .then(({ data }) => setProfile(data as Profile | null));
   }, [user]);
 
+  const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+      const { error: updErr } = await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", user.id);
+      if (updErr) throw updErr;
+      setProfile((p) => p ? { ...p, avatar_url: publicUrl } : p);
+      toast.success("Profile picture updated");
+    } catch (err) {
+      toast.error("Upload failed: " + (err as Error).message);
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
   if (!profile) return <div className="p-8 text-navy-light">Loading…</div>;
 
   return (
     <div className="p-4 lg:p-8 space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center gap-4">
-        <div className="grid h-16 w-16 place-items-center rounded-full bg-indigo text-white text-xl font-semibold">
-          {profile.first_name[0]}{profile.last_name[0]}
+        <div className="relative">
+          <div className="grid h-20 w-20 place-items-center rounded-full bg-indigo text-white text-xl font-semibold overflow-hidden">
+            {profile.avatar_url
+              ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+              : <>{profile.first_name[0]}{profile.last_name[0]}</>}
+          </div>
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full bg-indigo text-white border-2 border-white hover:bg-indigo-dark transition disabled:opacity-60"
+            aria-label="Change profile picture"
+          >
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={uploadAvatar} />
         </div>
         <div>
           <h1 className="font-display text-3xl font-bold text-navy-deep">{profile.first_name} {profile.last_name}</h1>
