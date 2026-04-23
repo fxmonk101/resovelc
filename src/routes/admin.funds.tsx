@@ -177,6 +177,29 @@ function AdminFunds() {
       <div className="mb-6">
         <h2 className="font-display text-2xl font-bold text-navy-deep flex items-center gap-2"><Wallet className="h-6 w-6 text-indigo" />Funds & transactions</h2>
         <p className="text-sm text-navy-light mt-1">Credit or debit any member's checking balance or credit card. Every action is logged.</p>
+        <div className="mt-3">
+          {roleStatus === "checking" && (
+            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-muted text-navy-light">
+              <Loader2 className="h-3 w-3 animate-spin" /> Verifying admin permissions…
+            </span>
+          )}
+          {roleStatus === "ok" && (
+            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <ShieldCheck className="h-3 w-3" /> Admin permissions verified
+            </span>
+          )}
+          {roleStatus === "denied" && (
+            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-destructive/10 text-destructive border border-destructive/30">
+              <ShieldAlert className="h-3 w-3" /> You no longer have admin permissions. Please sign in again.
+            </span>
+          )}
+          {roleStatus === "error" && (
+            <span className="inline-flex items-center gap-2 text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+              <ShieldAlert className="h-3 w-3" /> Couldn't verify permissions{roleError ? `: ${roleError}` : ""}
+              <button onClick={verifyAdmin} className="underline font-medium">Retry</button>
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
@@ -255,7 +278,14 @@ function AdminFunds() {
                   </div>
                 </div>
                 <div className="mt-4 flex justify-end">
-                  <button onClick={submit} className="px-5 h-10 rounded-md bg-indigo text-white text-sm font-semibold hover:bg-indigo/90">Post transaction</button>
+                  <button
+                    onClick={submit}
+                    disabled={submitting || roleStatus !== "ok"}
+                    title={roleStatus !== "ok" ? "Admin permissions required" : undefined}
+                    className="px-5 h-10 rounded-md bg-indigo text-white text-sm font-semibold hover:bg-indigo/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? "Posting…" : "Post transaction"}
+                  </button>
                 </div>
               </div>
 
