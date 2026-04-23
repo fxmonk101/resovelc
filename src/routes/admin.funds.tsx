@@ -1,8 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search, Equal, ShieldCheck, ShieldAlert, Loader2 } from "lucide-react";
+import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search, Equal, ShieldCheck, ShieldAlert, Loader2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin/funds")({
   component: AdminFunds,
@@ -35,6 +45,7 @@ function AdminFunds() {
   const [roleStatus, setRoleStatus] = useState<"checking" | "ok" | "denied" | "error">("checking");
   const [roleError, setRoleError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const loadUsers = async () => {
     const { data, error } = await supabase.rpc("admin_list_users");
