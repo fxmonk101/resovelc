@@ -116,16 +116,28 @@ function AdminFunds() {
     await select(refreshed);
   };
 
-  const submit = async () => {
-    if (!selected) return;
+  const submit = async (): Promise<boolean> => {
+    if (!selected) return false;
     if (roleStatus !== "ok") {
-      return toast.error("Admin permissions are not verified. Please refresh or sign in again.");
+      toast.error("Admin permissions are not verified. Please refresh or sign in again.");
+      return false;
     }
     const amt = Number(amount);
-    if (!amt || amt <= 0) return toast.error("Enter a positive amount");
+    if (!amt || amt <= 0) {
+      toast.error("Enter a positive amount");
+      return false;
+    }
 
     setSubmitting(true);
     try {
+      // Re-verify session right before the RPC; expired sessions silently run as anon.
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session?.access_token) {
+        console.error("Session check failed:", sessionError);
+        toast.error("Your session expired. Please sign in again.");
+        return false;
+      }
+
       if (target === "balance") {
         if (mode === "set") {
           const { data, error } = await supabase.rpc("admin_set_balance", {
@@ -133,10 +145,12 @@ function AdminFunds() {
             _new_balance: amt,
             _description: desc || `Admin set balance to $${amt}`,
           });
-          if (error) return toast.error(error.message);
-
-          const nextBalance = Number((data as { new_balance?: number } | null)?.new_balance ?? amt);
-          setSelected({ ...selected, balance: nextBalance });
+          console.log("admin_set_balance result", { data, error });
+          if (error) {
+            console.error("RPC failed:", error);
+            toast.error(`Transaction failed: ${error.message}`);
+            return false;
+          }
         } else {
           const { data, error } = await supabase.rpc("admin_adjust_balance", {
             _user_id: selected.user_id,
@@ -144,35 +158,55 @@ function AdminFunds() {
             _description: desc || `Admin ${mode} to checking`,
             _direction: mode,
           });
-          if (error) return toast.error(error.message);
-
-          const nextBalance = Number((data as { new_balance?: number } | null)?.new_balance ?? selected.balance);
-          setSelected({ ...selected, balance: nextBalance });
+          console.log("admin_adjust_balance result", { data, error });
+          if (error) {
+            console.error("RPC failed:", error);
+            toast.error(`Transaction failed: ${error.message}`);
+            return false;
+          }
         }
       } else {
-        if (mode === "set") return toast.error("Set-exact mode is only available for checking balances");
+        if (mode === "set") {
+          toast.error("Set-exact mode is only available for checking balances");
+          return false;
+        }
         const direction = mode;
         const signed = direction === "credit" ? amt : -amt;
         const card = cards.find((c) => c.id === target);
-        if (!card) return;
+        if (!card) return false;
         const newBalance = Number(card.current_balance) + (direction === "credit" ? -amt : amt);
         const newAvail = Number(card.credit_limit) - newBalance;
         if (newBalance < 0 || newAvail < 0 || newBalance > Number(card.credit_limit)) {
-          return toast.error("Operation would exceed card limits");
+          toast.error("Operation would exceed card limits");
+          return false;
         }
         const { error } = await supabase.from("credit_cards").update({ current_balance: newBalance, available_credit: newAvail }).eq("id", card.id);
-        if (error) return toast.error(error.message);
+        if (error) {
+          console.error("Card update failed:", error);
+          toast.error(`Transaction failed: ${error.message}`);
+          return false;
+        }
         const { error: txnError } = await supabase.from("transactions").insert({
           user_id: selected.user_id, amount: signed, type: direction === "credit" ? "card_payment" : "card_charge",
           description: desc || `Admin ${direction === "credit" ? "loaded funds onto" : "charged"} ${card.card_type} ••••${card.card_number.slice(-4)}`,
         });
-        if (txnError) return toast.error(txnError.message);
+        if (txnError) {
+          console.error("Transaction insert failed:", txnError);
+          toast.error(`Transaction failed: ${txnError.message}`);
+          return false;
+        }
       }
 
+      // Always re-fetch authoritative balance before showing success.
+      await refreshSelectedUser(selected);
       toast.success("Transaction posted");
       setAmount("");
       setDesc("");
-      await refreshSelectedUser(selected);
+      return true;
+    } catch (e) {
+      console.error("submit() threw:", e);
+      toast.error(e instanceof Error ? e.message : "Unexpected error");
+      return false;
     } finally {
       setSubmitting(false);
     }
@@ -416,8 +450,8 @@ function AdminFunds() {
               disabled={submitting}
               onClick={async (e) => {
                 e.preventDefault();
-                await submit();
-                setConfirmOpen(false);
+                const ok = await submit();
+                if (ok) setConfirmOpen(false);
               }}
             >
               {submitting ? "Posting…" : "Confirm & post"}
