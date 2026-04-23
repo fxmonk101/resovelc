@@ -95,10 +95,12 @@ function AdminFunds() {
 
     toast.success("Transaction posted");
     setAmount(""); setDesc("");
-    await loadUsers();
-    const refreshed = users.find((u) => u.user_id === selected.user_id);
-    if (refreshed) select(refreshed);
-    else select(selected);
+    // Refresh users list and re-select with the latest balance
+    const { data } = await supabase.rpc("admin_list_users");
+    const list = (data ?? []) as User[];
+    setUsers(list);
+    const refreshed = list.find((u) => u.user_id === selected.user_id) ?? selected;
+    await select(refreshed);
   };
 
   const filtered = users.filter((u) => {

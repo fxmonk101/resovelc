@@ -1,5 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { ThemeProvider } from "@/lib/theme-provider";
+import { FloatingWidgets } from "@/components/widgets/FloatingWidgets";
 
 import appCss from "../styles.css?url";
 
@@ -71,6 +72,7 @@ function RootComponent() {
   return (
     <ThemeProvider>
       <Outlet />
+      <FloatingWidgets />
     </ThemeProvider>
   );
 }
