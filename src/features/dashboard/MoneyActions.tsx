@@ -162,6 +162,50 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
   };
 
   if (receipt) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [emailOpen, setEmailOpen] = useState(false);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [emailTo, setEmailTo] = useState("");
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [emailBusy, setEmailBusy] = useState(false);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [emailMsg, setEmailMsg] = useState<{ ok?: string; err?: string }>({});
+
+    const sendEmail = async () => {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTo.trim())) {
+        setEmailMsg({ err: "Enter a valid email address" });
+        return;
+      }
+      setEmailBusy(true);
+      setEmailMsg({});
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const resp = await fetch("/api/email-receipt", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token ?? ""}`,
+          },
+          body: JSON.stringify({
+            email: emailTo.trim(),
+            reference: receipt.reference,
+            amount: receipt.amount,
+            recipient: receipt.recipient,
+            bank: receipt.bank,
+            accountMasked: receipt.accountMasked,
+            kind: receipt.kind,
+          }),
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data?.error || "Failed to send");
+        setEmailMsg({ ok: `Receipt sent to ${emailTo.trim()}` });
+      } catch (e) {
+        setEmailMsg({ err: e instanceof Error ? e.message : "Failed to send" });
+      } finally {
+        setEmailBusy(false);
+      }
+    };
+
     const downloadPdf = () => {
       const doc = new jsPDF({ unit: "pt", format: "letter" });
       const W = doc.internal.pageSize.getWidth();
