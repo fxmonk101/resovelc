@@ -253,7 +253,7 @@ function AdminFunds() {
           <div className="p-3 border-b border-border">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy-light" />
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search members" className="w-full pl-9 pr-3 h-9 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-indigo/30" />
+              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search members" className="w-full pl-9 pr-3 h-9 rounded-md border border-border bg-white text-sm text-navy-deep placeholder:text-navy-light/60 focus:outline-none focus:ring-2 focus:ring-indigo/30" />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -289,7 +289,7 @@ function AdminFunds() {
                 <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-medium text-navy-deep">Target account</label>
-                    <select value={target} onChange={(e) => setTarget(e.target.value)} className="mt-1 w-full h-10 px-3 rounded-md border border-border bg-white text-sm">
+                    <select value={target} onChange={(e) => setTarget(e.target.value)} className="mt-1 w-full h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep">
                       <option value="balance">Checking · ••••{selected.account_number?.slice(-4)}</option>
                       {cards.map((c) => (
                         <option key={c.id} value={c.id}>{c.card_type} ••••{c.card_number.slice(-4)} (limit ${c.credit_limit})</option>
@@ -315,11 +315,11 @@ function AdminFunds() {
                   </div>
                   <div>
                     <label className="text-xs font-medium text-navy-deep">Amount (USD)</label>
-                    <input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="mt-1 w-full h-10 px-3 rounded-md border border-border text-sm" />
+                    <input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="mt-1 w-full h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep placeholder:text-navy-light/60" />
                   </div>
                   <div>
                     <label className="text-xs font-medium text-navy-deep">Description</label>
-                    <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Optional memo" className="mt-1 w-full h-10 px-3 rounded-md border border-border text-sm" />
+                    <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Optional memo" className="mt-1 w-full h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep placeholder:text-navy-light/60" />
                   </div>
                 </div>
                 <div className="mt-4 flex justify-end">
