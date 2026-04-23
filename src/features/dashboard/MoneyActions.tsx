@@ -9,8 +9,8 @@ type Mode = "deposit" | "transfer" | "paybill" | null;
 export function MoneyActions({ mode, onClose, onDone }: { mode: Mode; onClose: () => void; onDone: () => void }) {
   if (!mode) return null;
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 backdrop-blur-sm p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-elevated w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-elevated w-full max-w-md max-h-[90vh] flex flex-col my-4" onClick={(e) => e.stopPropagation()}>
         {mode === "deposit" && <DepositForm onClose={onClose} onDone={onDone} />}
         {mode === "transfer" && <TransferForm onClose={onClose} onDone={onDone} />}
         {mode === "paybill" && <PayBillForm onClose={onClose} onDone={onDone} />}
