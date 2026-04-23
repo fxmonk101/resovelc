@@ -450,8 +450,8 @@ function AdminFunds() {
               disabled={submitting}
               onClick={async (e) => {
                 e.preventDefault();
-                await submit();
-                setConfirmOpen(false);
+                const ok = await submit();
+                if (ok) setConfirmOpen(false);
               }}
             >
               {submitting ? "Posting…" : "Confirm & post"}
