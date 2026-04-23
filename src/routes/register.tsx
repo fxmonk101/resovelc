@@ -155,7 +155,7 @@ function Field({ label, error, children, id }: { label: string; error?: string; 
   );
 }
 
-const inputCls = "w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-terra/30 focus:border-terra transition";
+const inputCls = "w-full rounded-lg border border-border bg-white text-navy-deep placeholder:text-slate-light px-4 py-3 focus:outline-none focus:ring-2 focus:ring-terra/30 focus:border-terra transition";
 
 function NavBtns({ onBack, label = "Continue", disabled }: { onBack?: () => void; label?: string; disabled?: boolean }) {
   return (
