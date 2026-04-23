@@ -3,7 +3,7 @@ export const BRAND = {
   legalName: "Resolva Credix, N.A.",
   tagline: "Banking built for trust, growth, and recovery.",
   email: "support@resolvacredix.com",
-  phone: "1-800-CREDIX",
+  phone: "+1 (213) 246-9750",
   address: "200 Park Avenue, Suite 4500, New York, NY 10166",
   hours: "Mon–Fri 7AM–10PM ET · Sat–Sun 8AM–8PM ET",
   routing: "251480576",
