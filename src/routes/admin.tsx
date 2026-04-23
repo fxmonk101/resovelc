@@ -16,6 +16,7 @@ export const Route = createFileRoute("/admin")({
 const NAV = [
   { to: "/admin", label: "Overview", icon: ShieldCheck, exact: true },
   { to: "/admin/users", label: "Users", icon: Users },
+  { to: "/admin/kyc", label: "KYC Verifications", icon: ShieldCheck },
   { to: "/admin/loans", label: "Loan Applications", icon: HandCoins },
   { to: "/admin/grants", label: "Grant Applications", icon: Gift },
   { to: "/admin/cards", label: "Card Applications", icon: CreditCard },
