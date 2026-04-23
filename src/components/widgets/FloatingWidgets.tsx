@@ -29,7 +29,7 @@ export function FloatingWidgets() {
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Back to top"
-          className="fixed bottom-24 left-5 z-40 grid h-11 w-11 place-items-center rounded-full bg-navy-deep text-white shadow-lg hover:bg-navy transition"
+          className="fixed bottom-5 right-5 z-40 grid h-11 w-11 place-items-center rounded-full bg-navy-deep text-white shadow-lg hover:bg-navy transition"
         >
           <ArrowUp className="h-5 w-5" />
         </button>
