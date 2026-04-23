@@ -166,15 +166,6 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
   };
 
   if (receipt) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [emailOpen, setEmailOpen] = useState(false);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [emailTo, setEmailTo] = useState("");
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [emailBusy, setEmailBusy] = useState(false);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [emailMsg, setEmailMsg] = useState<{ ok?: string; err?: string }>({});
-
     const sendEmail = async () => {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTo.trim())) {
         setEmailMsg({ err: "Enter a valid email address" });
