@@ -246,7 +246,9 @@ function Overview() {
             <h3 className="font-display font-bold text-sm">We're here 24/7</h3>
             <p className="text-xs text-white/60 mt-1">Talk to a real person, anytime.</p>
             <div className="mt-3 space-y-2 text-sm">
-              <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-terra-light" /> 1-800-555-0142</div>
+              <a href={`tel:${BRAND.phone.replace(/[^0-9+]/g, "")}`} className="flex items-center gap-2 hover:text-terra-light transition">
+                <Phone className="h-3.5 w-3.5 text-terra-light" /> {BRAND.phone}
+              </a>
               <div className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-terra-light" /> 4,300+ branches nationwide</div>
             </div>
           </div>
