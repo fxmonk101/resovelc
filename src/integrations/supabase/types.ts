@@ -202,6 +202,57 @@ export type Database = {
           },
         ]
       }
+      domestic_transfers: {
+        Row: {
+          account_number: string
+          account_type: string
+          admin_notes: string | null
+          amount: number
+          bank_name: string
+          created_at: string
+          id: string
+          memo: string | null
+          recipient_name: string
+          reference: string
+          routing_number: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_number: string
+          account_type: string
+          admin_notes?: string | null
+          amount: number
+          bank_name: string
+          created_at?: string
+          id?: string
+          memo?: string | null
+          recipient_name: string
+          reference?: string
+          routing_number: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_number?: string
+          account_type?: string
+          admin_notes?: string | null
+          amount?: number
+          bank_name?: string
+          created_at?: string
+          id?: string
+          memo?: string | null
+          recipient_name?: string
+          reference?: string
+          routing_number?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       grant_applications: {
         Row: {
           admin_notes: string | null
@@ -668,6 +719,18 @@ export type Database = {
       }
       user_request_deposit: {
         Args: { _amount: number; _method: string }
+        Returns: Json
+      }
+      user_submit_domestic_transfer: {
+        Args: {
+          _account_number: string
+          _account_type: string
+          _amount: number
+          _bank_name: string
+          _memo: string
+          _recipient_name: string
+          _routing_number: string
+        }
         Returns: Json
       }
       user_submit_international_transfer: {
