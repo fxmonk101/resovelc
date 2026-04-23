@@ -60,10 +60,9 @@ function Overview() {
   const balance = Number(profile?.balance ?? 0);
   const fmt = (n: number) => `${profile?.currency ?? "USD"} ${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  // Mock secondary accounts derived from primary balance for visual richness
+  // Show only the real personal banking account so the overview total matches the actual balance.
   const accounts = [
     { name: "Primary Checking", number: masked, balance, type: "Checking", color: "indigo" },
-    { name: "Premier Savings", number: `••••${(profile?.account_number ?? "0000").slice(0, 4)}`, balance: balance * 0.35, type: "Savings · 4.50% APY", color: "navy" },
   ];
 
   return (
