@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { X, Loader2, CheckCircle2, AlertCircle, Copy, ArrowRight, Download } from "lucide-react";
+import { X, Loader2, CheckCircle2, AlertCircle, Copy, ArrowRight, Download, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import jsPDF from "jspdf";
@@ -112,6 +112,10 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
     accountMasked?: string;
     kind: "internal" | "external";
   }>(null);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [emailTo, setEmailTo] = useState("");
+  const [emailBusy, setEmailBusy] = useState(false);
+  const [emailMsg, setEmailMsg] = useState<{ ok?: string; err?: string }>({});
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,6 +166,41 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
   };
 
   if (receipt) {
+    const sendEmail = async () => {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTo.trim())) {
+        setEmailMsg({ err: "Enter a valid email address" });
+        return;
+      }
+      setEmailBusy(true);
+      setEmailMsg({});
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const resp = await fetch("/api/email-receipt", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token ?? ""}`,
+          },
+          body: JSON.stringify({
+            email: emailTo.trim(),
+            reference: receipt.reference,
+            amount: receipt.amount,
+            recipient: receipt.recipient,
+            bank: receipt.bank,
+            accountMasked: receipt.accountMasked,
+            kind: receipt.kind,
+          }),
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data?.error || "Failed to send");
+        setEmailMsg({ ok: `Receipt sent to ${emailTo.trim()}` });
+      } catch (e) {
+        setEmailMsg({ err: e instanceof Error ? e.message : "Failed to send" });
+      } finally {
+        setEmailBusy(false);
+      }
+    };
+
     const downloadPdf = () => {
       const doc = new jsPDF({ unit: "pt", format: "letter" });
       const W = doc.internal.pageSize.getWidth();
@@ -306,6 +345,13 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
             >
               <Download className="h-4 w-4" /> Download PDF
             </button>
+            <button
+              type="button"
+              onClick={() => setEmailOpen((v) => !v)}
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-cream hover:bg-cream-dark border border-border text-navy-deep font-semibold py-2.5 rounded-lg transition"
+            >
+              <Mail className="h-4 w-4" /> Email receipt
+            </button>
             <Link
               to="/dashboard"
               onClick={onClose}
@@ -314,6 +360,31 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
               View transfer status <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+
+          {emailOpen && (
+            <div className="rounded-lg border border-border bg-white p-4 space-y-3">
+              <Field label="Send receipt to email">
+                <input
+                  type="email"
+                  value={emailTo}
+                  onChange={(e) => setEmailTo(e.target.value)}
+                  placeholder="you@example.com"
+                  className={inputCls}
+                  autoFocus
+                />
+              </Field>
+              <Status error={emailMsg.err} success={emailMsg.ok} />
+              <button
+                type="button"
+                onClick={sendEmail}
+                disabled={emailBusy}
+                className="w-full inline-flex items-center justify-center gap-2 bg-indigo hover:bg-indigo-dark text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-60"
+              >
+                {emailBusy && <Loader2 className="h-4 w-4 animate-spin" />}
+                <Mail className="h-4 w-4" /> Send receipt
+              </button>
+            </div>
+          )}
         </div>
       </Shell>
     );
