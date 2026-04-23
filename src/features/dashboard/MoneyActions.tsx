@@ -345,6 +345,13 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
             >
               <Download className="h-4 w-4" /> Download PDF
             </button>
+            <button
+              type="button"
+              onClick={() => setEmailOpen((v) => !v)}
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-cream hover:bg-cream-dark border border-border text-navy-deep font-semibold py-2.5 rounded-lg transition"
+            >
+              <Mail className="h-4 w-4" /> Email receipt
+            </button>
             <Link
               to="/dashboard"
               onClick={onClose}
@@ -353,6 +360,31 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
               View transfer status <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+
+          {emailOpen && (
+            <div className="rounded-lg border border-border bg-white p-4 space-y-3">
+              <Field label="Send receipt to email">
+                <input
+                  type="email"
+                  value={emailTo}
+                  onChange={(e) => setEmailTo(e.target.value)}
+                  placeholder="you@example.com"
+                  className={inputCls}
+                  autoFocus
+                />
+              </Field>
+              <Status error={emailMsg.err} success={emailMsg.ok} />
+              <button
+                type="button"
+                onClick={sendEmail}
+                disabled={emailBusy}
+                className="w-full inline-flex items-center justify-center gap-2 bg-indigo hover:bg-indigo-dark text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-60"
+              >
+                {emailBusy && <Loader2 className="h-4 w-4 animate-spin" />}
+                <Mail className="h-4 w-4" /> Send receipt
+              </button>
+            </div>
+          )}
         </div>
       </Shell>
     );
