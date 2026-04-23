@@ -30,6 +30,7 @@ function AdminFunds() {
   const [desc, setDesc] = useState("");
   const [mode, setMode] = useState<"credit" | "debit" | "set">("credit");
   const [target, setTarget] = useState<string>("balance"); // "balance" or card id
+  const [submitting, setSubmitting] = useState(false);
 
   const loadUsers = async () => {
     const { data, error } = await supabase.rpc("admin_list_users");
@@ -49,58 +50,82 @@ function AdminFunds() {
     setTxns((t ?? []) as Txn[]);
   };
 
+  const refreshSelectedUser = async (current: User) => {
+    const [{ data: profile, error: profileError }, { data: usersData, error: usersError }] = await Promise.all([
+      supabase.from("profiles").select("balance").eq("user_id", current.user_id).maybeSingle(),
+      supabase.rpc("admin_list_users"),
+    ]);
+
+    if (profileError) return toast.error(profileError.message);
+    if (usersError) return toast.error(usersError.message);
+
+    const list = (usersData ?? []) as User[];
+    const refreshed = list.find((u) => u.user_id === current.user_id) ?? {
+      ...current,
+      balance: Number(profile?.balance ?? current.balance),
+    };
+
+    setUsers(list);
+    await select(refreshed);
+  };
+
   const submit = async () => {
     if (!selected) return;
     const amt = Number(amount);
     if (!amt || amt <= 0) return toast.error("Enter a positive amount");
 
-    if (target === "balance") {
-      if (mode === "set") {
-        const { error } = await supabase.rpc("admin_set_balance", {
-          _user_id: selected.user_id,
-          _new_balance: amt,
-          _description: desc || `Admin set balance to $${amt}`,
-        });
-        if (error) return toast.error(error.message);
-      } else {
-        // Use atomic RPC so we always add to the LATEST balance (no stale overwrites)
-        const { error } = await supabase.rpc("admin_adjust_balance", {
-          _user_id: selected.user_id,
-          _amount: amt,
-          _description: desc || `Admin ${mode} to checking`,
-          _direction: mode,
-        });
-        if (error) return toast.error(error.message);
-      }
-    } else {
-      if (mode === "set") return toast.error("Set-exact mode is only available for checking balances");
-      const direction = mode;
-      const signed = direction === "credit" ? amt : -amt;
-      const card = cards.find((c) => c.id === target);
-      if (!card) return;
-      // For credit cards: "credit" = load funds onto card (increase available_credit beyond limit not allowed; instead reduce current_balance and increase available_credit)
-      // We'll treat: credit = pay-down balance (reduces current_balance, increases available); debit = charge (increases current_balance, decreases available)
-      const newBalance = Number(card.current_balance) + (direction === "credit" ? -amt : amt);
-      const newAvail = Number(card.credit_limit) - newBalance;
-      if (newBalance < 0 || newAvail < 0 || newBalance > Number(card.credit_limit)) {
-        return toast.error("Operation would exceed card limits");
-      }
-      const { error } = await supabase.from("credit_cards").update({ current_balance: newBalance, available_credit: newAvail }).eq("id", card.id);
-      if (error) return toast.error(error.message);
-      await supabase.from("transactions").insert({
-        user_id: selected.user_id, amount: signed, type: direction === "credit" ? "card_payment" : "card_charge",
-        description: desc || `Admin ${direction === "credit" ? "loaded funds onto" : "charged"} ${card.card_type} ••••${card.card_number.slice(-4)}`,
-      });
-    }
+    setSubmitting(true);
+    try {
+      if (target === "balance") {
+        if (mode === "set") {
+          const { data, error } = await supabase.rpc("admin_set_balance", {
+            _user_id: selected.user_id,
+            _new_balance: amt,
+            _description: desc || `Admin set balance to $${amt}`,
+          });
+          if (error) return toast.error(error.message);
 
-    toast.success("Transaction posted");
-    setAmount(""); setDesc("");
-    // Refresh users list and re-select with the latest balance
-    const { data } = await supabase.rpc("admin_list_users");
-    const list = (data ?? []) as User[];
-    setUsers(list);
-    const refreshed = list.find((u) => u.user_id === selected.user_id) ?? selected;
-    await select(refreshed);
+          const nextBalance = Number((data as { new_balance?: number } | null)?.new_balance ?? amt);
+          setSelected({ ...selected, balance: nextBalance });
+        } else {
+          const { data, error } = await supabase.rpc("admin_adjust_balance", {
+            _user_id: selected.user_id,
+            _amount: amt,
+            _description: desc || `Admin ${mode} to checking`,
+            _direction: mode,
+          });
+          if (error) return toast.error(error.message);
+
+          const nextBalance = Number((data as { new_balance?: number } | null)?.new_balance ?? selected.balance);
+          setSelected({ ...selected, balance: nextBalance });
+        }
+      } else {
+        if (mode === "set") return toast.error("Set-exact mode is only available for checking balances");
+        const direction = mode;
+        const signed = direction === "credit" ? amt : -amt;
+        const card = cards.find((c) => c.id === target);
+        if (!card) return;
+        const newBalance = Number(card.current_balance) + (direction === "credit" ? -amt : amt);
+        const newAvail = Number(card.credit_limit) - newBalance;
+        if (newBalance < 0 || newAvail < 0 || newBalance > Number(card.credit_limit)) {
+          return toast.error("Operation would exceed card limits");
+        }
+        const { error } = await supabase.from("credit_cards").update({ current_balance: newBalance, available_credit: newAvail }).eq("id", card.id);
+        if (error) return toast.error(error.message);
+        const { error: txnError } = await supabase.from("transactions").insert({
+          user_id: selected.user_id, amount: signed, type: direction === "credit" ? "card_payment" : "card_charge",
+          description: desc || `Admin ${direction === "credit" ? "loaded funds onto" : "charged"} ${card.card_type} ••••${card.card_number.slice(-4)}`,
+        });
+        if (txnError) return toast.error(txnError.message);
+      }
+
+      toast.success("Transaction posted");
+      setAmount("");
+      setDesc("");
+      await refreshSelectedUser(selected);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const filtered = users.filter((u) => {
