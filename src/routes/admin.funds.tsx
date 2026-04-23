@@ -290,7 +290,12 @@ function AdminFunds() {
                 </div>
                 <div className="mt-4 flex justify-end">
                   <button
-                    onClick={submit}
+                    onClick={() => {
+                      const amt = Number(amount);
+                      if (!amt || amt <= 0) return toast.error("Enter a positive amount");
+                      if (roleStatus !== "ok") return toast.error("Admin permissions required");
+                      setConfirmOpen(true);
+                    }}
                     disabled={submitting || roleStatus !== "ok"}
                     title={roleStatus !== "ok" ? "Admin permissions required" : undefined}
                     className="px-5 h-10 rounded-md bg-indigo text-white text-sm font-semibold hover:bg-indigo/90 disabled:opacity-50 disabled:cursor-not-allowed"
