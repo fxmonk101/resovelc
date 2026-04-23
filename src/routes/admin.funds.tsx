@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search, Equal } from "lucide-react";
+import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search, Equal, ShieldCheck, ShieldAlert, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -32,12 +32,48 @@ function AdminFunds() {
   const [target, setTarget] = useState<string>("balance"); // "balance" or card id
   const [submitting, setSubmitting] = useState(false);
 
+  const [roleStatus, setRoleStatus] = useState<"checking" | "ok" | "denied" | "error">("checking");
+  const [roleError, setRoleError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
   const loadUsers = async () => {
     const { data, error } = await supabase.rpc("admin_list_users");
     if (error) return toast.error(error.message);
     setUsers((data ?? []) as User[]);
   };
-  useEffect(() => { loadUsers(); }, []);
+
+  const verifyAdmin = async () => {
+    setRoleStatus("checking");
+    setRoleError(null);
+    try {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user) {
+        setRoleStatus("denied");
+        return;
+      }
+      setCurrentUserId(userData.user.id);
+      const { data: isAdmin, error: rpcErr } = await supabase.rpc("has_role", {
+        _user_id: userData.user.id,
+        _role: "admin",
+      });
+      if (rpcErr) {
+        setRoleError(rpcErr.message);
+        setRoleStatus("error");
+        return;
+      }
+      if (isAdmin === true) {
+        setRoleStatus("ok");
+        await loadUsers();
+      } else {
+        setRoleStatus("denied");
+      }
+    } catch (e) {
+      setRoleError(e instanceof Error ? e.message : "Unknown error");
+      setRoleStatus("error");
+    }
+  };
+
+  useEffect(() => { verifyAdmin(); }, []);
 
   const select = async (u: User) => {
     setSelected(u);
@@ -71,6 +107,9 @@ function AdminFunds() {
 
   const submit = async () => {
     if (!selected) return;
+    if (roleStatus !== "ok") {
+      return toast.error("Admin permissions are not verified. Please refresh or sign in again.");
+    }
     const amt = Number(amount);
     if (!amt || amt <= 0) return toast.error("Enter a positive amount");
 
@@ -138,6 +177,29 @@ function AdminFunds() {
       <div className="mb-6">
         <h2 className="font-display text-2xl font-bold text-navy-deep flex items-center gap-2"><Wallet className="h-6 w-6 text-indigo" />Funds & transactions</h2>
         <p className="text-sm text-navy-light mt-1">Credit or debit any member's checking balance or credit card. Every action is logged.</p>
+        <div className="mt-3">
+          {roleStatus === "checking" && (
+            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-muted text-navy-light">
+              <Loader2 className="h-3 w-3 animate-spin" /> Verifying admin permissions…
+            </span>
+          )}
+          {roleStatus === "ok" && (
+            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <ShieldCheck className="h-3 w-3" /> Admin permissions verified
+            </span>
+          )}
+          {roleStatus === "denied" && (
+            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-destructive/10 text-destructive border border-destructive/30">
+              <ShieldAlert className="h-3 w-3" /> You no longer have admin permissions. Please sign in again.
+            </span>
+          )}
+          {roleStatus === "error" && (
+            <span className="inline-flex items-center gap-2 text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+              <ShieldAlert className="h-3 w-3" /> Couldn't verify permissions{roleError ? `: ${roleError}` : ""}
+              <button onClick={verifyAdmin} className="underline font-medium">Retry</button>
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
@@ -216,7 +278,14 @@ function AdminFunds() {
                   </div>
                 </div>
                 <div className="mt-4 flex justify-end">
-                  <button onClick={submit} className="px-5 h-10 rounded-md bg-indigo text-white text-sm font-semibold hover:bg-indigo/90">Post transaction</button>
+                  <button
+                    onClick={submit}
+                    disabled={submitting || roleStatus !== "ok"}
+                    title={roleStatus !== "ok" ? "Admin permissions required" : undefined}
+                    className="px-5 h-10 rounded-md bg-indigo text-white text-sm font-semibold hover:bg-indigo/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? "Posting…" : "Post transaction"}
+                  </button>
                 </div>
               </div>
 
