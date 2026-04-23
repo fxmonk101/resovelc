@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowDownLeft, ArrowUpRight, Briefcase, CreditCard, Eye, EyeOff,
   Gift, HandCoins, Plus, Send, ShieldCheck, Wallet, TrendingUp,
-  PiggyBank, FileText, Smartphone, Phone, MapPin, Calendar
+  PiggyBank, FileText, Smartphone, Phone, Calendar
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
@@ -244,13 +244,12 @@ function Overview() {
 
           {/* Customer service */}
           <div className="bg-navy-deep text-white rounded-2xl p-5">
-            <h3 className="font-display font-bold text-sm">We're here 24/7</h3>
+            <h3 className="font-display font-bold text-sm">24/7 Customer Support</h3>
             <p className="text-xs text-white/60 mt-1">Talk to a real person, anytime.</p>
             <div className="mt-3 space-y-2 text-sm">
               <a href={`tel:${BRAND.phone.replace(/[^0-9+]/g, "")}`} className="flex items-center gap-2 hover:text-terra-light transition">
                 <Phone className="h-3.5 w-3.5 text-terra-light" /> {BRAND.phone}
               </a>
-              <div className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-terra-light" /> 4,300+ branches nationwide</div>
             </div>
           </div>
 
