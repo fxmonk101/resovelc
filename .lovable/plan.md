@@ -1,57 +1,35 @@
 
 
-## Fix: confirmed transactions don't update the user's balance
+## Phone Number Field Redesign — Sign Up Step 2
 
-### Problem
+Restructure the phone input on the registration page so the country code selector and the local number field stack vertically, look polished on all screen sizes, and treat US and Canada as distinct entries.
 
-After clicking **Confirm & post** in the modal, the toast says success but the selected member's balance doesn't change. Root cause is in `submit()` in `src/routes/admin.funds.tsx`:
+### Changes
 
-The function uses `return toast.error(...)` for validation/error branches **inside the `try` block**. Because `toast.error()` returns a value, those `return` statements exit `submit()` early — but they short-circuit on the **happy path** too in subtle ways:
+**1. Split US and Canada in `DIAL_CODES`** (`src/routes/register.tsx`)
+- Replace the combined `{ code: "+1", country: "United States / Canada", flag: "🇺🇸" }` with two entries:
+  - `{ code: "+1", country: "United States", flag: "🇺🇸" }`
+  - `{ code: "+1", country: "Canada", flag: "🇨🇦" }`
+- Both share dial code `+1` but show different flags/labels in the dropdown so users can pick their actual country.
 
-```ts
-const { data, error } = await supabase.rpc("admin_set_balance", {...});
-if (error) return toast.error(error.message);
-const nextBalance = Number((data as ...)?.new_balance ?? amt);
-setSelected({ ...selected, balance: nextBalance });
-// ... no toast, no refresh here — falls through
-```
+**2. Stack the layout vertically** (`Step2` component)
+- Replace the current `<div className="flex gap-2">` wrapper with a vertical stack (`space-y-2`).
+- Top row: full-width country code `<select>` showing flag + country name + dial code (e.g. `🇺🇸 United States (+1)`), so the long labels are no longer cramped.
+- Bottom row: full-width number `<input>` with placeholder `2132469750`.
+- Both controls become full-width (`w-full`), eliminating the overflow/cramping at small viewports (the user is on 850px wide).
 
-The success toast and `refreshSelectedUser(selected)` only run **after** the `if/else` block. But `setSelected({ ...selected, balance: nextBalance })` mutates `selected` synchronously in state, while `refreshSelectedUser(selected)` is called with the **stale** closure `selected` (old balance). Combined with the modal's `setConfirmOpen(false)` racing the async refresh, the UI ends up showing the pre-transaction balance.
+**3. Polish the visual presentation**
+- Add a small helper label above the selector: "Country code".
+- Keep the live preview line `Final format: +12132469750` underneath the number field so users see the resulting E.164 string.
+- Ensure the selector uses the same `inputCls` styling (white bg, navy-deep text) for consistency with the visibility fix already in place.
 
-Additionally, the RPC may be silently failing with an RLS/permission error that's swallowed because the `try/finally` doesn't surface non-thrown errors clearly, and the role preflight uses a cached check that may not match the actual server-side `auth.uid()` at call time.
+**4. Preserve existing behavior**
+- `updatePhone()` logic, hidden `phone` register field, validation, and the `+1` dial code default remain unchanged.
+- Initial-load matching logic still works because both new US/Canada entries share `+1` (the first match wins on prefix, which is acceptable since only the dial code is persisted).
 
-### Fix
+### Files Edited
+- `src/routes/register.tsx`
 
-**1. `src/routes/admin.funds.tsx` — rewrite `submit()` for correctness:**
-
-- Stop using `return toast.error(...)` inside `try`. Use explicit `throw new Error(msg)` or set a flag and `return` cleanly so the `finally` always resets `submitting`.
-- After a successful RPC, **always** call `await refreshSelectedUser(selected)` to re-fetch the authoritative balance from `profiles` — don't trust optimistic local state.
-- Log the raw RPC response (`console.log("admin_adjust_balance result", { data, error })`) so we can see in the console exactly what came back if it still fails.
-- Show the success toast **only after** the refresh resolves, so the user sees the new balance before dismissal.
-- Move `setConfirmOpen(false)` to run **after** `await submit()` completes successfully — already done, but ensure `submit()` actually awaits the refresh.
-
-**2. Add a re-verification of the session right before the RPC call:**
-
-Call `supabase.auth.getSession()` inside `submit()` and confirm a valid `access_token` exists. If the session expired between mount and confirm, the RPC silently runs as anon and `has_role(auth.uid(), 'admin')` returns false → RPC raises "Admin only" → caught and toasted, but the modal already closed.
-
-**3. Surface RPC errors loudly:**
-
-Replace silent `if (error) return toast.error(error.message)` with:
-```ts
-if (error) {
-  console.error("RPC failed:", error);
-  toast.error(`Transaction failed: ${error.message}`);
-  return;
-}
-```
-
-**4. Ensure modal closes only on success:**
-
-Change the modal's `AlertDialogAction` handler so `setConfirmOpen(false)` runs **only** if `submit()` returned a truthy success indicator. Update `submit()` to return `boolean`.
-
-### Files touched
-
-- `src/routes/admin.funds.tsx` — rewrite `submit()` to return boolean, always refresh after success, log RPC errors, re-verify session, and gate modal close on success.
-
-No database, RPC, or RLS changes needed — the underlying `admin_adjust_balance` / `admin_set_balance` functions are correct.
+### Result
+A clean, mobile-friendly stacked layout: country selector on top (full width, readable labels), number input directly underneath (full width, large tap target), with US and Canada selectable independently.
 
