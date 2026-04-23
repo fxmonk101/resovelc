@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { X, Loader2, CheckCircle2, AlertCircle, Copy, ArrowRight, Download } from "lucide-react";
+import { X, Loader2, CheckCircle2, AlertCircle, Copy, ArrowRight, Download, Mail } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import jsPDF from "jspdf";

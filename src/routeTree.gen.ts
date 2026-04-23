@@ -30,6 +30,7 @@ import { Route as DashboardInternationalRouteImport } from './routes/dashboard.i
 import { Route as DashboardGrantsRouteImport } from './routes/dashboard.grants'
 import { Route as DashboardCardsRouteImport } from './routes/dashboard.cards'
 import { Route as DashboardBusinessRouteImport } from './routes/dashboard.business'
+import { Route as ApiEmailReceiptRouteImport } from './routes/api.email-receipt'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminLoansRouteImport } from './routes/admin.loans'
 import { Route as AdminKycRouteImport } from './routes/admin.kyc'
@@ -143,6 +144,11 @@ const DashboardBusinessRoute = DashboardBusinessRouteImport.update({
   path: '/business',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ApiEmailReceiptRoute = ApiEmailReceiptRouteImport.update({
+  id: '/api/email-receipt',
+  path: '/api/email-receipt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/admin/kyc': typeof AdminKycRoute
   '/admin/loans': typeof AdminLoansRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/email-receipt': typeof ApiEmailReceiptRoute
   '/dashboard/business': typeof DashboardBusinessRoute
   '/dashboard/cards': typeof DashboardCardsRoute
   '/dashboard/grants': typeof DashboardGrantsRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/admin/kyc': typeof AdminKycRoute
   '/admin/loans': typeof AdminLoansRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/email-receipt': typeof ApiEmailReceiptRoute
   '/dashboard/business': typeof DashboardBusinessRoute
   '/dashboard/cards': typeof DashboardCardsRoute
   '/dashboard/grants': typeof DashboardGrantsRoute
@@ -258,6 +266,7 @@ export interface FileRoutesById {
   '/admin/kyc': typeof AdminKycRoute
   '/admin/loans': typeof AdminLoansRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/email-receipt': typeof ApiEmailReceiptRoute
   '/dashboard/business': typeof DashboardBusinessRoute
   '/dashboard/cards': typeof DashboardCardsRoute
   '/dashboard/grants': typeof DashboardGrantsRoute
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/loans'
     | '/admin/users'
+    | '/api/email-receipt'
     | '/dashboard/business'
     | '/dashboard/cards'
     | '/dashboard/grants'
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/loans'
     | '/admin/users'
+    | '/api/email-receipt'
     | '/dashboard/business'
     | '/dashboard/cards'
     | '/dashboard/grants'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/loans'
     | '/admin/users'
+    | '/api/email-receipt'
     | '/dashboard/business'
     | '/dashboard/cards'
     | '/dashboard/grants'
@@ -372,6 +384,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PersonalRoute: typeof PersonalRoute
   RegisterRoute: typeof RegisterRoute
+  ApiEmailReceiptRoute: typeof ApiEmailReceiptRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -523,6 +536,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBusinessRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/api/email-receipt': {
+      id: '/api/email-receipt'
+      path: '/api/email-receipt'
+      fullPath: '/api/email-receipt'
+      preLoaderRoute: typeof ApiEmailReceiptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -638,6 +658,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PersonalRoute: PersonalRoute,
   RegisterRoute: RegisterRoute,
+  ApiEmailReceiptRoute: ApiEmailReceiptRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
