@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, Shield } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Shield, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import { registerStep1, registerStep2, registerStep3, registerStep4 } from "@/lib/validators";
 import { supabase } from "@/integrations/supabase/client";
@@ -267,6 +267,8 @@ function Step4({ data, onSubmit, onBack, error }: { data: FormData; onSubmit: (d
   const score = passwordStrength(pw);
   const labels = ["Too weak", "Weak", "Fair", "Strong", "Excellent"];
   const colors = ["bg-error", "bg-error", "bg-warning", "bg-amber-sand", "bg-success"];
+  const [showPw, setShowPw] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -275,7 +277,12 @@ function Step4({ data, onSubmit, onBack, error }: { data: FormData; onSubmit: (d
         <p className="text-sm text-body mt-1">Choose a strong password.</p>
       </div>
       <Field label="Password" id="password" error={errors.password?.message}>
-        <input id="password" type="password" {...register("password")} className={inputCls} />
+        <div className="relative">
+          <input id="password" type={showPw ? "text" : "password"} {...register("password")} className={`${inputCls} pr-11`} />
+          <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute inset-y-0 right-3 grid place-items-center text-slate-mid hover:text-slate-deep" aria-label="Toggle password visibility">
+            {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
         {pw && (
           <div className="mt-2">
             <div className="h-1.5 bg-ivory-dark rounded-full overflow-hidden flex gap-0.5">
@@ -288,7 +295,12 @@ function Step4({ data, onSubmit, onBack, error }: { data: FormData; onSubmit: (d
         )}
       </Field>
       <Field label="Confirm password" id="confirmPassword" error={errors.confirmPassword?.message}>
-        <input id="confirmPassword" type="password" {...register("confirmPassword")} className={inputCls} />
+        <div className="relative">
+          <input id="confirmPassword" type={showConfirm ? "text" : "password"} {...register("confirmPassword")} className={`${inputCls} pr-11`} />
+          <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute inset-y-0 right-3 grid place-items-center text-slate-mid hover:text-slate-deep" aria-label="Toggle password visibility">
+            {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
       </Field>
       <label className="flex items-start gap-3 cursor-pointer">
         <input type="checkbox" {...register("termsAccepted")} className="mt-1 h-4 w-4 accent-[oklch(0.68_0.14_35)]" />

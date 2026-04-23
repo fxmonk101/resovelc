@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
 import { MoneyActions } from "@/features/dashboard/MoneyActions";
 import { KycCard } from "@/features/dashboard/KycCard";
+import { BRAND } from "@/lib/constants";
 
 export const Route = createFileRoute("/dashboard/")({
   component: Overview,
