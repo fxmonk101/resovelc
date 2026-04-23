@@ -278,24 +278,27 @@ function Step2({ data, onNext, onBack }: { data: FormData; onNext: (d: z.infer<t
         <input id="email" type="email" {...register("email")} className={inputCls} />
       </Field>
       <Field label="Phone number" id="phone" error={errors.phone?.message}>
-        <div className="flex gap-2">
-          <select
-            aria-label="Country code"
-            value={dialCode}
-            onChange={(e) => { setDialCode(e.target.value); updatePhone(e.target.value, localNumber); }}
-            className={`${inputCls} w-36 shrink-0 pr-2`}
-          >
-            {DIAL_CODES.map((d) => (
-              <option key={`${d.code}-${d.country}`} value={d.code}>{d.flag} {d.code} {d.country}</option>
-            ))}
-          </select>
+        <div className="space-y-2">
+          <div>
+            <span className="text-xs text-slate-light block mb-1">Country code</span>
+            <select
+              aria-label="Country code"
+              value={dialCode}
+              onChange={(e) => { setDialCode(e.target.value); updatePhone(e.target.value, localNumber); }}
+              className={`${inputCls} w-full`}
+            >
+              {DIAL_CODES.map((d) => (
+                <option key={`${d.code}-${d.country}`} value={d.code}>{d.flag} {d.country} ({d.code})</option>
+              ))}
+            </select>
+          </div>
           <input
             id="phone"
             type="tel"
             inputMode="tel"
             value={localNumber}
             onChange={(e) => updatePhone(dialCode, e.target.value)}
-            className={`${inputCls} flex-1`}
+            className={`${inputCls} w-full`}
             placeholder="2132469750"
           />
         </div>
