@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { X, Loader2, CheckCircle2, AlertCircle, Copy, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
 type Mode = "deposit" | "transfer" | "paybill" | null;
@@ -103,6 +104,14 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [ok, setOk] = useState("");
+  const [receipt, setReceipt] = useState<null | {
+    reference: string;
+    amount: number;
+    recipient: string;
+    bank?: string;
+    accountMasked?: string;
+    kind: "internal" | "external";
+  }>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,11 +124,19 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
       });
       setBusy(false);
       if (error) return setErr(error.message);
-      setOk("Transfer completed.");
+      setReceipt({
+        reference: `RC-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
+        amount: Number(amount),
+        recipient: to.trim(),
+        accountMasked: `••••${to.trim().slice(-4)}`,
+        kind: "internal",
+      });
+      onDone();
+      return;
     } else {
       if (!/^\d{9}$/.test(routing.trim())) { setBusy(false); return setErr("Routing number must be exactly 9 digits"); }
       if (!/^\d{5,20}$/.test(extAccount.trim())) { setBusy(false); return setErr("Account number must be 5–20 digits"); }
-      const { error } = await supabase.rpc("user_submit_domestic_transfer", {
+      const { data, error } = await supabase.rpc("user_submit_domestic_transfer", {
         _recipient_name: recipientName.trim(),
         _bank_name: bankName.trim(),
         _routing_number: routing.trim(),
@@ -130,11 +147,95 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
       });
       setBusy(false);
       if (error) return setErr(error.message);
-      setOk("Transfer submitted. Funds typically arrive in 1–3 business days.");
+      const ref = (data as { reference?: string } | null)?.reference ?? "DT-PENDING";
+      setReceipt({
+        reference: ref,
+        amount: Number(amount),
+        recipient: recipientName.trim(),
+        bank: bankName.trim(),
+        accountMasked: `••••${extAccount.trim().slice(-4)}`,
+        kind: "external",
+      });
+      onDone();
+      return;
     }
-    onDone();
-    setTimeout(onClose, 1600);
   };
+
+  if (receipt) {
+    return (
+      <Shell title="Transfer submitted" subtitle="Keep this reference for your records" onClose={onClose}>
+        <div className="space-y-5">
+          <div className="flex items-center gap-3 rounded-lg bg-success/10 border border-success/30 px-4 py-3">
+            <CheckCircle2 className="h-6 w-6 text-success shrink-0" />
+            <div className="text-sm text-navy-deep">
+              {receipt.kind === "external"
+                ? "Your external transfer is being processed. Funds typically arrive in 1–3 business days."
+                : "Your transfer to the member account was completed successfully."}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-cream/40 p-4">
+            <div className="text-xs font-semibold text-navy-deep uppercase tracking-wide">Reference ID</div>
+            <div className="mt-1 flex items-center justify-between gap-2">
+              <div className="font-mono text-lg font-bold text-navy-deep">{receipt.reference}</div>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard?.writeText(receipt.reference)}
+                className="inline-flex items-center gap-1.5 text-xs text-indigo hover:text-indigo-dark font-semibold"
+                aria-label="Copy reference"
+              >
+                <Copy className="h-3.5 w-3.5" /> Copy
+              </button>
+            </div>
+          </div>
+
+          <dl className="text-sm divide-y divide-border rounded-lg border border-border overflow-hidden">
+            <div className="flex justify-between px-4 py-2.5 bg-white">
+              <dt className="text-navy-light">Amount</dt>
+              <dd className="font-semibold text-navy-deep">${receipt.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</dd>
+            </div>
+            <div className="flex justify-between px-4 py-2.5 bg-white">
+              <dt className="text-navy-light">Recipient</dt>
+              <dd className="font-semibold text-navy-deep text-right">{receipt.recipient}</dd>
+            </div>
+            {receipt.bank && (
+              <div className="flex justify-between px-4 py-2.5 bg-white">
+                <dt className="text-navy-light">Bank</dt>
+                <dd className="font-semibold text-navy-deep text-right">{receipt.bank}</dd>
+              </div>
+            )}
+            {receipt.accountMasked && (
+              <div className="flex justify-between px-4 py-2.5 bg-white">
+                <dt className="text-navy-light">Account</dt>
+                <dd className="font-mono font-semibold text-navy-deep">{receipt.accountMasked}</dd>
+              </div>
+            )}
+            <div className="flex justify-between px-4 py-2.5 bg-white">
+              <dt className="text-navy-light">Status</dt>
+              <dd className="font-semibold text-navy-deep">{receipt.kind === "external" ? "Pending" : "Completed"}</dd>
+            </div>
+          </dl>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Link
+              to="/dashboard"
+              onClick={onClose}
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-indigo hover:bg-indigo-dark text-white font-semibold py-2.5 rounded-lg transition"
+            >
+              View transfer status <ArrowRight className="h-4 w-4" />
+            </Link>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 inline-flex items-center justify-center bg-white border border-border text-navy-deep font-semibold py-2.5 rounded-lg hover:bg-cream/40 transition"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </Shell>
+    );
+  }
 
   return (
     <Shell title="Transfer money" subtitle="Send funds to another member account" onClose={onClose}>
