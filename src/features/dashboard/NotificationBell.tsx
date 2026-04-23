@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bell, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
+import { Bell, CheckCircle2, ArrowRight, Loader2, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -65,6 +65,15 @@ export function NotificationBell({ userId }: { userId: string }) {
     setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
 
+  const removeNotif = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const prev = items;
+    setItems((cur) => cur.filter((n) => n.id !== id));
+    const { error } = await supabase.from("notifications").delete().eq("id", id);
+    if (error) setItems(prev);
+  };
+
   return (
     <div className="relative" ref={ref}>
       <button
@@ -99,22 +108,30 @@ export function NotificationBell({ userId }: { userId: string }) {
               </div>
             ) : (
               items.map((n) => (
-                <Link
-                  key={n.id}
-                  to={(n.link as "/dashboard") ?? "/dashboard"}
-                  onClick={() => { markRead(n.id); setOpen(false); }}
-                  className={`block px-4 py-3 border-b border-border/60 hover:bg-ivory transition ${n.read ? "" : "bg-indigo/5"}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className={`mt-0.5 inline-block h-2 w-2 rounded-full shrink-0 ${n.read ? "bg-transparent" : "bg-brand-red"}`} />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-navy-deep text-sm">{n.title}</div>
-                      <div className="text-xs text-navy-light mt-0.5 line-clamp-2">{n.body}</div>
-                      <div className="text-[10px] text-navy-light mt-1">{new Date(n.created_at).toLocaleString()}</div>
+                <div key={n.id} className={`group relative border-b border-border/60 ${n.read ? "" : "bg-indigo/5"}`}>
+                  <Link
+                    to={(n.link as "/dashboard") ?? "/dashboard"}
+                    onClick={() => { markRead(n.id); setOpen(false); }}
+                    className="block px-4 py-3 pr-10 hover:bg-ivory transition"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className={`mt-0.5 inline-block h-2 w-2 rounded-full shrink-0 ${n.read ? "bg-transparent" : "bg-brand-red"}`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-navy-deep text-sm">{n.title}</div>
+                        <div className="text-xs text-navy-light mt-0.5 line-clamp-2">{n.body}</div>
+                        <div className="text-[10px] text-navy-light mt-1">{new Date(n.created_at).toLocaleString()}</div>
+                      </div>
+                      <ArrowRight className="h-3.5 w-3.5 text-navy-light shrink-0 mt-1" />
                     </div>
-                    <ArrowRight className="h-3.5 w-3.5 text-navy-light shrink-0 mt-1" />
-                  </div>
-                </Link>
+                  </Link>
+                  <button
+                    onClick={(e) => removeNotif(e, n.id)}
+                    className="absolute top-2 right-2 grid h-7 w-7 place-items-center rounded-md text-navy-light hover:bg-destructive/10 hover:text-destructive transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+                    aria-label="Delete notification"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               ))
             )}
           </div>
