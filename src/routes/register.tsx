@@ -25,6 +25,53 @@ const COUNTRIES = ["United States", "United Kingdom", "Canada", "Australia", "Ge
 const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD", "JPY", "CHF", "CNY", "INR", "BRL", "ZAR", "NGN"];
 const ACCOUNT_TYPES = ["Checking Account", "Savings Account", "Fixed Deposit", "Current Account", "Business Account", "Investment Account"];
 
+const DIAL_CODES: { code: string; country: string; flag: string }[] = [
+  { code: "+1", country: "United States / Canada", flag: "🇺🇸" },
+  { code: "+44", country: "United Kingdom", flag: "🇬🇧" },
+  { code: "+61", country: "Australia", flag: "🇦🇺" },
+  { code: "+49", country: "Germany", flag: "🇩🇪" },
+  { code: "+33", country: "France", flag: "🇫🇷" },
+  { code: "+34", country: "Spain", flag: "🇪🇸" },
+  { code: "+39", country: "Italy", flag: "🇮🇹" },
+  { code: "+31", country: "Netherlands", flag: "🇳🇱" },
+  { code: "+41", country: "Switzerland", flag: "🇨🇭" },
+  { code: "+46", country: "Sweden", flag: "🇸🇪" },
+  { code: "+47", country: "Norway", flag: "🇳🇴" },
+  { code: "+45", country: "Denmark", flag: "🇩🇰" },
+  { code: "+353", country: "Ireland", flag: "🇮🇪" },
+  { code: "+351", country: "Portugal", flag: "🇵🇹" },
+  { code: "+30", country: "Greece", flag: "🇬🇷" },
+  { code: "+7", country: "Russia", flag: "🇷🇺" },
+  { code: "+81", country: "Japan", flag: "🇯🇵" },
+  { code: "+82", country: "South Korea", flag: "🇰🇷" },
+  { code: "+86", country: "China", flag: "🇨🇳" },
+  { code: "+852", country: "Hong Kong", flag: "🇭🇰" },
+  { code: "+65", country: "Singapore", flag: "🇸🇬" },
+  { code: "+91", country: "India", flag: "🇮🇳" },
+  { code: "+92", country: "Pakistan", flag: "🇵🇰" },
+  { code: "+880", country: "Bangladesh", flag: "🇧🇩" },
+  { code: "+62", country: "Indonesia", flag: "🇮🇩" },
+  { code: "+60", country: "Malaysia", flag: "🇲🇾" },
+  { code: "+63", country: "Philippines", flag: "🇵🇭" },
+  { code: "+66", country: "Thailand", flag: "🇹🇭" },
+  { code: "+84", country: "Vietnam", flag: "🇻🇳" },
+  { code: "+971", country: "UAE", flag: "🇦🇪" },
+  { code: "+966", country: "Saudi Arabia", flag: "🇸🇦" },
+  { code: "+972", country: "Israel", flag: "🇮🇱" },
+  { code: "+90", country: "Turkey", flag: "🇹🇷" },
+  { code: "+20", country: "Egypt", flag: "🇪🇬" },
+  { code: "+27", country: "South Africa", flag: "🇿🇦" },
+  { code: "+234", country: "Nigeria", flag: "🇳🇬" },
+  { code: "+254", country: "Kenya", flag: "🇰🇪" },
+  { code: "+233", country: "Ghana", flag: "🇬🇭" },
+  { code: "+55", country: "Brazil", flag: "🇧🇷" },
+  { code: "+52", country: "Mexico", flag: "🇲🇽" },
+  { code: "+54", country: "Argentina", flag: "🇦🇷" },
+  { code: "+56", country: "Chile", flag: "🇨🇱" },
+  { code: "+57", country: "Colombia", flag: "🇨🇴" },
+  { code: "+51", country: "Peru", flag: "🇵🇪" },
+];
+
 type FormData = Partial<
   z.infer<typeof registerStep1> & z.infer<typeof registerStep2> &
   z.infer<typeof registerStep3> & { password: string; confirmPassword: string; termsAccepted: boolean }
@@ -203,10 +250,24 @@ function Step1({ data, onNext }: { data: FormData; onNext: (d: z.infer<typeof re
 }
 
 function Step2({ data, onNext, onBack }: { data: FormData; onNext: (d: z.infer<typeof registerStep2>) => void; onBack: () => void }) {
-  const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof registerStep2>>({
+  // Split existing phone into dial code + local part
+  const initialPhone = data.phone || "";
+  const matchedDial = DIAL_CODES.find((d) => initialPhone.startsWith(d.code));
+  const [dialCode, setDialCode] = useState(matchedDial?.code ?? "+1");
+  const [localNumber, setLocalNumber] = useState(matchedDial ? initialPhone.slice(matchedDial.code.length) : initialPhone.replace(/^\+/, ""));
+
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<z.infer<typeof registerStep2>>({
     resolver: zodResolver(registerStep2),
     defaultValues: data as z.infer<typeof registerStep2>,
   });
+
+  const updatePhone = (code: string, local: string) => {
+    const cleanLocal = local.replace(/\D/g, "").slice(0, 14);
+    setLocalNumber(cleanLocal);
+    const full = `${code}${cleanLocal}`;
+    setValue("phone", full, { shouldValidate: cleanLocal.length > 0 });
+  };
+
   return (
     <form onSubmit={handleSubmit(onNext)} className="space-y-5">
       <div>
@@ -216,8 +277,30 @@ function Step2({ data, onNext, onBack }: { data: FormData; onNext: (d: z.infer<t
       <Field label="Email" id="email" error={errors.email?.message}>
         <input id="email" type="email" {...register("email")} className={inputCls} />
       </Field>
-      <Field label="Phone (international format)" id="phone" error={errors.phone?.message}>
-        <input id="phone" {...register("phone")} className={inputCls} placeholder="+14155551234" />
+      <Field label="Phone number" id="phone" error={errors.phone?.message}>
+        <div className="flex gap-2">
+          <select
+            aria-label="Country code"
+            value={dialCode}
+            onChange={(e) => { setDialCode(e.target.value); updatePhone(e.target.value, localNumber); }}
+            className={`${inputCls} w-36 shrink-0 pr-2`}
+          >
+            {DIAL_CODES.map((d) => (
+              <option key={`${d.code}-${d.country}`} value={d.code}>{d.flag} {d.code} {d.country}</option>
+            ))}
+          </select>
+          <input
+            id="phone"
+            type="tel"
+            inputMode="tel"
+            value={localNumber}
+            onChange={(e) => updatePhone(dialCode, e.target.value)}
+            className={`${inputCls} flex-1`}
+            placeholder="2132469750"
+          />
+        </div>
+        <input type="hidden" {...register("phone")} />
+        <p className="text-xs text-slate-light mt-1">Final format: {dialCode}{localNumber || "XXXXXXXXXX"}</p>
       </Field>
       <Field label="Country" id="country" error={errors.country?.message}>
         <select id="country" {...register("country")} className={inputCls}>
