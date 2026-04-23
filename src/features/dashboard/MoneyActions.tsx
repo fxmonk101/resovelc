@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from "react";
-import { X, Loader2, CheckCircle2, AlertCircle, Copy, ArrowRight } from "lucide-react";
+import { X, Loader2, CheckCircle2, AlertCircle, Copy, ArrowRight, Download } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import jsPDF from "jspdf";
 
 type Mode = "deposit" | "transfer" | "paybill" | null;
 
@@ -161,6 +162,88 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
   };
 
   if (receipt) {
+    const downloadPdf = () => {
+      const doc = new jsPDF({ unit: "pt", format: "letter" });
+      const W = doc.internal.pageSize.getWidth();
+      const now = new Date();
+      // Header band
+      doc.setFillColor(30, 41, 82);
+      doc.rect(0, 0, W, 90, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.text("Resolva Credix", 40, 45);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.text("Transfer confirmation receipt", 40, 65);
+      doc.text(now.toLocaleString(), W - 40, 65, { align: "right" });
+
+      // Status badge
+      doc.setTextColor(20, 20, 20);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text(receipt.kind === "external" ? "Transfer submitted" : "Transfer completed", 40, 130);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(90, 90, 90);
+      const sub = receipt.kind === "external"
+        ? "Funds typically arrive in 1-3 business days."
+        : "Your internal transfer was processed successfully.";
+      doc.text(sub, 40, 150);
+
+      // Reference box
+      doc.setDrawColor(220, 220, 220);
+      doc.setFillColor(248, 247, 242);
+      doc.roundedRect(40, 175, W - 80, 60, 6, 6, "FD");
+      doc.setFontSize(9);
+      doc.setTextColor(120, 120, 120);
+      doc.text("REFERENCE ID", 56, 195);
+      doc.setFont("courier", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(20, 20, 20);
+      doc.text(receipt.reference, 56, 220);
+
+      // Detail table
+      const rows: [string, string][] = [
+        ["Amount", `$${receipt.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`],
+        ["Recipient", receipt.recipient],
+        ...(receipt.bank ? [["Bank", receipt.bank] as [string, string]] : []),
+        ...(receipt.accountMasked ? [["Account", receipt.accountMasked] as [string, string]] : []),
+        ["Type", receipt.kind === "external" ? "External (US bank / credit union)" : "Internal Resolva account"],
+        ["Status", receipt.kind === "external" ? "Pending" : "Completed"],
+        ["Date", now.toLocaleString()],
+      ];
+      let y = 270;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      rows.forEach(([k, v], i) => {
+        if (i % 2 === 0) {
+          doc.setFillColor(250, 250, 250);
+          doc.rect(40, y - 14, W - 80, 24, "F");
+        }
+        doc.setTextColor(110, 110, 110);
+        doc.text(k, 56, y);
+        doc.setTextColor(20, 20, 20);
+        doc.setFont("helvetica", "bold");
+        doc.text(String(v), W - 56, y, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        y += 24;
+      });
+
+      // Footer
+      doc.setDrawColor(220, 220, 220);
+      doc.line(40, y + 10, W - 40, y + 10);
+      doc.setFontSize(9);
+      doc.setTextColor(140, 140, 140);
+      doc.text(
+        "Keep this receipt for your records. For questions, contact Resolva Credix support.",
+        40,
+        y + 30,
+      );
+
+      doc.save(`Resolva-Receipt-${receipt.reference}.pdf`);
+    };
+
     return (
       <Shell title="Transfer submitted" subtitle="Keep this reference for your records" onClose={onClose}>
         <div className="space-y-5">
@@ -216,6 +299,13 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
           </dl>
 
           <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              type="button"
+              onClick={downloadPdf}
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-navy-deep hover:bg-navy text-white font-semibold py-2.5 rounded-lg transition"
+            >
+              <Download className="h-4 w-4" /> Download PDF
+            </button>
             <Link
               to="/dashboard"
               onClick={onClose}
@@ -223,13 +313,6 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
             >
               View transfer status <ArrowRight className="h-4 w-4" />
             </Link>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 inline-flex items-center justify-center bg-white border border-border text-navy-deep font-semibold py-2.5 rounded-lg hover:bg-cream/40 transition"
-            >
-              Done
-            </button>
           </div>
         </div>
       </Shell>
