@@ -32,6 +32,7 @@ import { Route as DashboardCardsRouteImport } from './routes/dashboard.cards'
 import { Route as DashboardBusinessRouteImport } from './routes/dashboard.business'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminLoansRouteImport } from './routes/admin.loans'
+import { Route as AdminKycRouteImport } from './routes/admin.kyc'
 import { Route as AdminGrantsRouteImport } from './routes/admin.grants'
 import { Route as AdminFundsRouteImport } from './routes/admin.funds'
 import { Route as AdminCardsRouteImport } from './routes/admin.cards'
@@ -152,6 +153,11 @@ const AdminLoansRoute = AdminLoansRouteImport.update({
   path: '/loans',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminKycRoute = AdminKycRouteImport.update({
+  id: '/kyc',
+  path: '/kyc',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminGrantsRoute = AdminGrantsRouteImport.update({
   id: '/grants',
   path: '/grants',
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/admin/cards': typeof AdminCardsRoute
   '/admin/funds': typeof AdminFundsRoute
   '/admin/grants': typeof AdminGrantsRoute
+  '/admin/kyc': typeof AdminKycRoute
   '/admin/loans': typeof AdminLoansRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard/business': typeof DashboardBusinessRoute
@@ -217,6 +224,7 @@ export interface FileRoutesByTo {
   '/admin/cards': typeof AdminCardsRoute
   '/admin/funds': typeof AdminFundsRoute
   '/admin/grants': typeof AdminGrantsRoute
+  '/admin/kyc': typeof AdminKycRoute
   '/admin/loans': typeof AdminLoansRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard/business': typeof DashboardBusinessRoute
@@ -247,6 +255,7 @@ export interface FileRoutesById {
   '/admin/cards': typeof AdminCardsRoute
   '/admin/funds': typeof AdminFundsRoute
   '/admin/grants': typeof AdminGrantsRoute
+  '/admin/kyc': typeof AdminKycRoute
   '/admin/loans': typeof AdminLoansRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard/business': typeof DashboardBusinessRoute
@@ -278,6 +287,7 @@ export interface FileRouteTypes {
     | '/admin/cards'
     | '/admin/funds'
     | '/admin/grants'
+    | '/admin/kyc'
     | '/admin/loans'
     | '/admin/users'
     | '/dashboard/business'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/admin/cards'
     | '/admin/funds'
     | '/admin/grants'
+    | '/admin/kyc'
     | '/admin/loans'
     | '/admin/users'
     | '/dashboard/business'
@@ -334,6 +345,7 @@ export interface FileRouteTypes {
     | '/admin/cards'
     | '/admin/funds'
     | '/admin/grants'
+    | '/admin/kyc'
     | '/admin/loans'
     | '/admin/users'
     | '/dashboard/business'
@@ -525,6 +537,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoansRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/kyc': {
+      id: '/admin/kyc'
+      path: '/kyc'
+      fullPath: '/admin/kyc'
+      preLoaderRoute: typeof AdminKycRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/grants': {
       id: '/admin/grants'
       path: '/grants'
@@ -561,6 +580,7 @@ interface AdminRouteChildren {
   AdminCardsRoute: typeof AdminCardsRoute
   AdminFundsRoute: typeof AdminFundsRoute
   AdminGrantsRoute: typeof AdminGrantsRoute
+  AdminKycRoute: typeof AdminKycRoute
   AdminLoansRoute: typeof AdminLoansRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -571,6 +591,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCardsRoute: AdminCardsRoute,
   AdminFundsRoute: AdminFundsRoute,
   AdminGrantsRoute: AdminGrantsRoute,
+  AdminKycRoute: AdminKycRoute,
   AdminLoansRoute: AdminLoansRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,

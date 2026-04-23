@@ -183,7 +183,7 @@ function Overview() {
         <div className="lg:col-span-2 bg-white border border-border rounded-2xl shadow-card">
           <div className="flex items-center justify-between px-6 py-4 border-b border-border">
             <h2 className="font-display text-lg font-bold text-navy-deep">Recent transactions</h2>
-            <button className="text-sm text-indigo font-semibold hover:underline">View all</button>
+            <Link to="/dashboard/personal" className="text-sm text-indigo font-semibold hover:underline">View all</Link>
           </div>
           {txs.length === 0 ? (
             <div className="py-14 text-center text-navy-light px-6">
