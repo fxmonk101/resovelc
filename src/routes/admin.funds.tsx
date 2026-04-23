@@ -1,8 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search, Equal, ShieldCheck, ShieldAlert, Loader2 } from "lucide-react";
+import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search, Equal, ShieldCheck, ShieldAlert, Loader2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin/funds")({
   component: AdminFunds,
@@ -35,6 +45,7 @@ function AdminFunds() {
   const [roleStatus, setRoleStatus] = useState<"checking" | "ok" | "denied" | "error">("checking");
   const [roleError, setRoleError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const loadUsers = async () => {
     const { data, error } = await supabase.rpc("admin_list_users");
@@ -279,7 +290,12 @@ function AdminFunds() {
                 </div>
                 <div className="mt-4 flex justify-end">
                   <button
-                    onClick={submit}
+                    onClick={() => {
+                      const amt = Number(amount);
+                      if (!amt || amt <= 0) return toast.error("Enter a positive amount");
+                      if (roleStatus !== "ok") return toast.error("Admin permissions required");
+                      setConfirmOpen(true);
+                    }}
                     disabled={submitting || roleStatus !== "ok"}
                     title={roleStatus !== "ok" ? "Admin permissions required" : undefined}
                     className="px-5 h-10 rounded-md bg-indigo text-white text-sm font-semibold hover:bg-indigo/90 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -332,6 +348,83 @@ function AdminFunds() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              Confirm transaction
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 pt-2 text-sm">
+                <div>Please review the details below before posting. This action will be logged.</div>
+                {selected && (
+                  <div className="rounded-md border border-border bg-muted/40 p-3 space-y-2">
+                    <div className="flex justify-between gap-3">
+                      <span className="text-navy-light">Member</span>
+                      <span className="font-medium text-navy-deep text-right">
+                        {selected.first_name} {selected.last_name}
+                        <div className="text-xs text-navy-light font-normal">{selected.email}</div>
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span className="text-navy-light">Target</span>
+                      <span className="font-medium text-navy-deep">
+                        {target === "balance"
+                          ? `Checking ••••${selected.account_number?.slice(-4)}`
+                          : (() => {
+                              const c = cards.find((x) => x.id === target);
+                              return c ? `${c.card_type} ••••${c.card_number.slice(-4)}` : "Card";
+                            })()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span className="text-navy-light">Action</span>
+                      <span
+                        className={`font-semibold ${
+                          mode === "credit"
+                            ? "text-emerald-700"
+                            : mode === "debit"
+                            ? "text-destructive"
+                            : "text-indigo"
+                        }`}
+                      >
+                        {mode === "credit" ? "Credit (+)" : mode === "debit" ? "Debit (−)" : "Set exact balance"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span className="text-navy-light">Amount</span>
+                      <span className="font-bold text-navy-deep">
+                        ${Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    {desc && (
+                      <div className="flex justify-between gap-3">
+                        <span className="text-navy-light">Memo</span>
+                        <span className="text-navy-deep text-right max-w-[60%] truncate">{desc}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submitting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={submitting}
+              onClick={async (e) => {
+                e.preventDefault();
+                await submit();
+                setConfirmOpen(false);
+              }}
+            >
+              {submitting ? "Posting…" : "Confirm & post"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
