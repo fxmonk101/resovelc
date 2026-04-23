@@ -93,7 +93,7 @@ function LoginPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
             <div>
               <label htmlFor="email" className="text-label text-navy">Email</label>
-              <input id="email" type="email" {...register("email")} className="mt-2 w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo transition" />
+              <input id="email" type="email" {...register("email")} className="mt-2 w-full rounded-lg border border-border bg-white text-navy-deep placeholder:text-slate-light px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo transition" />
               {errors.email && <p role="alert" className="text-xs text-error mt-1">{errors.email.message}</p>}
             </div>
 
@@ -103,7 +103,7 @@ function LoginPage() {
                 <Link to="/" className="text-xs text-indigo hover:underline">Forgot?</Link>
               </div>
               <div className="relative mt-2">
-                <input id="password" type={show ? "text" : "password"} {...register("password")} className="w-full rounded-lg border border-border bg-white px-4 py-3 pr-11 focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo transition" />
+                <input id="password" type={show ? "text" : "password"} {...register("password")} className="w-full rounded-lg border border-border bg-white text-navy-deep placeholder:text-slate-light px-4 py-3 pr-11 focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo transition" />
                 <button type="button" onClick={() => setShow((v) => !v)} className="absolute inset-y-0 right-3 grid place-items-center text-navy-light hover:text-navy-deep" aria-label="Toggle password">
                   {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
