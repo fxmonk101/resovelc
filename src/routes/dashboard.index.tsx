@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowDownLeft, ArrowUpRight, Briefcase, CreditCard, Eye, EyeOff,
   Gift, HandCoins, Plus, Send, ShieldCheck, Wallet, TrendingUp,
-  PiggyBank, FileText, Smartphone, Phone, MapPin, Calendar
+  PiggyBank, FileText, Smartphone, Phone, Calendar
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
