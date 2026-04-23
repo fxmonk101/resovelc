@@ -41,7 +41,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-const inputCls = "w-full px-3.5 py-2.5 rounded-lg border border-border bg-white text-navy-deep text-sm focus:outline-none focus:border-indigo focus:ring-2 focus:ring-indigo/20";
+const inputCls = "w-full px-3.5 py-2.5 rounded-lg border border-border bg-white text-navy-deep text-sm placeholder:text-navy-light/60 focus:outline-none focus:border-indigo focus:ring-2 focus:ring-indigo/20";
 
 function Status({ error, success }: { error?: string; success?: string }) {
   if (error) return <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2 text-sm text-destructive flex items-center gap-2"><AlertCircle className="h-4 w-4" />{error}</div>;
