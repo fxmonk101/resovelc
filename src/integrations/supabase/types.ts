@@ -476,8 +476,10 @@ export type Database = {
         Row: {
           account_number: string
           account_type: string
+          address_line: string | null
           avatar_url: string | null
           balance: number
+          city: string | null
           country: string | null
           created_at: string
           currency: string
@@ -486,16 +488,21 @@ export type Database = {
           is_verified: boolean
           last_name: string
           middle_name: string | null
+          notification_preferences: Json
           phone: string | null
+          state: string | null
           updated_at: string
           user_id: string
           username: string
+          zip: string | null
         }
         Insert: {
           account_number?: string
           account_type?: string
+          address_line?: string | null
           avatar_url?: string | null
           balance?: number
+          city?: string | null
           country?: string | null
           created_at?: string
           currency?: string
@@ -504,16 +511,21 @@ export type Database = {
           is_verified?: boolean
           last_name: string
           middle_name?: string | null
+          notification_preferences?: Json
           phone?: string | null
+          state?: string | null
           updated_at?: string
           user_id: string
           username: string
+          zip?: string | null
         }
         Update: {
           account_number?: string
           account_type?: string
+          address_line?: string | null
           avatar_url?: string | null
           balance?: number
+          city?: string | null
           country?: string | null
           created_at?: string
           currency?: string
@@ -522,10 +534,13 @@ export type Database = {
           is_verified?: boolean
           last_name?: string
           middle_name?: string | null
+          notification_preferences?: Json
           phone?: string | null
+          state?: string | null
           updated_at?: string
           user_id?: string
           username?: string
+          zip?: string | null
         }
         Relationships: []
       }
