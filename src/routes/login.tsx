@@ -87,14 +87,14 @@ function LoginPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
             <div>
-              <label htmlFor="identifier" className="text-label text-navy">Email or username</label>
+              <label htmlFor="identifier" className="text-sm font-semibold text-navy-deep">Email or username</label>
               <input id="identifier" type="text" autoComplete="username" placeholder="you@example.com or your username" {...register("identifier")} className="mt-2 w-full rounded-lg border border-border bg-white text-navy-deep placeholder:text-slate-light px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo transition" />
               {errors.identifier && <p role="alert" className="text-xs text-error mt-1">{errors.identifier.message}</p>}
             </div>
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="text-label text-navy">Password</label>
+                <label htmlFor="password" className="text-sm font-semibold text-navy-deep">Password</label>
                 <Link to="/" className="text-xs text-indigo hover:underline">Forgot?</Link>
               </div>
               <div className="relative mt-2">
