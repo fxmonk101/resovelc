@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Eye, EyeOff, ShieldCheck, Zap, Globe, Smartphone } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validators";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
@@ -18,13 +18,6 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
-const FEATURES = [
-  { icon: ShieldCheck, label: "Bank-grade 256-bit encryption" },
-  { icon: Zap, label: "Real-time transfers & alerts" },
-  { icon: Globe, label: "Worldwide ATM access" },
-  { icon: Smartphone, label: "Award-winning mobile app" },
-];
-
 function LoginPage() {
   const navigate = useNavigate();
   const [show, setShow] = useState(false);
@@ -36,12 +29,24 @@ function LoginPage() {
 
   const onSubmit = async (data: LoginInput) => {
     setAuthError(null);
+    let email = data.identifier.trim();
+    // If the identifier doesn't look like an email, treat it as a username and resolve to its email.
+    if (!email.includes("@")) {
+      const { data: resolved, error: lookupError } = await supabase.rpc("get_email_for_username", {
+        _username: email,
+      });
+      if (lookupError || !resolved) {
+        setAuthError("Incorrect username or password.");
+        return;
+      }
+      email = resolved as string;
+    }
     const { error } = await supabase.auth.signInWithPassword({
-      email: data.email,
+      email,
       password: data.password,
     });
     if (error) {
-      setAuthError(error.message === "Invalid login credentials" ? "Incorrect email or password." : error.message);
+      setAuthError(error.message === "Invalid login credentials" ? "Incorrect email/username or password." : error.message);
       return;
     }
     navigate({ to: "/dashboard" });
@@ -62,16 +67,6 @@ function LoginPage() {
             Welcome back to your money.
           </h2>
           <p className="mt-4 text-white/70 max-w-sm">Sign in to manage accounts, transfers, loans, grants, and credit cards — all in one place.</p>
-          <ul className="mt-10 space-y-4">
-            {FEATURES.map((f) => (
-              <li key={f.label} className="flex items-center gap-3 text-white/85">
-                <span className="grid h-9 w-9 place-items-center rounded-lg bg-white/10 text-indigo-light">
-                  <f.icon className="h-4 w-4" />
-                </span>
-                <span className="text-sm">{f.label}</span>
-              </li>
-            ))}
-          </ul>
         </div>
 
         <div className="relative bg-white/10 backdrop-blur rounded-2xl p-5 border border-white/10 max-w-xs">
@@ -92,9 +87,9 @@ function LoginPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
             <div>
-              <label htmlFor="email" className="text-label text-navy">Email</label>
-              <input id="email" type="email" {...register("email")} className="mt-2 w-full rounded-lg border border-border bg-white text-navy-deep placeholder:text-slate-light px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo transition" />
-              {errors.email && <p role="alert" className="text-xs text-error mt-1">{errors.email.message}</p>}
+              <label htmlFor="identifier" className="text-label text-navy">Email or username</label>
+              <input id="identifier" type="text" autoComplete="username" placeholder="you@example.com or your username" {...register("identifier")} className="mt-2 w-full rounded-lg border border-border bg-white text-navy-deep placeholder:text-slate-light px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo transition" />
+              {errors.identifier && <p role="alert" className="text-xs text-error mt-1">{errors.identifier.message}</p>}
             </div>
 
             <div>
@@ -103,7 +98,7 @@ function LoginPage() {
                 <Link to="/" className="text-xs text-indigo hover:underline">Forgot?</Link>
               </div>
               <div className="relative mt-2">
-                <input id="password" type={show ? "text" : "password"} {...register("password")} className="w-full rounded-lg border border-border bg-white text-navy-deep placeholder:text-slate-light px-4 py-3 pr-11 focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo transition" />
+                <input id="password" type={show ? "text" : "password"} autoComplete="current-password" placeholder="Enter your password" {...register("password")} className="w-full rounded-lg border border-border bg-white text-navy-deep placeholder:text-slate-light px-4 py-3 pr-11 focus:outline-none focus:ring-2 focus:ring-indigo/30 focus:border-indigo transition" />
                 <button type="button" onClick={() => setShow((v) => !v)} className="absolute inset-y-0 right-3 grid place-items-center text-navy-light hover:text-navy-deep" aria-label="Toggle password">
                   {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
