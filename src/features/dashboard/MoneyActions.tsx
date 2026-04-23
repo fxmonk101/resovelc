@@ -112,6 +112,10 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
     accountMasked?: string;
     kind: "internal" | "external";
   }>(null);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [emailTo, setEmailTo] = useState("");
+  const [emailBusy, setEmailBusy] = useState(false);
+  const [emailMsg, setEmailMsg] = useState<{ ok?: string; err?: string }>({});
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
