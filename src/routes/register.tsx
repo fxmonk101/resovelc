@@ -26,7 +26,8 @@ const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD", "JPY", "CHF", "CNY", "INR
 const ACCOUNT_TYPES = ["Checking Account", "Savings Account", "Fixed Deposit", "Current Account", "Business Account", "Investment Account"];
 
 const DIAL_CODES: { code: string; country: string; flag: string }[] = [
-  { code: "+1", country: "United States / Canada", flag: "🇺🇸" },
+  { code: "+1", country: "United States", flag: "🇺🇸" },
+  { code: "+1", country: "Canada", flag: "🇨🇦" },
   { code: "+44", country: "United Kingdom", flag: "🇬🇧" },
   { code: "+61", country: "Australia", flag: "🇦🇺" },
   { code: "+49", country: "Germany", flag: "🇩🇪" },
