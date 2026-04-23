@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Phone, MapPin, Clock, MapPinned, CheckCircle2 } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, MapPinned, CheckCircle2, MessageSquare } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { contactSchema, type ContactInput } from "@/lib/validators";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,6 +53,20 @@ function ContactPage() {
         <div className="container-page">
           <h1 className="font-display text-5xl md:text-6xl font-bold">Get in touch</h1>
           <p className="mt-4 text-white/70 max-w-xl">We typically respond within a few hours.</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a
+              href={`tel:${BRAND.phone.replace(/[^0-9+]/g, "")}`}
+              className="inline-flex items-center gap-2 bg-white text-slate-deep font-semibold px-5 py-2.5 rounded-lg hover:bg-white/90 transition"
+            >
+              <Phone className="h-4 w-4" /> Call {BRAND.phone}
+            </a>
+            <a
+              href={`sms:${BRAND.phone.replace(/[^0-9+]/g, "")}?&body=${encodeURIComponent("Hi Resolva Credix, I need help with ")}`}
+              className="inline-flex items-center gap-2 bg-terra hover:bg-terra-dark text-white font-semibold px-5 py-2.5 rounded-lg transition"
+            >
+              <MessageSquare className="h-4 w-4" /> Text us
+            </a>
+          </div>
         </div>
       </section>
 
