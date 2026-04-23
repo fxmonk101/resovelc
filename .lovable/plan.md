@@ -1,35 +1,57 @@
+## Fix: Allow external bank transfers with any account number length
 
-
-## Phone Number Field Redesign — Sign Up Step 2
-
-Restructure the phone input on the registration page so the country code selector and the local number field stack vertically, look polished on all screen sizes, and treat US and Canada as distinct entries.
+A customer reported they cannot transfer funds to their credit union account because the field implies a strict 10-digit limit and the flow only supports internal member-to-member transfers. We will rework the **Transfer money** modal so users can send to either an internal member account or an external US bank/credit union, with no artificial digit limit.
 
 ### Changes
 
-**1. Split US and Canada in `DIAL_CODES`** (`src/routes/register.tsx`)
-- Replace the combined `{ code: "+1", country: "United States / Canada", flag: "🇺🇸" }` with two entries:
-  - `{ code: "+1", country: "United States", flag: "🇺🇸" }`
-  - `{ code: "+1", country: "Canada", flag: "🇨🇦" }`
-- Both share dial code `+1` but show different flags/labels in the dropdown so users can pick their actual country.
+**1. `src/features/dashboard/MoneyActions.tsx` — `TransferForm**`
 
-**2. Stack the layout vertically** (`Step2` component)
-- Replace the current `<div className="flex gap-2">` wrapper with a vertical stack (`space-y-2`).
-- Top row: full-width country code `<select>` showing flag + country name + dial code (e.g. `🇺🇸 United States (+1)`), so the long labels are no longer cramped.
-- Bottom row: full-width number `<input>` with placeholder `2132469750`.
-- Both controls become full-width (`w-full`), eliminating the overflow/cramping at small viewports (the user is on 850px wide).
+Replace the single "Recipient account number" field with a transfer-type toggle plus contextual fields:
 
-**3. Polish the visual presentation**
-- Add a small helper label above the selector: "Country code".
-- Keep the live preview line `Final format: +12132469750` underneath the number field so users see the resulting E.164 string.
-- Ensure the selector uses the same `inputCls` styling (white bg, navy-deep text) for consistency with the visibility fix already in place.
+- Add a **Transfer to** selector: `Internal Resolva account` (default) | `External US bank / credit union`.
+- **Internal mode** (current behaviour, polished): one field "Member account number", placeholder "Enter recipient account number", `inputMode="numeric"`, `maxLength={20}` (was effectively 10 by hint). Calls existing `user_transfer_funds` RPC.
+- **External mode** (new): adds the following fields, all required:
+  - Recipient full name
+  - Bank / credit union name
+  - Routing number (ABA) — `inputMode="numeric"`, `maxLength={9}`, `pattern="\d{9}"`
+  - Account number — `inputMode="numeric"`, `maxLength={20}` (supports credit-union numbers longer than 10 digits)
+  - Account type: Checking | Savings
+- Amount and memo fields remain.
+- On submit in external mode, call a new RPC `user_submit_domestic_transfer` (see below). On success, show "Transfer submitted. Funds typically arrive in 1–3 business days."
+- Add explicit `text-navy-deep bg-white placeholder:text-navy-light/60` to all inputs/selects so admin-style visibility issue does not recur here.
 
-**4. Preserve existing behavior**
-- `updatePhone()` logic, hidden `phone` register field, validation, and the `+1` dial code default remain unchanged.
-- Initial-load matching logic still works because both new US/Canada entries share `+1` (the first match wins on prefix, which is acceptable since only the dial code is persisted).
+**2. Database — new RPC + table for external (domestic) transfers**
 
-### Files Edited
-- `src/routes/register.tsx`
+Migration creates:
+
+- `public.domestic_transfers` table:
+  - `id uuid pk default gen_random_uuid()`
+  - `user_id uuid not null` (references `auth.users` logically; not FK)
+  - `reference text not null` (auto-generated like `DT-XXXXXX`)
+  - `recipient_name text not null`
+  - `bank_name text not null`
+  - `routing_number text not null` (validated 9 digits)
+  - `account_number text not null` (1–20 chars)
+  - `account_type text not null check in ('checking','savings')`
+  - `amount numeric(14,2) not null check (amount > 0)`
+  - `memo text`
+  - `status text not null default 'pending'`
+  - `created_at timestamptz default now()`
+- RLS enabled. Policies:
+  - Users can `SELECT` their own rows (`auth.uid() = user_id`)
+  - Users can `INSERT` only via the RPC (no direct insert policy)
+  - Admins (via existing `has_role`) can select/update all
+- RPC `public.user_submit_domestic_transfer(_recipient_name, _bank_name, _routing_number, _account_number, _account_type, _amount, _memo)` — `security definer`, validates routing length = 9, account 5–20 digits, debits balance via existing pattern, inserts row, returns json.
+
+**3. Recent transfers visibility (light touch)**
+
+The dashboard transfer modal stays focused on submission. The user's existing transactions list on the overview already shows debits. No new page is added in this change to keep scope minimal; admins can manage status from the existing admin tools (a follow-up task can add a dedicated `dashboard/transfers` view if desired).
+
+### Files Edited / Created
+
+- `src/features/dashboard/MoneyActions.tsx` (edit `TransferForm`)
+- `supabase/migrations/<new>.sql` (table + RLS + RPC)
 
 ### Result
-A clean, mobile-friendly stacked layout: country selector on top (full width, readable labels), number input directly underneath (full width, large tap target), with US and Canada selectable independently.
 
+Customers can transfer funds to an external US bank or credit union with account numbers up to 20 digits, eliminating the "larger than 10 digits" blocker. Internal member transfers continue to work unchanged. fix any other related issues that may arise
