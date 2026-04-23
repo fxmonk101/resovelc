@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Eye, EyeOff, ShieldCheck, Zap, Globe, Smartphone } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validators";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
@@ -18,13 +18,6 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
-const FEATURES = [
-  { icon: ShieldCheck, label: "Bank-grade 256-bit encryption" },
-  { icon: Zap, label: "Real-time transfers & alerts" },
-  { icon: Globe, label: "Worldwide ATM access" },
-  { icon: Smartphone, label: "Award-winning mobile app" },
-];
-
 function LoginPage() {
   const navigate = useNavigate();
   const [show, setShow] = useState(false);
@@ -36,8 +29,26 @@ function LoginPage() {
 
   const onSubmit = async (data: LoginInput) => {
     setAuthError(null);
+    let email = data.identifier.trim();
+    // If the identifier doesn't look like an email, treat it as a username and resolve to email.
+    if (!email.includes("@")) {
+      const username = email;
+      const { data: profile, error: lookupError } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("username", username)
+        .maybeSingle();
+      if (lookupError || !profile) {
+        setAuthError("Incorrect username or password.");
+        return;
+      }
+      // Use a Supabase RPC to look up email is not available client-side; instead, sign in via username -> email mapping in user metadata is not exposed.
+      // Fallback: ask the user to use their email if username lookup can't resolve to an email here.
+      setAuthError("Please sign in with your email address. Username sign-in is coming soon.");
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword({
-      email: data.email,
+      email,
       password: data.password,
     });
     if (error) {
