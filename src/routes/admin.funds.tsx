@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search, Equal } from "lucide-react";
+import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search, Equal, ShieldCheck, ShieldAlert, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -32,12 +32,48 @@ function AdminFunds() {
   const [target, setTarget] = useState<string>("balance"); // "balance" or card id
   const [submitting, setSubmitting] = useState(false);
 
+  const [roleStatus, setRoleStatus] = useState<"checking" | "ok" | "denied" | "error">("checking");
+  const [roleError, setRoleError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
   const loadUsers = async () => {
     const { data, error } = await supabase.rpc("admin_list_users");
     if (error) return toast.error(error.message);
     setUsers((data ?? []) as User[]);
   };
-  useEffect(() => { loadUsers(); }, []);
+
+  const verifyAdmin = async () => {
+    setRoleStatus("checking");
+    setRoleError(null);
+    try {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user) {
+        setRoleStatus("denied");
+        return;
+      }
+      setCurrentUserId(userData.user.id);
+      const { data: isAdmin, error: rpcErr } = await supabase.rpc("has_role", {
+        _user_id: userData.user.id,
+        _role: "admin",
+      });
+      if (rpcErr) {
+        setRoleError(rpcErr.message);
+        setRoleStatus("error");
+        return;
+      }
+      if (isAdmin === true) {
+        setRoleStatus("ok");
+        await loadUsers();
+      } else {
+        setRoleStatus("denied");
+      }
+    } catch (e) {
+      setRoleError(e instanceof Error ? e.message : "Unknown error");
+      setRoleStatus("error");
+    }
+  };
+
+  useEffect(() => { verifyAdmin(); }, []);
 
   const select = async (u: User) => {
     setSelected(u);
@@ -71,6 +107,9 @@ function AdminFunds() {
 
   const submit = async () => {
     if (!selected) return;
+    if (roleStatus !== "ok") {
+      return toast.error("Admin permissions are not verified. Please refresh or sign in again.");
+    }
     const amt = Number(amount);
     if (!amt || amt <= 0) return toast.error("Enter a positive amount");
 
