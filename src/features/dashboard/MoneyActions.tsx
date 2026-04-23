@@ -103,7 +103,6 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
   const [accountType, setAccountType] = useState<"checking" | "savings">("checking");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const [ok, setOk] = useState("");
   const [receipt, setReceipt] = useState<null | {
     reference: string;
     amount: number;
@@ -115,7 +114,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true); setErr(""); setOk("");
+    setBusy(true); setErr("");
     if (kind === "internal") {
       const { error } = await supabase.rpc("user_transfer_funds", {
         _to_account: to.trim(),
@@ -290,7 +289,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
         <Field label="Memo (optional)">
           <input value={memo} onChange={(e) => setMemo(e.target.value)} className={inputCls} placeholder="What's this for?" maxLength={120} />
         </Field>
-        <Status error={err} success={ok} />
+        <Status error={err} />
         <button disabled={busy} className="w-full bg-indigo hover:bg-indigo-dark text-white font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-60">
           {busy && <Loader2 className="h-4 w-4 animate-spin" />} {kind === "internal" ? "Send transfer" : "Submit external transfer"}
         </button>
