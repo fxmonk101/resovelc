@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, Loader2, AlertCircle, CheckCircle2, ArrowDownLeft, ArrowUpRight, Calendar, Hash, Tag, Copy, Pencil } from "lucide-react";
+import { X, Loader2, AlertCircle, CheckCircle2, ArrowDownLeft, ArrowUpRight, Calendar, Hash, Tag, Copy, Pencil, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EditDomesticModal } from "./PendingTransfers";
 
@@ -39,6 +39,7 @@ export function TransactionDetailsModal({
   const isPending = tx.status === "pending";
   const transferReference = extractTransferReference(tx);
   const canManageTransfer = Boolean(linked.id) && !msg.ok;
+  const isDomesticTransfer = linked.kind === "domestic" && Boolean(linked.record);
 
   useEffect(() => {
     let alive = true;
@@ -72,6 +73,8 @@ export function TransactionDetailsModal({
     setConfirming(false);
     onChange?.();
   };
+
+  const cancelLabel = linked.kind === "intl" ? "Cancel wire" : "Cancel transfer";
 
   const copy = (val: string) => {
     navigator.clipboard?.writeText(val).catch(() => {});
