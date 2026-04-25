@@ -392,7 +392,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
 
   return (
     <Shell title="Transfer money" subtitle="Send funds to another member account" onClose={onClose}>
-      <form onSubmit={submit} className="space-y-4">
+      <form onSubmit={submit} className="space-y-3 sm:space-y-4">
         <Field label="Transfer to">
           <select value={kind} onChange={(e) => setKind(e.target.value as "internal" | "external")} className={inputCls}>
             <option value="internal">Internal Resolva account</option>
@@ -420,7 +420,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
             <Field label="Bank or credit union name">
               <input required value={bankName} onChange={(e) => setBankName(e.target.value)} maxLength={120} className={inputCls} placeholder="e.g. Navy Federal Credit Union" />
             </Field>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <Field label="Routing number (ABA)">
                 <input required value={routing} onChange={(e) => setRouting(e.target.value.replace(/\D/g, ""))} inputMode="numeric" maxLength={9} pattern="\d{9}" className={inputCls} placeholder="9 digits" />
               </Field>
