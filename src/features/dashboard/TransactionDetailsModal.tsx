@@ -133,36 +133,37 @@ export function TransactionDetailsModal({
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2 p-4 border-t border-border shrink-0">
-          <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-lg border border-border text-navy-deep text-sm font-semibold">
-            Close
+        {confirming && canManageTransfer && (
+          <div className="mx-4 mb-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+              <div>
+                <p className="text-sm font-semibold text-destructive">Cancel this pending transaction?</p>
+                <p className="mt-0.5 text-xs text-navy-light">This will cancel the pending transfer and cannot be undone.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-4 border-t border-border shrink-0">
+          <button type="button" onClick={confirming ? () => setConfirming(false) : onClose} className="w-full py-2.5 rounded-lg border border-border text-navy-deep text-sm font-semibold">
+            {confirming ? "Keep transaction" : "Close"}
           </button>
+          {canManageTransfer && isDomesticTransfer && !confirming && (
+            <button
+              type="button" onClick={() => setEditing(true)} disabled={busy}
+              className="w-full py-2.5 rounded-lg bg-indigo/10 hover:bg-indigo/20 border border-indigo/30 text-indigo text-sm font-semibold inline-flex items-center justify-center gap-1.5 disabled:opacity-60"
+            >
+              <Pencil className="h-3.5 w-3.5" /> Edit
+            </button>
+          )}
           {canManageTransfer && (
-            <>
-            {linked.kind === "domestic" && !confirming && (
-              <button
-                type="button" onClick={() => setEditing(true)} disabled={busy}
-                className="flex-1 py-2.5 rounded-lg bg-indigo/10 hover:bg-indigo/20 border border-indigo/30 text-indigo text-sm font-semibold inline-flex items-center justify-center gap-1.5 disabled:opacity-60"
-              >
-                <Pencil className="h-3.5 w-3.5" /> Edit
-              </button>
-            )}
-            {confirming ? (
-              <button
-                type="button" onClick={cancel} disabled={busy}
-                className="flex-1 py-2.5 rounded-lg bg-destructive hover:bg-destructive/90 text-white text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
-              >
-                {busy && <Loader2 className="h-4 w-4 animate-spin" />} Confirm cancel
-              </button>
-            ) : (
-              <button
-                type="button" onClick={() => setConfirming(true)} disabled={busy}
-                className="flex-1 py-2.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 text-destructive text-sm font-semibold disabled:opacity-60"
-              >
-                Cancel transfer
-              </button>
-            )}
-            </>
+            <button
+              type="button" onClick={confirming ? cancel : () => setConfirming(true)} disabled={busy}
+              className={`w-full py-2.5 rounded-lg text-sm font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-60 ${confirming ? "bg-destructive hover:bg-destructive/90 text-white" : "bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 text-destructive"}`}
+            >
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />} {confirming ? "Yes, cancel" : cancelLabel}
+            </button>
           )}
         </div>
         {editing && linked.kind === "domestic" && linked.record && (
