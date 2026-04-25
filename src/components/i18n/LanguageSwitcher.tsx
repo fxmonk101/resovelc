@@ -14,27 +14,27 @@ import { Globe, ChevronDown } from "lucide-react";
  * branded button + menu and toggles Google Translate's underlying cookie.
  */
 
-const LANGS: { code: string; label: string }[] = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Español" },
-  { code: "fr", label: "Français" },
-  { code: "de", label: "Deutsch" },
-  { code: "pt", label: "Português" },
-  { code: "it", label: "Italiano" },
-  { code: "nl", label: "Nederlands" },
-  { code: "zh-CN", label: "中文 (简体)" },
-  { code: "zh-TW", label: "中文 (繁體)" },
-  { code: "ja", label: "日本語" },
-  { code: "ko", label: "한국어" },
-  { code: "ar", label: "العربية" },
-  { code: "hi", label: "हिन्दी" },
-  { code: "ru", label: "Русский" },
-  { code: "tr", label: "Türkçe" },
-  { code: "pl", label: "Polski" },
-  { code: "vi", label: "Tiếng Việt" },
-  { code: "th", label: "ไทย" },
-  { code: "id", label: "Bahasa Indonesia" },
-  { code: "sw", label: "Kiswahili" },
+const LANGS: { code: string; label: string; flag: string }[] = [
+  { code: "en", label: "English", flag: "🇺🇸" },
+  { code: "es", label: "Español", flag: "🇪🇸" },
+  { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪" },
+  { code: "pt", label: "Português", flag: "🇵🇹" },
+  { code: "it", label: "Italiano", flag: "🇮🇹" },
+  { code: "nl", label: "Nederlands", flag: "🇳🇱" },
+  { code: "zh-CN", label: "中文 (简体)", flag: "🇨🇳" },
+  { code: "zh-TW", label: "中文 (繁體)", flag: "🇹🇼" },
+  { code: "ja", label: "日本語", flag: "🇯🇵" },
+  { code: "ko", label: "한국어", flag: "🇰🇷" },
+  { code: "ar", label: "العربية", flag: "🇸🇦" },
+  { code: "hi", label: "हिन्दी", flag: "🇮🇳" },
+  { code: "ru", label: "Русский", flag: "🇷🇺" },
+  { code: "tr", label: "Türkçe", flag: "🇹🇷" },
+  { code: "pl", label: "Polski", flag: "🇵🇱" },
+  { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
+  { code: "th", label: "ไทย", flag: "🇹🇭" },
+  { code: "id", label: "Bahasa Indonesia", flag: "🇮🇩" },
+  { code: "sw", label: "Kiswahili", flag: "🇰🇪" },
 ];
 
 const COOKIE_NAME = "googtrans";
@@ -172,7 +172,7 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
     }
   };
 
-  const label = LANGS.find((l) => l.code === current)?.label ?? "English";
+  const currentLang = LANGS.find((l) => l.code === current) ?? LANGS[0];
 
   return (
     <>
@@ -198,8 +198,11 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
           }
           aria-label="Change language"
         >
-          <Globe className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
-          <span className="hidden sm:inline">{label}</span>
+          <span className={compact ? "text-base leading-none" : "text-lg leading-none"} aria-hidden="true">
+            {currentLang.flag}
+          </span>
+          <Globe className={`${compact ? "h-3.5 w-3.5" : "h-4 w-4"} hidden sm:inline-block`} />
+          <span className="hidden sm:inline">{currentLang.label}</span>
           <ChevronDown className={compact ? "h-3 w-3" : "h-3.5 w-3.5"} />
         </button>
         {open && (
@@ -209,11 +212,12 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
                 key={l.code}
                 type="button"
                 onClick={() => choose(l.code)}
-                className={`block w-full text-left px-3 py-1.5 text-sm hover:bg-ivory transition ${
+                className={`flex items-center gap-2.5 w-full text-left px-3 py-1.5 text-sm hover:bg-ivory transition ${
                   l.code === current ? "text-indigo font-semibold bg-ivory/60" : "text-navy-deep"
                 }`}
               >
-                {l.label}
+                <span className="text-base leading-none" aria-hidden="true">{l.flag}</span>
+                <span>{l.label}</span>
               </button>
             ))}
           </div>
