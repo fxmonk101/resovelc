@@ -15,6 +15,12 @@ export interface TxRow {
 
 type LinkedKind = "domestic" | "intl" | null;
 
+function extractTransferReference(tx: TxRow) {
+  const direct = tx.reference?.trim();
+  if (direct) return direct;
+  return tx.description.match(/\b(?:DT|INT)-[A-Z0-9]+\b/i)?.[0]?.toUpperCase() ?? null;
+}
+
 /**
  * Shows full details for a transaction. If the transaction is still pending
  * and matches a domestic/international transfer by reference, the user can
@@ -31,17 +37,21 @@ export function TransactionDetailsModal({
   const [editing, setEditing] = useState(false);
   const credit = tx.type === "credit" || tx.type === "admin_credit" || Number(tx.amount) > 0;
   const isPending = tx.status === "pending";
+  const transferReference = extractTransferReference(tx);
+  const canManageTransfer = Boolean(linked.id) && !msg.ok;
 
   useEffect(() => {
     let alive = true;
     (async () => {
-      if (!isPending || !tx.reference) {
+      setLinked({ kind: null, id: null });
+      setResolving(true);
+      if (!transferReference) {
         setResolving(false);
         return;
       }
       const [{ data: dt }, { data: it }] = await Promise.all([
-        supabase.from("domestic_transfers").select("id,reference,recipient_name,bank_name,routing_number,account_number,account_type,amount,memo,status,created_at").eq("reference", tx.reference).maybeSingle(),
-        supabase.from("international_transfers").select("id,status").eq("reference", tx.reference).maybeSingle(),
+        supabase.from("domestic_transfers").select("id,reference,recipient_name,bank_name,routing_number,account_number,account_type,amount,memo,status,created_at").eq("reference", transferReference).maybeSingle(),
+        supabase.from("international_transfers").select("id,status").eq("reference", transferReference).maybeSingle(),
       ]);
       if (!alive) return;
       if (dt && dt.status === "pending") setLinked({ kind: "domestic", id: dt.id, record: dt });
@@ -49,7 +59,7 @@ export function TransactionDetailsModal({
       setResolving(false);
     })();
     return () => { alive = false; };
-  }, [tx.reference, isPending]);
+  }, [transferReference]);
 
   const cancel = async () => {
     if (!linked.id) return;
