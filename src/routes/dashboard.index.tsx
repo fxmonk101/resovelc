@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MoneyActions } from "@/features/dashboard/MoneyActions";
 import { KycCard } from "@/features/dashboard/KycCard";
 import { PendingTransfers } from "@/features/dashboard/PendingTransfers";
+import { TransactionDetailsModal, type TxRow } from "@/features/dashboard/TransactionDetailsModal";
 import { BRAND } from "@/lib/constants";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -32,6 +33,7 @@ interface Tx {
   type: string;
   status: string;
   created_at: string;
+  reference?: string;
 }
 
 function Overview() {
@@ -41,6 +43,7 @@ function Overview() {
   const [txs, setTxs] = useState<Tx[]>([]);
   const [hide, setHide] = useState(false);
   const [action, setAction] = useState<"deposit" | "transfer" | "paybill" | null>(null);
+  const [selectedTx, setSelectedTx] = useState<TxRow | null>(null);
 
   const loadAll = useCallback(async () => {
     if (!user) return;
@@ -49,7 +52,7 @@ function Overview() {
         supabase.from("loan_applications").select("*", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("grant_applications").select("*", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("credit_cards").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("transactions").select("id,description,amount,type,status,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+        supabase.from("transactions").select("id,description,amount,type,status,created_at,reference").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
       ]);
       setProfile(p as Profile | null);
       setCounts({ loans: lc ?? 0, grants: gc ?? 0, cards: cc ?? 0 });
@@ -199,7 +202,12 @@ function Overview() {
               {txs.map((t) => {
                 const credit = t.type === "credit" || Number(t.amount) > 0;
                 return (
-                  <li key={t.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-ivory transition">
+                  <li key={t.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTx(t as TxRow)}
+                      className="w-full flex items-center justify-between px-6 py-3.5 hover:bg-ivory transition text-left"
+                    >
                     <div className="flex items-center gap-3">
                       <span className={`grid h-9 w-9 place-items-center rounded-full ${credit ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
                         {credit ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
@@ -217,6 +225,7 @@ function Overview() {
                     <div className={`font-mono font-semibold text-sm ${credit ? "text-success" : "text-navy-deep"}`}>
                       {credit ? "+" : "−"}{fmt(Math.abs(Number(t.amount)))}
                     </div>
+                    </button>
                   </li>
                 );
               })}
@@ -266,6 +275,13 @@ function Overview() {
       </div>
 
       <MoneyActions mode={action} onClose={() => setAction(null)} onDone={loadAll} />
+      {selectedTx && (
+        <TransactionDetailsModal
+          tx={selectedTx}
+          onClose={() => setSelectedTx(null)}
+          onChange={() => { setSelectedTx(null); loadAll(); }}
+        />
+      )}
     </div>
   );
 }
