@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
 import { MoneyActions } from "@/features/dashboard/MoneyActions";
 import { KycCard } from "@/features/dashboard/KycCard";
+import { PendingTransfers } from "@/features/dashboard/PendingTransfers";
 import { BRAND } from "@/lib/constants";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -69,6 +70,8 @@ function Overview() {
   return (
     <div className="p-4 lg:p-8 space-y-6 max-w-7xl mx-auto">
       <KycCard />
+
+      {user && <PendingTransfers userId={user.id} onChange={loadAll} />}
 
       {/* Top: Balance + spending chart */}
       <div className="grid lg:grid-cols-3 gap-5">

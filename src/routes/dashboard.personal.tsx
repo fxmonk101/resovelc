@@ -52,9 +52,12 @@ function PersonalDash() {
         <h2 className="font-display text-xl font-bold text-navy-deep mb-4">Account services</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {["Order checks", "Direct deposit", "Mobile deposit", "Wire transfer", "Set up alerts", "Statements", "Tax documents", "Card controls"].map((s) => (
-            <button key={s} className="text-left bg-ivory hover:bg-ivory-dark border border-border rounded-lg p-4 text-sm font-medium text-navy-deep transition">
+            <button
+              key={s}
+              className="text-left bg-white hover:bg-ivory border border-border rounded-lg p-4 text-sm font-semibold text-navy-deep transition shadow-sm"
+            >
               <Wallet className="h-4 w-4 text-indigo mb-2" />
-              {s}
+              <span className="text-navy-deep">{s}</span>
             </button>
           ))}
         </div>

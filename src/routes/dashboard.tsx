@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
 import { UserMenu } from "@/features/dashboard/UserMenu";
 import { NotificationBell } from "@/features/dashboard/NotificationBell";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import logo from "@/assets/logo-credix.png";
 
 export const Route = createFileRoute("/dashboard")({
@@ -109,6 +110,7 @@ function DashboardLayout() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher compact />
             <NotificationBell userId={user.id} />
             <UserMenu
               userId={user.id}

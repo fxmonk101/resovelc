@@ -22,14 +22,14 @@ export function MoneyActions({ mode, onClose, onDone }: { mode: Mode; onClose: (
 function Shell({ title, subtitle, onClose, children }: { title: string; subtitle: string; onClose: () => void; children: ReactNode }) {
   return (
     <>
-      <div className="flex items-start justify-between p-6 border-b border-border shrink-0">
+      <div className="flex items-start justify-between p-4 sm:p-6 border-b border-border shrink-0">
         <div>
-          <h2 className="font-display text-xl font-bold text-navy-deep">{title}</h2>
-          <p className="text-sm text-navy-light mt-1">{subtitle}</p>
+          <h2 className="font-display text-lg sm:text-xl font-bold text-navy-deep">{title}</h2>
+          <p className="text-xs sm:text-sm text-navy-light mt-0.5 sm:mt-1">{subtitle}</p>
         </div>
         <button onClick={onClose} className="text-navy-light hover:text-navy-deep" aria-label="Close"><X className="h-5 w-5" /></button>
       </div>
-      <div className="p-6 overflow-y-auto flex-1">{children}</div>
+      <div className="p-4 sm:p-6 overflow-y-auto flex-1">{children}</div>
     </>
   );
 }
@@ -38,12 +38,12 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
       <span className="text-xs font-semibold text-navy-deep uppercase tracking-wide">{label}</span>
-      <div className="mt-1.5">{children}</div>
+      <div className="mt-1">{children}</div>
     </label>
   );
 }
 
-const inputCls = "w-full px-3.5 py-2.5 rounded-lg border border-border bg-white text-navy-deep text-sm placeholder:text-navy-light/60 focus:outline-none focus:border-indigo focus:ring-2 focus:ring-indigo/20";
+const inputCls = "w-full px-3 py-2 sm:py-2.5 rounded-lg border border-border bg-white text-navy-deep text-sm placeholder:text-navy-light/60 focus:outline-none focus:border-indigo focus:ring-2 focus:ring-indigo/20";
 
 function Status({ error, success }: { error?: string; success?: string }) {
   if (error) return <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2 text-sm text-destructive flex items-center gap-2"><AlertCircle className="h-4 w-4" />{error}</div>;
@@ -392,7 +392,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
 
   return (
     <Shell title="Transfer money" subtitle="Send funds to another member account" onClose={onClose}>
-      <form onSubmit={submit} className="space-y-4">
+      <form onSubmit={submit} className="space-y-3 sm:space-y-4">
         <Field label="Transfer to">
           <select value={kind} onChange={(e) => setKind(e.target.value as "internal" | "external")} className={inputCls}>
             <option value="internal">Internal Resolva account</option>
@@ -420,7 +420,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
             <Field label="Bank or credit union name">
               <input required value={bankName} onChange={(e) => setBankName(e.target.value)} maxLength={120} className={inputCls} placeholder="e.g. Navy Federal Credit Union" />
             </Field>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <Field label="Routing number (ABA)">
                 <input required value={routing} onChange={(e) => setRouting(e.target.value.replace(/\D/g, ""))} inputMode="numeric" maxLength={9} pattern="\d{9}" className={inputCls} placeholder="9 digits" />
               </Field>

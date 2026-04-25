@@ -3,6 +3,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { NAV_LINKS, SERVICE_LINKS, BRAND } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo-credix.png";
 
@@ -85,6 +86,7 @@ export function Navbar() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          <LanguageSwitcher />
           <ThemeToggle />
           <Link to="/login" className="text-sm font-medium text-navy-deep hover:text-indigo px-4 py-2 rounded-lg border border-border hover:bg-ivory transition">
             Sign in
@@ -95,6 +97,7 @@ export function Navbar() {
         </div>
 
         <div className="lg:hidden flex items-center gap-2">
+          <LanguageSwitcher compact />
           <ThemeToggle />
           <button className="text-navy-deep p-2" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}

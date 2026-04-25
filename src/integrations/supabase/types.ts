@@ -713,6 +713,27 @@ export type Database = {
         Returns: boolean
       }
       is_username_available: { Args: { _username: string }; Returns: boolean }
+      user_cancel_domestic_transfer: {
+        Args: { _id: string }
+        Returns: undefined
+      }
+      user_cancel_international_transfer: {
+        Args: { _id: string }
+        Returns: undefined
+      }
+      user_edit_domestic_transfer: {
+        Args: {
+          _account_number: string
+          _account_type: string
+          _amount: number
+          _bank_name: string
+          _id: string
+          _memo: string
+          _recipient_name: string
+          _routing_number: string
+        }
+        Returns: undefined
+      }
       user_pay_bill: {
         Args: { _amount: number; _memo: string; _payee: string }
         Returns: Json
