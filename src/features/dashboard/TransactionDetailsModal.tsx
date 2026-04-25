@@ -15,6 +15,12 @@ export interface TxRow {
 
 type LinkedKind = "domestic" | "intl" | null;
 
+function extractTransferReference(tx: TxRow) {
+  const direct = tx.reference?.trim();
+  if (direct && /^(DT|INT)-[A-Z0-9]+$/i.test(direct)) return direct.toUpperCase();
+  return tx.description.match(/\b(?:DT|INT)-[A-Z0-9]+\b/i)?.[0]?.toUpperCase() ?? direct ?? null;
+}
+
 /**
  * Shows full details for a transaction. If the transaction is still pending
  * and matches a domestic/international transfer by reference, the user can
@@ -31,17 +37,21 @@ export function TransactionDetailsModal({
   const [editing, setEditing] = useState(false);
   const credit = tx.type === "credit" || tx.type === "admin_credit" || Number(tx.amount) > 0;
   const isPending = tx.status === "pending";
+  const transferReference = extractTransferReference(tx);
+  const canManageTransfer = Boolean(linked.id) && !msg.ok;
 
   useEffect(() => {
     let alive = true;
     (async () => {
-      if (!isPending || !tx.reference) {
+      setLinked({ kind: null, id: null });
+      setResolving(true);
+      if (!transferReference) {
         setResolving(false);
         return;
       }
       const [{ data: dt }, { data: it }] = await Promise.all([
-        supabase.from("domestic_transfers").select("id,reference,recipient_name,bank_name,routing_number,account_number,account_type,amount,memo,status,created_at").eq("reference", tx.reference).maybeSingle(),
-        supabase.from("international_transfers").select("id,status").eq("reference", tx.reference).maybeSingle(),
+        supabase.from("domestic_transfers").select("id,reference,recipient_name,bank_name,routing_number,account_number,account_type,amount,memo,status,created_at").eq("reference", transferReference).maybeSingle(),
+        supabase.from("international_transfers").select("id,status").eq("reference", transferReference).maybeSingle(),
       ]);
       if (!alive) return;
       if (dt && dt.status === "pending") setLinked({ kind: "domestic", id: dt.id, record: dt });
@@ -49,7 +59,7 @@ export function TransactionDetailsModal({
       setResolving(false);
     })();
     return () => { alive = false; };
-  }, [tx.reference, isPending]);
+  }, [transferReference]);
 
   const cancel = async () => {
     if (!linked.id) return;
@@ -98,10 +108,10 @@ export function TransactionDetailsModal({
             <Row icon={Calendar} label="Date">
               {new Date(tx.created_at).toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" })}
             </Row>
-            {tx.reference && (
+            {transferReference && (
               <Row icon={Hash} label="Reference">
-                <button onClick={() => copy(tx.reference!)} className="font-mono text-xs inline-flex items-center gap-1.5 hover:text-indigo">
-                  {tx.reference} <Copy className="h-3 w-3" />
+                <button onClick={() => copy(transferReference)} className="font-mono text-xs inline-flex items-center gap-1.5 hover:text-indigo">
+                  {transferReference} <Copy className="h-3 w-3" />
                 </button>
               </Row>
             )}
@@ -113,7 +123,7 @@ export function TransactionDetailsModal({
           {msg.err && <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2 text-sm text-destructive flex items-center gap-2"><AlertCircle className="h-4 w-4" />{msg.err}</div>}
           {msg.ok && <div className="rounded-lg bg-success/10 border border-success/30 px-3 py-2 text-sm text-success flex items-center gap-2"><CheckCircle2 className="h-4 w-4" />{msg.ok}</div>}
 
-          {isPending && !resolving && !linked.id && !msg.ok && (
+          {isPending && !resolving && !canManageTransfer && !msg.ok && (
             <p className="text-[11px] text-navy-light text-center">
               This pending item is being processed. To cancel a pending transfer, use the “Pending transfers” panel on your dashboard.
             </p>
@@ -124,7 +134,7 @@ export function TransactionDetailsModal({
           <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-lg border border-border text-navy-deep text-sm font-semibold">
             Close
           </button>
-          {isPending && linked.id && !msg.ok && (
+          {canManageTransfer && (
             <>
             {linked.kind === "domestic" && !confirming && (
               <button
