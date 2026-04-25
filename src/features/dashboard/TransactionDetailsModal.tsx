@@ -17,8 +17,8 @@ type LinkedKind = "domestic" | "intl" | null;
 
 function extractTransferReference(tx: TxRow) {
   const direct = tx.reference?.trim();
-  if (direct) return direct;
-  return tx.description.match(/\b(?:DT|INT)-[A-Z0-9]+\b/i)?.[0]?.toUpperCase() ?? null;
+  if (direct && /^(DT|INT)-[A-Z0-9]+$/i.test(direct)) return direct.toUpperCase();
+  return tx.description.match(/\b(?:DT|INT)-[A-Z0-9]+\b/i)?.[0]?.toUpperCase() ?? direct ?? null;
 }
 
 /**
