@@ -721,6 +721,10 @@ export type Database = {
         Args: { _id: string }
         Returns: undefined
       }
+      user_cancel_pending_transaction: {
+        Args: { _id: string }
+        Returns: undefined
+      }
       user_edit_domestic_transfer: {
         Args: {
           _account_number: string
@@ -732,6 +736,10 @@ export type Database = {
           _recipient_name: string
           _routing_number: string
         }
+        Returns: undefined
+      }
+      user_edit_pending_transaction: {
+        Args: { _amount: number; _description: string; _id: string }
         Returns: undefined
       }
       user_pay_bill: {
