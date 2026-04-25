@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { X, Loader2, AlertCircle, CheckCircle2, ArrowDownLeft, ArrowUpRight, Calendar, Hash, Tag, Copy } from "lucide-react";
+import { X, Loader2, AlertCircle, CheckCircle2, ArrowDownLeft, ArrowUpRight, Calendar, Hash, Tag, Copy, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { EditDomesticModal } from "./PendingTransfers";
 
 export interface TxRow {
   id: string;
@@ -22,11 +23,12 @@ type LinkedKind = "domestic" | "intl" | null;
 export function TransactionDetailsModal({
   tx, onClose, onChange,
 }: { tx: TxRow; onClose: () => void; onChange?: () => void }) {
-  const [linked, setLinked] = useState<{ kind: LinkedKind; id: string | null }>({ kind: null, id: null });
+  const [linked, setLinked] = useState<{ kind: LinkedKind; id: string | null; record?: any }>({ kind: null, id: null });
   const [resolving, setResolving] = useState(true);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok?: string; err?: string }>({});
   const [confirming, setConfirming] = useState(false);
+  const [editing, setEditing] = useState(false);
   const credit = tx.type === "credit" || tx.type === "admin_credit" || Number(tx.amount) > 0;
   const isPending = tx.status === "pending";
 
@@ -38,11 +40,11 @@ export function TransactionDetailsModal({
         return;
       }
       const [{ data: dt }, { data: it }] = await Promise.all([
-        supabase.from("domestic_transfers").select("id,status").eq("reference", tx.reference).maybeSingle(),
+        supabase.from("domestic_transfers").select("id,reference,recipient_name,bank_name,routing_number,account_number,account_type,amount,memo,status,created_at").eq("reference", tx.reference).maybeSingle(),
         supabase.from("international_transfers").select("id,status").eq("reference", tx.reference).maybeSingle(),
       ]);
       if (!alive) return;
-      if (dt && dt.status === "pending") setLinked({ kind: "domestic", id: dt.id });
+      if (dt && dt.status === "pending") setLinked({ kind: "domestic", id: dt.id, record: dt });
       else if (it && it.status === "pending") setLinked({ kind: "intl", id: it.id });
       setResolving(false);
     })();
@@ -123,7 +125,16 @@ export function TransactionDetailsModal({
             Close
           </button>
           {isPending && linked.id && !msg.ok && (
-            confirming ? (
+            <>
+            {linked.kind === "domestic" && !confirming && (
+              <button
+                type="button" onClick={() => setEditing(true)} disabled={busy}
+                className="flex-1 py-2.5 rounded-lg bg-indigo/10 hover:bg-indigo/20 border border-indigo/30 text-indigo text-sm font-semibold inline-flex items-center justify-center gap-1.5 disabled:opacity-60"
+              >
+                <Pencil className="h-3.5 w-3.5" /> Edit
+              </button>
+            )}
+            {confirming ? (
               <button
                 type="button" onClick={cancel} disabled={busy}
                 className="flex-1 py-2.5 rounded-lg bg-destructive hover:bg-destructive/90 text-white text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
@@ -137,9 +148,17 @@ export function TransactionDetailsModal({
               >
                 Cancel transfer
               </button>
-            )
+            )}
+            </>
           )}
         </div>
+        {editing && linked.kind === "domestic" && linked.record && (
+          <EditDomesticModal
+            transfer={linked.record}
+            onClose={() => setEditing(false)}
+            onSaved={() => { setEditing(false); setMsg({ ok: "Transfer updated" }); onChange?.(); }}
+          />
+        )}
       </div>
     </div>
   );
