@@ -42,7 +42,7 @@ const PREF_KEY = "rc_lang_pref";
 
 function setGoogTransCookie(target: string) {
   // Format expected by Google Translate: "/auto/<target>"
-  const value = target === "en" ? "" : `/auto/${target}`;
+  const value = `/auto/${target}`;
   const domain = typeof window !== "undefined" ? window.location.hostname : "";
   // Set on both domain and root domain so it survives subdomain navigation
   document.cookie = `${COOKIE_NAME}=${value}; path=/`;
@@ -53,6 +53,11 @@ function setGoogTransCookie(target: string) {
       document.cookie = `${COOKIE_NAME}=${value}; path=/; domain=.${root}`;
     }
   }
+}
+
+function dispatchTranslateChange(select: HTMLSelectElement, code: string) {
+  select.value = code;
+  select.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 function getCurrentLang(): string {
@@ -146,29 +151,22 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
     const apply = (attempt = 0) => {
       const select = document.querySelector<HTMLSelectElement>("select.goog-te-combo");
       if (select) {
-        select.value = code === "en" ? "" : code;
-        select.dispatchEvent(new Event("change"));
+        dispatchTranslateChange(select, code);
         return;
       }
       // Widget may not be mounted yet on first interaction; retry briefly.
       if (attempt < 20) setTimeout(() => apply(attempt + 1), 150);
     };
+    apply();
 
+    // Google treats English as a normal target option in the hidden combo.
+    // Dispatch it twice because returning to the page language can otherwise
+    // leave translated DOM nodes in place until a reload.
     if (code === "en") {
-      // "English" means "show original" — clear the cookie and reset the widget.
-      const select = document.querySelector<HTMLSelectElement>("select.goog-te-combo");
-      if (select) {
-        select.value = "";
-        select.dispatchEvent(new Event("change"));
-      }
-      // Google sometimes leaves residual translated nodes; nudge it by
-      // also dispatching a second change on the next tick.
       setTimeout(() => {
-        const s = document.querySelector<HTMLSelectElement>("select.goog-te-combo");
-        if (s) { s.value = ""; s.dispatchEvent(new Event("change")); }
-      }, 50);
-    } else {
-      apply();
+        const select = document.querySelector<HTMLSelectElement>("select.goog-te-combo");
+        if (select) dispatchTranslateChange(select, "en");
+      }, 75);
     }
   };
 
