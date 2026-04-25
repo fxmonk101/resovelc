@@ -189,7 +189,7 @@ function ConfirmCancelModal({ title, description, busy, onClose, onConfirm }: { 
   );
 }
 
-function EditDomesticModal({ transfer, onClose, onSaved }: { transfer: DT; onClose: () => void; onSaved: () => void }) {
+export function EditDomesticModal({ transfer, onClose, onSaved }: { transfer: DT; onClose: () => void; onSaved: () => void }) {
   const [recipient, setRecipient] = useState(transfer.recipient_name);
   const [bank, setBank] = useState(transfer.bank_name);
   const [routing, setRouting] = useState(transfer.routing_number);
