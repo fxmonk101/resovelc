@@ -6,6 +6,7 @@ import {
 import { useAuth, signOut } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND } from "@/lib/constants";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import logo from "@/assets/logo-credix.png";
 
 export const Route = createFileRoute("/admin")({
@@ -108,9 +109,12 @@ function AdminLayout() {
               <p className="text-xs text-navy-light hidden sm:block">Privileged access · all actions are logged</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold-500/10 border border-gold-500/30">
-            <ShieldCheck className="h-3.5 w-3.5 text-gold-600" />
-            <span className="text-xs font-semibold text-gold-700">ADMIN</span>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher compact />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold-500/10 border border-gold-500/30">
+              <ShieldCheck className="h-3.5 w-3.5 text-gold-600" />
+              <span className="text-xs font-semibold text-gold-700">ADMIN</span>
+            </div>
           </div>
         </header>
 
