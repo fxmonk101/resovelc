@@ -38,6 +38,11 @@ export function PendingTransfers({ userId, onChange }: { userId: string; onChang
   const [editing, setEditing] = useState<DT | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok?: string; err?: string }>({});
+  const [confirmCancel, setConfirmCancel] = useState<
+    | { kind: "domestic"; id: string; label: string; amount: string }
+    | { kind: "intl"; id: string; label: string; amount: string }
+    | null
+  >(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -57,7 +62,6 @@ export function PendingTransfers({ userId, onChange }: { userId: string; onChang
   useEffect(() => { load(); }, [load]);
 
   const cancelDomestic = async (id: string) => {
-    if (!confirm("Cancel this pending transfer? This cannot be undone.")) return;
     setBusyId(id); setMsg({});
     const { error } = await supabase.rpc("user_cancel_domestic_transfer", { _id: id });
     setBusyId(null);
@@ -67,7 +71,6 @@ export function PendingTransfers({ userId, onChange }: { userId: string; onChang
   };
 
   const cancelIntl = async (id: string) => {
-    if (!confirm("Cancel this pending wire? This cannot be undone.")) return;
     setBusyId(id); setMsg({});
     const { error } = await supabase.rpc("user_cancel_international_transfer", { _id: id });
     setBusyId(null);
@@ -112,7 +115,7 @@ export function PendingTransfers({ userId, onChange }: { userId: string; onChang
               <button onClick={() => setEditing(t)} disabled={busyId === t.id} className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-md bg-ivory hover:bg-ivory-dark border border-border text-navy-deep transition disabled:opacity-50">
                 <Pencil className="h-3 w-3" /> Edit
               </button>
-              <button onClick={() => cancelDomestic(t.id)} disabled={busyId === t.id} className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-md bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 text-destructive transition disabled:opacity-50">
+              <button onClick={() => setConfirmCancel({ kind: "domestic", id: t.id, label: `${t.recipient_name} · ${t.bank_name}`, amount: `$${Number(t.amount).toLocaleString(undefined,{minimumFractionDigits:2})}` })} disabled={busyId === t.id} className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-md bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 text-destructive transition disabled:opacity-50">
                 {busyId === t.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3" />} Cancel
               </button>
             </div>
@@ -126,7 +129,7 @@ export function PendingTransfers({ userId, onChange }: { userId: string; onChang
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="font-mono text-sm font-bold text-navy-deep">{t.currency} {Number(t.amount).toLocaleString(undefined,{minimumFractionDigits:2})}</div>
-              <button onClick={() => cancelIntl(t.id)} disabled={busyId === t.id} className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-md bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 text-destructive transition disabled:opacity-50">
+              <button onClick={() => setConfirmCancel({ kind: "intl", id: t.id, label: `${t.recipient_name} · ${t.recipient_country}`, amount: `${t.currency} ${Number(t.amount).toLocaleString(undefined,{minimumFractionDigits:2})}` })} disabled={busyId === t.id} className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-md bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 text-destructive transition disabled:opacity-50">
                 {busyId === t.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3" />} Cancel
               </button>
             </div>
@@ -141,6 +144,47 @@ export function PendingTransfers({ userId, onChange }: { userId: string; onChang
           onSaved={() => { setEditing(null); load(); onChange?.(); setMsg({ ok: "Transfer updated" }); }}
         />
       )}
+
+      {confirmCancel && (
+        <ConfirmCancelModal
+          title={confirmCancel.kind === "intl" ? "Cancel this wire transfer?" : "Cancel this transfer?"}
+          description={`${confirmCancel.label} — ${confirmCancel.amount}. This cannot be undone.`}
+          busy={busyId === confirmCancel.id}
+          onClose={() => setConfirmCancel(null)}
+          onConfirm={async () => {
+            const c = confirmCancel;
+            setConfirmCancel(null);
+            if (c.kind === "domestic") await cancelDomestic(c.id);
+            else await cancelIntl(c.id);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function ConfirmCancelModal({ title, description, busy, onClose, onConfirm }: { title: string; description: string; busy: boolean; onClose: () => void; onConfirm: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="bg-white rounded-2xl shadow-elevated w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+        <div className="p-5">
+          <div className="flex items-start gap-3">
+            <div className="h-10 w-10 rounded-full bg-destructive/10 grid place-items-center shrink-0">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-display text-base font-bold text-navy-deep">{title}</h3>
+              <p className="text-sm text-navy-light mt-1">{description}</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2 p-4 border-t border-border">
+          <button type="button" onClick={onClose} disabled={busy} className="flex-1 py-2.5 rounded-lg border border-border text-navy-deep text-sm font-semibold disabled:opacity-60">Keep transfer</button>
+          <button type="button" onClick={onConfirm} disabled={busy} className="flex-1 py-2.5 rounded-lg bg-destructive hover:bg-destructive/90 text-white text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60">
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />} Yes, cancel
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
