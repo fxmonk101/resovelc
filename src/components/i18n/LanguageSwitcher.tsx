@@ -134,12 +134,42 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
   }, [open]);
 
   const choose = (code: string) => {
+    // Persist for future navigations (cookie covers SSR + Google's own re-init,
+    // localStorage covers our React-side display state).
     setGoogTransCookie(code);
     localStorage.setItem(PREF_KEY, code);
     setCurrent(code);
     setOpen(false);
-    // Reload so Google Translate re-applies cleanly across the whole tree.
-    window.location.reload();
+
+    // Drive Google Translate's hidden <select> directly so the page is
+    // re-translated in place — no reload required.
+    const apply = (attempt = 0) => {
+      const select = document.querySelector<HTMLSelectElement>("select.goog-te-combo");
+      if (select) {
+        select.value = code === "en" ? "" : code;
+        select.dispatchEvent(new Event("change"));
+        return;
+      }
+      // Widget may not be mounted yet on first interaction; retry briefly.
+      if (attempt < 20) setTimeout(() => apply(attempt + 1), 150);
+    };
+
+    if (code === "en") {
+      // "English" means "show original" — clear the cookie and reset the widget.
+      const select = document.querySelector<HTMLSelectElement>("select.goog-te-combo");
+      if (select) {
+        select.value = "";
+        select.dispatchEvent(new Event("change"));
+      }
+      // Google sometimes leaves residual translated nodes; nudge it by
+      // also dispatching a second change on the next tick.
+      setTimeout(() => {
+        const s = document.querySelector<HTMLSelectElement>("select.goog-te-combo");
+        if (s) { s.value = ""; s.dispatchEvent(new Event("change")); }
+      }, 50);
+    } else {
+      apply();
+    }
   };
 
   const label = LANGS.find((l) => l.code === current)?.label ?? "English";
