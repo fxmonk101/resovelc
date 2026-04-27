@@ -226,7 +226,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
       doc.setFontSize(11);
       doc.setTextColor(90, 90, 90);
       const sub = receipt.kind === "external"
-        ? "Funds typically arrive in 1-3 business days."
+        ? "Funds typically arrive in 12–24 hours."
         : "Your internal transfer was processed successfully.";
       doc.text(sub, 40, 150);
 
@@ -290,7 +290,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
             <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
               <div className="flex items-center gap-2 font-semibold">
                 <span className="inline-block h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                Pending — funds will arrive in 24–48 hours
+                Pending — funds will arrive in 12–24 hours
               </div>
               <p className="mt-1 text-xs leading-relaxed">
                 The amount has been debited from your account and your transfer
@@ -347,7 +347,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
             )}
             <div className="flex justify-between px-4 py-2.5 bg-white">
               <dt className="text-navy-light">Status</dt>
-              <dd className={`font-semibold ${receipt.kind === "external" ? "text-amber-700" : "text-navy-deep"}`}>{receipt.kind === "external" ? "Pending · 24–48h" : "Completed"}</dd>
+              <dd className={`font-semibold ${receipt.kind === "external" ? "text-amber-700" : "text-navy-deep"}`}>{receipt.kind === "external" ? "Pending · 12–24h" : "Completed"}</dd>
             </div>
           </dl>
 
