@@ -694,6 +694,15 @@ export type Database = {
         Args: { _description: string; _new_balance: number; _user_id: string }
         Returns: Json
       }
+      admin_settle_transfer: {
+        Args: {
+          _id: string
+          _kind: string
+          _new_status: string
+          _notes?: string
+        }
+        Returns: Json
+      }
       emit_notification: {
         Args: {
           _body: string
