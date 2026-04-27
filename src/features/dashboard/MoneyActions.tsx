@@ -286,14 +286,28 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
     return (
       <Shell title="Transfer submitted" subtitle="Keep this reference for your records" onClose={onClose}>
         <div className="space-y-5">
-          <div className="flex items-center gap-3 rounded-lg bg-success/10 border border-success/30 px-4 py-3">
-            <CheckCircle2 className="h-6 w-6 text-success shrink-0" />
-            <div className="text-sm text-navy-deep">
-              {receipt.kind === "external"
-                ? "Your external transfer is being processed. Funds typically arrive in 1–3 business days."
-                : "Your transfer to the member account was completed successfully."}
+          {receipt.kind === "external" ? (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              <div className="flex items-center gap-2 font-semibold">
+                <span className="inline-block h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                Pending — funds will arrive in 24–48 hours
+              </div>
+              <p className="mt-1 text-xs leading-relaxed">
+                The amount has been debited from your account and your transfer
+                is being processed. If the transfer cannot be completed, the
+                full amount is automatically refunded to your account. You can
+                edit or cancel this transfer from Recent transactions while it
+                remains pending.
+              </p>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center gap-3 rounded-lg bg-success/10 border border-success/30 px-4 py-3">
+              <CheckCircle2 className="h-6 w-6 text-success shrink-0" />
+              <div className="text-sm text-navy-deep">
+                Your transfer to the member account was completed successfully.
+              </div>
+            </div>
+          )}
 
           <div className="rounded-lg border border-border bg-cream/40 p-4">
             <div className="text-xs font-semibold text-navy-deep uppercase tracking-wide">Reference ID</div>
@@ -333,7 +347,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
             )}
             <div className="flex justify-between px-4 py-2.5 bg-white">
               <dt className="text-navy-light">Status</dt>
-              <dd className="font-semibold text-navy-deep">{receipt.kind === "external" ? "Pending" : "Completed"}</dd>
+              <dd className={`font-semibold ${receipt.kind === "external" ? "text-amber-700" : "text-navy-deep"}`}>{receipt.kind === "external" ? "Pending · 24–48h" : "Completed"}</dd>
             </div>
           </dl>
 
