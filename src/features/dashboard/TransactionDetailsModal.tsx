@@ -47,6 +47,8 @@ export function TransactionDetailsModal({
   // pending deposit request created by an admin).
   const canManageTx = isPending && !msg.ok && !canManageTransfer;
   const isDomesticTransfer = linked.kind === "domestic" && Boolean(linked.record);
+  const isExternalTransferType = tx.type === "domestic_transfer" || tx.type === "international_transfer";
+  const showPendingBanner = isPending && isExternalTransferType;
 
   useEffect(() => {
     let alive = true;
@@ -129,6 +131,17 @@ export function TransactionDetailsModal({
         </div>
 
         <div className="p-5 overflow-y-auto flex-1 space-y-4">
+          {showPendingBanner && (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+              <p className="font-semibold">This transfer is being processed</p>
+              <p className="mt-1 text-xs leading-relaxed">
+                The amount has been debited from your account. Funds will arrive in
+                the recipient's bank within <strong>24–48 hours</strong>. You can
+                edit or cancel this transfer while it remains pending — if it is
+                cancelled or fails, the money is automatically refunded.
+              </p>
+            </div>
+          )}
           <div className="text-center">
             <div className={`font-display text-3xl font-bold ${credit ? "text-success" : "text-navy-deep"}`}>
               {credit ? "+" : "−"}${Math.abs(Number(tx.amount)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
