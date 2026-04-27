@@ -1,57 +1,54 @@
-## Fix: Allow external bank transfers with any account number length
+# Pending status for external transfers
 
-A customer reported they cannot transfer funds to their credit union account because the field implies a strict 10-digit limit and the flow only supports internal member-to-member transfers. We will rework the **Transfer money** modal so users can send to either an internal member account or an external US bank/credit union, with no artificial digit limit.
+## Goal
 
-### Changes
+When a user submits an external transfer (domestic ACH or international wire), the money should be **debited from the balance immediately**, but the resulting transaction must be clearly marked **Pending** with a friendly message like:
 
-**1. `src/features/dashboard/MoneyActions.tsx` — `TransferForm**`
+> "Funds will arrive in the recipient's bank within 24 - 48 Hours."
 
-Replace the single "Recipient account number" field with a transfer-type toggle plus contextual fields:
+Both if the transaction does not pull through the money should be credited back to the user account
 
-- Add a **Transfer to** selector: `Internal Resolva account` (default) | `External US bank / credit union`.
-- **Internal mode** (current behaviour, polished): one field "Member account number", placeholder "Enter recipient account number", `inputMode="numeric"`, `maxLength={20}` (was effectively 10 by hint). Calls existing `user_transfer_funds` RPC.
-- **External mode** (new): adds the following fields, all required:
-  - Recipient full name
-  - Bank / credit union name
-  - Routing number (ABA) — `inputMode="numeric"`, `maxLength={9}`, `pattern="\d{9}"`
-  - Account number — `inputMode="numeric"`, `maxLength={20}` (supports credit-union numbers longer than 10 digits)
-  - Account type: Checking | Savings
-- Amount and memo fields remain.
-- On submit in external mode, call a new RPC `user_submit_domestic_transfer` (see below). On success, show "Transfer submitted. Funds typically arrive in 1–3 business days."
-- Add explicit `text-navy-deep bg-white placeholder:text-navy-light/60` to all inputs/selects so admin-style visibility issue does not recur here.
+Internal member-to-member transfers stay instant (they already complete on both sides).
 
-**2. Database — new RPC + table for external (domestic) transfers**
+## Current state
 
-Migration creates:
+- `user_submit_domestic_transfer` already debits the balance and inserts the transaction with `status = 'pending'`. ✅
+- `user_submit_international_transfer` debits the balance but the transaction is inserted **without a status**, so it defaults to `'completed'`. ❌ This is the main bug — international wires look completed instantly.
+- The transfer success modal in `MoneyActions.tsx` shows a generic confirmation but the timing message is short and only appears for external transfers.
+- The transaction details modal doesn't surface a friendly "when will this arrive" line for pending external transfers.
 
-- `public.domestic_transfers` table:
-  - `id uuid pk default gen_random_uuid()`
-  - `user_id uuid not null` (references `auth.users` logically; not FK)
-  - `reference text not null` (auto-generated like `DT-XXXXXX`)
-  - `recipient_name text not null`
-  - `bank_name text not null`
-  - `routing_number text not null` (validated 9 digits)
-  - `account_number text not null` (1–20 chars)
-  - `account_type text not null check in ('checking','savings')`
-  - `amount numeric(14,2) not null check (amount > 0)`
-  - `memo text`
-  - `status text not null default 'pending'`
-  - `created_at timestamptz default now()`
-- RLS enabled. Policies:
-  - Users can `SELECT` their own rows (`auth.uid() = user_id`)
-  - Users can `INSERT` only via the RPC (no direct insert policy)
-  - Admins (via existing `has_role`) can select/update all
-- RPC `public.user_submit_domestic_transfer(_recipient_name, _bank_name, _routing_number, _account_number, _account_type, _amount, _memo)` — `security definer`, validates routing length = 9, account 5–20 digits, debits balance via existing pattern, inserts row, returns json.
+## Changes
 
-**3. Recent transfers visibility (light touch)**
+### 1. Database migration — fix international transfer status
 
-The dashboard transfer modal stays focused on submission. The user's existing transactions list on the overview already shows debits. No new page is added in this change to keep scope minimal; admins can manage status from the existing admin tools (a follow-up task can add a dedicated `dashboard/transfers` view if desired).
+Update `public.user_submit_international_transfer` so the inserted transactions row explicitly sets `status = 'pending'` (matching the domestic flow). No schema changes — only the function body.
 
-### Files Edited / Created
+### 2. Success receipt modal (`src/features/dashboard/MoneyActions.tsx`)
 
-- `src/features/dashboard/MoneyActions.tsx` (edit `TransferForm`)
-- `supabase/migrations/<new>.sql` (table + RLS + RPC)
+In the external-transfer success view (`receipt.kind === "external"`):
 
-### Result
+- Replace the current short subtitle with a clear pending banner:
+  > "Pending — funds were debited from your account and will arrive at the recipient's bank within **1–3 business days** (domestic) / **3–5 business days** (international)."
+- Show an amber/pending pill instead of the green success check for external transfers (keep green for internal).
+- Add a small helper line: "You can cancel this transfer from Recent transactions while it is still pending."
 
-Customers can transfer funds to an external US bank or credit union with account numbers up to 20 digits, eliminating the "larger than 10 digits" blocker. Internal member transfers continue to work unchanged. fix any other related issues that may arise
+### 3. Transaction details modal (`src/features/dashboard/TransactionDetailsModal.tsx`)
+
+When the open transaction is pending and is a domestic or international transfer, render an info banner above the existing details:
+
+> "This transfer is being processed. Funds typically arrive at the recipient bank within 1–3 business days (domestic) or 3–5 business days (international). You can edit or cancel it while it remains pending."
+
+### 4. Recent transactions list
+
+No code change needed — the existing pending pill already surfaces the status. The improved DB status from step 1 means international wires will now correctly render as Pending in the list.
+
+## Out of scope
+
+- Internal member transfers stay instant.
+- No changes to admin approval flow — admins still mark transfers `completed` / `failed` from the admin panel, which already updates the linked transaction status.
+
+## Files touched
+
+- `supabase/migrations/<new>.sql` — replace `user_submit_international_transfer` to set `status = 'pending'` on the transactions insert.
+- `src/features/dashboard/MoneyActions.tsx` — pending banner + amber styling on external receipt.
+- `src/features/dashboard/TransactionDetailsModal.tsx` — pending info banner for external transfers.
