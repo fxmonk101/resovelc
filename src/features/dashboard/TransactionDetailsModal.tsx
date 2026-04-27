@@ -136,7 +136,7 @@ export function TransactionDetailsModal({
               <p className="font-semibold">This transfer is being processed</p>
               <p className="mt-1 text-xs leading-relaxed">
                 The amount has been debited from your account. Funds will arrive in
-                the recipient's bank within <strong>24–48 hours</strong>. You can
+                the recipient's bank within <strong>12–24 hours</strong>. You can
                 edit or cancel this transfer while it remains pending — if it is
                 cancelled or fails, the money is automatically refunded.
               </p>
