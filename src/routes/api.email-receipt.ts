@@ -65,7 +65,7 @@ export const Route = createFileRoute("/api/email-receipt")({
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })} USD`;
-          const statusStr = kind === "external" ? "Pending (1–3 business days)" : "Completed";
+          const statusStr = kind === "external" ? "Pending (12–24 hours)" : "Completed";
           const typeStr = kind === "external" ? "External US bank / credit union" : "Internal Resolva account";
 
           const html = `
@@ -81,7 +81,7 @@ export const Route = createFileRoute("/api/email-receipt")({
       </div>
       <div style="font-size:13px;color:#5a5a6a;margin:0 0 20px;">
         ${kind === "external"
-          ? "Funds typically arrive in 1–3 business days."
+          ? "Funds typically arrive in 12–24 hours."
           : "Your internal transfer was processed successfully."}
       </div>
       <div style="background:#f8f7f2;border:1px solid #e5e2d8;border-radius:8px;padding:14px 18px;margin-bottom:22px;">
