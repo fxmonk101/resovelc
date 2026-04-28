@@ -143,7 +143,7 @@ function AdminFunds() {
           const { data, error } = await supabase.rpc("admin_set_balance", {
             _user_id: selected.user_id,
             _new_balance: amt,
-            _description: desc || `Resolva Credix set balance to $${amt}`,
+            _description: desc || `Resolva set balance to $${amt}`,
           });
           console.log("admin_set_balance result", { data, error });
           if (error) {
@@ -155,7 +155,7 @@ function AdminFunds() {
           const { data, error } = await supabase.rpc("admin_adjust_balance", {
             _user_id: selected.user_id,
             _amount: amt,
-            _description: desc || `Resolva Credix ${mode} to checking`,
+            _description: desc || `Resolva ${mode} to checking`,
             _direction: mode,
           });
           console.log("admin_adjust_balance result", { data, error });
@@ -188,7 +188,7 @@ function AdminFunds() {
         }
         const { error: txnError } = await supabase.from("transactions").insert({
           user_id: selected.user_id, amount: signed, type: direction === "credit" ? "card_payment" : "card_charge",
-          description: desc || `Resolva Credix ${direction === "credit" ? "loaded funds onto" : "charged"} ${card.card_type} ••••${card.card_number.slice(-4)}`,
+          description: desc || `Resolva ${direction === "credit" ? "loaded funds onto" : "charged"} ${card.card_type} ••••${card.card_number.slice(-4)}`,
         });
         if (txnError) {
           console.error("Transaction insert failed:", txnError);
