@@ -40,6 +40,7 @@ import { Route as AdminFundsRouteImport } from './routes/admin.funds'
 import { Route as AdminCardsRouteImport } from './routes/admin.cards'
 import { Route as AdminAdminsRouteImport } from './routes/admin.admins'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as ApiAdminNotifyCotCancellationsRouteImport } from './routes/api/admin.notify-cot-cancellations'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -199,6 +200,12 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminNotifyCotCancellationsRoute =
+  ApiAdminNotifyCotCancellationsRouteImport.update({
+    id: '/api/admin/notify-cot-cancellations',
+    path: '/api/admin/notify-cot-cancellations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -249,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/admin/notify-cot-cancellations': typeof ApiAdminNotifyCotCancellationsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -283,6 +291,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/api/admin/notify-cot-cancellations': typeof ApiAdminNotifyCotCancellationsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -320,6 +329,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/admin/notify-cot-cancellations': typeof ApiAdminNotifyCotCancellationsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -358,6 +368,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin/'
     | '/dashboard/'
+    | '/api/admin/notify-cot-cancellations'
     | '/lovable/email/suppression'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -392,6 +403,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin'
     | '/dashboard'
+    | '/api/admin/notify-cot-cancellations'
     | '/lovable/email/suppression'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -428,6 +440,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin/'
     | '/dashboard/'
+    | '/api/admin/notify-cot-cancellations'
     | '/lovable/email/suppression'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -449,6 +462,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ApiEmailReceiptRoute: typeof ApiEmailReceiptRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ApiAdminNotifyCotCancellationsRoute: typeof ApiAdminNotifyCotCancellationsRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -674,6 +688,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/notify-cot-cancellations': {
+      id: '/api/admin/notify-cot-cancellations'
+      path: '/api/admin/notify-cot-cancellations'
+      fullPath: '/api/admin/notify-cot-cancellations'
+      preLoaderRoute: typeof ApiAdminNotifyCotCancellationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -763,6 +784,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ApiEmailReceiptRoute: ApiEmailReceiptRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  ApiAdminNotifyCotCancellationsRoute: ApiAdminNotifyCotCancellationsRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
