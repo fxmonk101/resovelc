@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/transactions")({
   head: () => ({ meta: [{ title: "Pending transactions — Admin" }] }),
-  component: AdminTransactions;
+  component: AdminTransactions,
 });
 
 interface PendingTx {
