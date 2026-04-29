@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bell, CheckCircle2, ArrowRight, Loader2, Trash2 } from "lucide-react";
+import { Bell, CheckCircle2, ArrowRight, Loader2, Trash2, ChevronDown } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,6 +17,7 @@ export function NotificationBell({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Notif[]>([]);
   const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const ref = useRef<HTMLDivElement>(null);
 
   const load = async () => {
@@ -109,21 +110,39 @@ export function NotificationBell({ userId }: { userId: string }) {
             ) : (
               items.map((n) => (
                 <div key={n.id} className={`group relative border-b border-border/60 ${n.read ? "" : "bg-indigo/5"}`}>
-                  <Link
-                    to={(n.link as "/dashboard") ?? "/dashboard"}
-                    onClick={() => { markRead(n.id); setOpen(false); }}
-                    className="block px-4 py-3 pr-10 hover:bg-ivory transition"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      markRead(n.id);
+                      setExpanded((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(n.id)) next.delete(n.id); else next.add(n.id);
+                        return next;
+                      });
+                    }}
+                    className="block w-full text-left px-4 py-3 pr-10 hover:bg-ivory transition"
                   >
                     <div className="flex items-start gap-3">
                       <span className={`mt-0.5 inline-block h-2 w-2 rounded-full shrink-0 ${n.read ? "bg-transparent" : "bg-brand-red"}`} />
                       <div className="flex-1 min-w-0">
                         <div className="font-semibold text-navy-deep text-sm">{n.title}</div>
-                        <div className="text-xs text-navy-light mt-0.5 line-clamp-2">{n.body}</div>
-                        <div className="text-[10px] text-navy-light mt-1">{new Date(n.created_at).toLocaleString()}</div>
+                        <div className={`text-xs text-navy-light mt-0.5 whitespace-pre-wrap ${expanded.has(n.id) ? "" : "line-clamp-2"}`}>{n.body}</div>
+                        <div className="flex items-center justify-between mt-1.5 gap-2">
+                          <div className="text-[10px] text-navy-light">{new Date(n.created_at).toLocaleString()}</div>
+                          {n.link ? (
+                            <Link
+                              to={n.link as "/dashboard"}
+                              onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+                              className="text-[11px] text-indigo hover:underline inline-flex items-center gap-0.5"
+                            >
+                              View <ArrowRight className="h-3 w-3" />
+                            </Link>
+                          ) : null}
+                        </div>
                       </div>
-                      <ArrowRight className="h-3.5 w-3.5 text-navy-light shrink-0 mt-1" />
+                      <ChevronDown className={`h-3.5 w-3.5 text-navy-light shrink-0 mt-1 transition-transform ${expanded.has(n.id) ? "rotate-180" : ""}`} />
                     </div>
-                  </Link>
+                  </button>
                   <button
                     onClick={(e) => removeNotif(e, n.id)}
                     className="absolute top-2 right-2 grid h-7 w-7 place-items-center rounded-md text-navy-light hover:bg-destructive/10 hover:text-destructive transition opacity-0 group-hover:opacity-100 focus:opacity-100"
