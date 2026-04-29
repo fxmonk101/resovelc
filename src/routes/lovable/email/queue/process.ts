@@ -1,6 +1,11 @@
 import { sendLovableEmail } from '@lovable.dev/email-js'
-import { createClient } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
+
+// Use untyped client because email infrastructure tables (email_send_log,
+// email_send_state, suppressed_emails, etc.) are not in the generated types.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createClient = createSupabaseClient as unknown as (...args: Parameters<typeof createSupabaseClient>) => any
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
