@@ -10,7 +10,9 @@ export interface TemplateEntry {
 }
 
 import { template as transferCancelledCot } from './transfer-cancelled-cot'
+import { template as transactionStatusUpdate } from './transaction-status-update'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'transfer-cancelled-cot': transferCancelledCot,
+  'transaction-status-update': transactionStatusUpdate,
 }
