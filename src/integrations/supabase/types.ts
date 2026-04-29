@@ -708,6 +708,7 @@ export type Database = {
       }
       transactions: {
         Row: {
+          admin_notes: string | null
           amount: number
           created_at: string
           description: string
@@ -718,6 +719,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
           amount: number
           created_at?: string
           description: string
@@ -728,6 +730,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
           amount?: number
           created_at?: string
           description?: string
@@ -812,6 +815,10 @@ export type Database = {
           _new_status: string
           _notes?: string
         }
+        Returns: Json
+      }
+      admin_update_transaction_status: {
+        Args: { _admin_notes?: string; _id: string; _new_status: string }
         Returns: Json
       }
       delete_email: {

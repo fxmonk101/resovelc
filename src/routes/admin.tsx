@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  ShieldCheck, Users, HandCoins, Gift, CreditCard, Wallet, LogOut, Menu, UserCog,
+  ShieldCheck, Users, HandCoins, Gift, CreditCard, Wallet, LogOut, Menu, UserCog, Clock,
 } from "lucide-react";
 import { useAuth, signOut } from "@/lib/auth-store";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,7 @@ const NAV = [
   { to: "/admin/grants", label: "Grant Applications", icon: Gift },
   { to: "/admin/cards", label: "Card Applications", icon: CreditCard },
   { to: "/admin/funds", label: "Funds & Transactions", icon: Wallet },
+  { to: "/admin/transactions", label: "Pending Transactions", icon: Clock },
   { to: "/admin/admins", label: "Administrators", icon: UserCog },
 ];
 
