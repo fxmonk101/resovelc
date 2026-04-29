@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, HandCoins, Gift, CreditCard, TrendingUp, Clock } from "lucide-react";
+import { Users, HandCoins, Gift, CreditCard, TrendingUp, Clock, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminOverview,
@@ -18,6 +19,36 @@ interface Stats {
 
 function AdminOverview() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [sendingEmails, setSendingEmails] = useState(false);
+
+  const handleSendCotEmails = async () => {
+    if (!confirm("Send cancellation emails to all users with COT-cancelled transfers?")) return;
+    setSendingEmails(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+      const resp = await fetch("/api/admin/notify-cot-cancellations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        toast.error(data.error || "Failed to send emails");
+        return;
+      }
+      toast.success(`Emails queued: ${data.sent} sent, ${data.failed} failed, ${data.skipped} skipped (of ${data.total})`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setSendingEmails(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -58,6 +89,25 @@ function AdminOverview() {
       <div>
         <h2 className="font-display text-2xl font-bold text-navy-deep">Operational overview</h2>
         <p className="text-sm text-navy-light mt-1">Real-time system health and pending review queues.</p>
+      </div>
+
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-lg bg-amber-100 text-amber-700 shrink-0">
+            <Mail className="h-5 w-5" />
+          </span>
+          <div>
+            <div className="font-semibold text-navy-deep">Notify COT-cancelled users</div>
+            <div className="text-sm text-navy-light mt-0.5">Send cancellation emails to users whose pending transfers were cancelled due to missing COT codes.</div>
+          </div>
+        </div>
+        <button
+          onClick={handleSendCotEmails}
+          disabled={sendingEmails}
+          className="rounded-lg bg-navy-deep text-white text-sm font-semibold px-4 py-2 hover:bg-navy-deep/90 transition disabled:opacity-60 shrink-0"
+        >
+          {sendingEmails ? "Sending…" : "Send emails"}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
