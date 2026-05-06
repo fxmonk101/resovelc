@@ -299,7 +299,7 @@ function Step2({ data, onNext, onBack }: { data: FormData; onNext: (d: z.infer<t
             value={localNumber}
             onChange={(e) => updatePhone(dialCode, e.target.value)}
             className={`${inputCls} w-full`}
-            placeholder="2132469750"
+            placeholder="2135957723"
           />
         </div>
         <input type="hidden" {...register("phone")} />
