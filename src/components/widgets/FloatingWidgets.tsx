@@ -59,20 +59,6 @@ export function FloatingWidgets() {
                 <div className="text-sm font-semibold text-navy-deep truncate">{BRAND.email}</div>
               </div>
             </a>
-            <a href={`tel:${BRAND.phone.replace(/[^0-9+]/g, "")}`} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-ivory transition">
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-indigo/10 text-indigo"><Phone className="h-4 w-4" /></span>
-              <div className="min-w-0">
-                <div className="text-xs text-navy-light">Call us</div>
-                <div className="text-sm font-semibold text-navy-deep">{BRAND.phone}</div>
-              </div>
-            </a>
-            <a href={`sms:${BRAND.phone.replace(/[^0-9+]/g, "")}?&body=${encodeURIComponent("Hi Resolva Credix, I need help with ")}`} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-ivory transition">
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-indigo/10 text-indigo"><MessageSquare className="h-4 w-4" /></span>
-              <div className="min-w-0">
-                <div className="text-xs text-navy-light">Text us</div>
-                <div className="text-sm font-semibold text-navy-deep">{BRAND.phone}</div>
-              </div>
-            </a>
             <form onSubmit={sendEmail} className="space-y-2 pt-2 border-t border-border">
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name (optional)" className="w-full h-9 px-3 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-indigo/30" />
               <textarea required value={msg} onChange={(e) => setMsg(e.target.value)} rows={3} placeholder="How can we help?" className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-indigo/30 resize-none" />
