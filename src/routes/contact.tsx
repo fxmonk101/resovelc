@@ -125,7 +125,7 @@ function ContactPage() {
                 </span>
                 <div>
                   <div className="text-label text-slate-light">{c.label}</div>
-                  <div className={`mt-1 text-slate-deep ${c.mono ? "font-mono" : ""}`}>{c.value}</div>
+                  <div className="mt-1 text-slate-deep">{c.value}</div>
                 </div>
               </div>
             ))}
