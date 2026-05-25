@@ -42,8 +42,6 @@ export function Navbar() {
             <span className="text-white/95">{BRAND.fdic} · Trusted since {BRAND.founded}</span>
           </div>
           <div className="flex items-center gap-4">
-            <a href={`tel:${BRAND.phone}`} className="hover:text-white text-white/95">{BRAND.phone}</a>
-            <span className="text-white/40">|</span>
             <span className="text-white/95">{BRAND.hours}</span>
           </div>
         </div>

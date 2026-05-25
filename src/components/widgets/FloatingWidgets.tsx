@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowUp, MessageCircle, X, Mail, Phone, Send, MessageSquare } from "lucide-react";
+import { ArrowUp, MessageCircle, X, Mail, Send } from "lucide-react";
 import { BRAND } from "@/lib/constants";
 
 export function FloatingWidgets() {
