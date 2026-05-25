@@ -231,9 +231,6 @@ function ServiceModal({
             </div>
           )}
 
-          <p className="text-[11px] text-navy-light">
-            Need help? Call us 24/7 at <a href={`tel:${BRAND.phone.replace(/[^0-9+]/g, "")}`} className="text-indigo font-semibold">{BRAND.phone}</a>.
-          </p>
         </div>
 
         <div className="flex gap-2 p-4 border-t border-border shrink-0">

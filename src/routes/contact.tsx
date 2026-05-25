@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Phone, MapPin, Clock, MapPinned, CheckCircle2, MessageSquare } from "lucide-react";
+import { Mail, MapPin, Clock, MapPinned, CheckCircle2 } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
 import { contactSchema, type ContactInput } from "@/lib/validators";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/contact")({
       { title: "Contact — Resolve Case" },
       { name: "description", content: "Get in touch with our support team. We're here 24/7." },
       { property: "og:title", content: "Contact Resolve Case" },
-      { property: "og:description", content: "Reach out by form, phone, or email. We respond fast." },
+      { property: "og:description", content: "Reach out by form or email. We respond fast." },
     ],
   }),
   component: ContactPage,
@@ -53,20 +53,6 @@ function ContactPage() {
         <div className="container-page">
           <h1 className="font-display text-5xl md:text-6xl font-bold">Get in touch</h1>
           <p className="mt-4 text-white/70 max-w-xl">We typically respond within a few hours.</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <a
-              href={`tel:${BRAND.phone.replace(/[^0-9+]/g, "")}`}
-              className="inline-flex items-center gap-2 bg-white text-slate-deep font-semibold px-5 py-2.5 rounded-lg hover:bg-white/90 transition"
-            >
-              <Phone className="h-4 w-4" /> Call {BRAND.phone}
-            </a>
-            <a
-              href={`sms:${BRAND.phone.replace(/[^0-9+]/g, "")}?&body=${encodeURIComponent("Hi Resolva Credix, I need help with ")}`}
-              className="inline-flex items-center gap-2 bg-terra hover:bg-terra-dark text-white font-semibold px-5 py-2.5 rounded-lg transition"
-            >
-              <MessageSquare className="h-4 w-4" /> Text us
-            </a>
-          </div>
         </div>
       </section>
 
@@ -130,7 +116,6 @@ function ContactPage() {
           <div className="lg:col-span-2 space-y-4">
             {[
               { icon: Mail, label: "Email", value: BRAND.email },
-              { icon: Phone, label: "Phone", value: BRAND.phone, mono: true },
               { icon: Clock, label: "Hours", value: BRAND.hours },
               { icon: MapPin, label: "Address", value: BRAND.address },
             ].map((c) => (
@@ -140,7 +125,7 @@ function ContactPage() {
                 </span>
                 <div>
                   <div className="text-label text-slate-light">{c.label}</div>
-                  <div className={`mt-1 text-slate-deep ${c.mono ? "font-mono" : ""}`}>{c.value}</div>
+                  <div className="mt-1 text-slate-deep">{c.value}</div>
                 </div>
               </div>
             ))}
