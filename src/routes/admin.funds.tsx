@@ -463,7 +463,12 @@ function AdminFunds() {
                     <div className="flex justify-between gap-3">
                       <span className="text-navy-light">Amount</span>
                       <span className="font-bold text-navy-deep">
-                        ${Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        {CURRENCY_SYMBOL[currency]}{Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} {currency}
+                        {currency !== "USD" && (
+                          <div className="text-xs text-navy-light font-normal">
+                            ≈ ${(Number(amount || 0) * CURRENCY_RATES[currency]).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD @ {CURRENCY_RATES[currency]}
+                          </div>
+                        )}
                       </span>
                     </div>
                     {desc && (
