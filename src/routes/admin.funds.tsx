@@ -29,6 +29,14 @@ interface User {
 interface Card { id: string; card_type: string; card_number: string; credit_limit: number; available_credit: number; current_balance: number; status: string; }
 interface Txn { id: string; amount: number; type: string; description: string; reference: string; created_at: string; }
 
+type Currency = "USD" | "EUR" | "GBP";
+const CURRENCY_RATES: Record<Currency, number> = {
+  USD: 1,
+  EUR: 1.08, // 1 EUR ≈ 1.08 USD
+  GBP: 1.27, // 1 GBP ≈ 1.27 USD
+};
+const CURRENCY_SYMBOL: Record<Currency, string> = { USD: "$", EUR: "€", GBP: "£" };
+
 function AdminFunds() {
   const [users, setUsers] = useState<User[]>([]);
   const [q, setQ] = useState("");
@@ -40,6 +48,7 @@ function AdminFunds() {
   const [desc, setDesc] = useState("");
   const [mode, setMode] = useState<"credit" | "debit" | "set">("credit");
   const [target, setTarget] = useState<string>("balance"); // "balance" or card id
+  const [currency, setCurrency] = useState<Currency>("USD");
   const [submitting, setSubmitting] = useState(false);
 
   const [roleStatus, setRoleStatus] = useState<"checking" | "ok" | "denied" | "error">("checking");
