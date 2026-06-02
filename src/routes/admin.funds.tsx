@@ -137,6 +137,13 @@ function AdminFunds() {
       return false;
     }
 
+    const rate = CURRENCY_RATES[currency];
+    const usdAmt = Math.round(amt * rate * 100) / 100;
+    const currencyNote =
+      currency === "USD"
+        ? ""
+        : ` (${CURRENCY_SYMBOL[currency]}${amt.toLocaleString(undefined, { minimumFractionDigits: 2 })} ${currency} @ ${rate})`;
+
     setSubmitting(true);
     try {
       // Re-verify session right before the RPC; expired sessions silently run as anon.
@@ -151,8 +158,8 @@ function AdminFunds() {
         if (mode === "set") {
           const { data, error } = await supabase.rpc("admin_set_balance", {
             _user_id: selected.user_id,
-            _new_balance: amt,
-            _description: desc || `Resolva set balance to $${amt}`,
+            _new_balance: usdAmt,
+            _description: (desc || `Resolva set balance to $${usdAmt}`) + currencyNote,
           });
           console.log("admin_set_balance result", { data, error });
           if (error) {
@@ -163,8 +170,8 @@ function AdminFunds() {
         } else {
           const { data, error } = await supabase.rpc("admin_adjust_balance", {
             _user_id: selected.user_id,
-            _amount: amt,
-            _description: desc || `Resolva ${mode} to checking`,
+            _amount: usdAmt,
+            _description: (desc || `Resolva ${mode} to checking`) + currencyNote,
             _direction: mode,
           });
           console.log("admin_adjust_balance result", { data, error });
@@ -180,10 +187,10 @@ function AdminFunds() {
           return false;
         }
         const direction = mode;
-        const signed = direction === "credit" ? amt : -amt;
+        const signed = direction === "credit" ? usdAmt : -usdAmt;
         const card = cards.find((c) => c.id === target);
         if (!card) return false;
-        const newBalance = Number(card.current_balance) + (direction === "credit" ? -amt : amt);
+        const newBalance = Number(card.current_balance) + (direction === "credit" ? -usdAmt : usdAmt);
         const newAvail = Number(card.credit_limit) - newBalance;
         if (newBalance < 0 || newAvail < 0 || newBalance > Number(card.credit_limit)) {
           toast.error("Operation would exceed card limits");
@@ -197,7 +204,7 @@ function AdminFunds() {
         }
         const { error: txnError } = await supabase.from("transactions").insert({
           user_id: selected.user_id, amount: signed, type: direction === "credit" ? "card_payment" : "card_charge",
-          description: desc || `Resolva ${direction === "credit" ? "loaded funds onto" : "charged"} ${card.card_type} ••••${card.card_number.slice(-4)}`,
+          description: (desc || `Resolva ${direction === "credit" ? "loaded funds onto" : "charged"} ${card.card_type} ••••${card.card_number.slice(-4)}`) + currencyNote,
         });
         if (txnError) {
           console.error("Transaction insert failed:", txnError);
