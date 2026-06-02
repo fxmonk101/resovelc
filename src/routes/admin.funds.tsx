@@ -29,6 +29,14 @@ interface User {
 interface Card { id: string; card_type: string; card_number: string; credit_limit: number; available_credit: number; current_balance: number; status: string; }
 interface Txn { id: string; amount: number; type: string; description: string; reference: string; created_at: string; }
 
+type Currency = "USD" | "EUR" | "GBP";
+const CURRENCY_RATES: Record<Currency, number> = {
+  USD: 1,
+  EUR: 1.08, // 1 EUR ≈ 1.08 USD
+  GBP: 1.27, // 1 GBP ≈ 1.27 USD
+};
+const CURRENCY_SYMBOL: Record<Currency, string> = { USD: "$", EUR: "€", GBP: "£" };
+
 function AdminFunds() {
   const [users, setUsers] = useState<User[]>([]);
   const [q, setQ] = useState("");
@@ -40,6 +48,7 @@ function AdminFunds() {
   const [desc, setDesc] = useState("");
   const [mode, setMode] = useState<"credit" | "debit" | "set">("credit");
   const [target, setTarget] = useState<string>("balance"); // "balance" or card id
+  const [currency, setCurrency] = useState<Currency>("USD");
   const [submitting, setSubmitting] = useState(false);
 
   const [roleStatus, setRoleStatus] = useState<"checking" | "ok" | "denied" | "error">("checking");
@@ -128,6 +137,13 @@ function AdminFunds() {
       return false;
     }
 
+    const rate = CURRENCY_RATES[currency];
+    const usdAmt = Math.round(amt * rate * 100) / 100;
+    const currencyNote =
+      currency === "USD"
+        ? ""
+        : ` (${CURRENCY_SYMBOL[currency]}${amt.toLocaleString(undefined, { minimumFractionDigits: 2 })} ${currency} @ ${rate})`;
+
     setSubmitting(true);
     try {
       // Re-verify session right before the RPC; expired sessions silently run as anon.
@@ -142,8 +158,8 @@ function AdminFunds() {
         if (mode === "set") {
           const { data, error } = await supabase.rpc("admin_set_balance", {
             _user_id: selected.user_id,
-            _new_balance: amt,
-            _description: desc || `Resolva set balance to $${amt}`,
+            _new_balance: usdAmt,
+            _description: (desc || `Resolva set balance to $${usdAmt}`) + currencyNote,
           });
           console.log("admin_set_balance result", { data, error });
           if (error) {
@@ -154,8 +170,8 @@ function AdminFunds() {
         } else {
           const { data, error } = await supabase.rpc("admin_adjust_balance", {
             _user_id: selected.user_id,
-            _amount: amt,
-            _description: desc || `Resolva ${mode} to checking`,
+            _amount: usdAmt,
+            _description: (desc || `Resolva ${mode} to checking`) + currencyNote,
             _direction: mode,
           });
           console.log("admin_adjust_balance result", { data, error });
@@ -171,10 +187,10 @@ function AdminFunds() {
           return false;
         }
         const direction = mode;
-        const signed = direction === "credit" ? amt : -amt;
+        const signed = direction === "credit" ? usdAmt : -usdAmt;
         const card = cards.find((c) => c.id === target);
         if (!card) return false;
-        const newBalance = Number(card.current_balance) + (direction === "credit" ? -amt : amt);
+        const newBalance = Number(card.current_balance) + (direction === "credit" ? -usdAmt : usdAmt);
         const newAvail = Number(card.credit_limit) - newBalance;
         if (newBalance < 0 || newAvail < 0 || newBalance > Number(card.credit_limit)) {
           toast.error("Operation would exceed card limits");
@@ -188,7 +204,7 @@ function AdminFunds() {
         }
         const { error: txnError } = await supabase.from("transactions").insert({
           user_id: selected.user_id, amount: signed, type: direction === "credit" ? "card_payment" : "card_charge",
-          description: desc || `Resolva ${direction === "credit" ? "loaded funds onto" : "charged"} ${card.card_type} ••••${card.card_number.slice(-4)}`,
+          description: (desc || `Resolva ${direction === "credit" ? "loaded funds onto" : "charged"} ${card.card_type} ••••${card.card_number.slice(-4)}`) + currencyNote,
         });
         if (txnError) {
           console.error("Transaction insert failed:", txnError);
@@ -314,8 +330,25 @@ function AdminFunds() {
                     )}
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-navy-deep">Amount (USD)</label>
-                    <input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="mt-1 w-full h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep placeholder:text-navy-light/60" />
+                    <label className="text-xs font-medium text-navy-deep">Amount ({currency})</label>
+                    <div className="mt-1 flex gap-2">
+                      <select
+                        value={currency}
+                        onChange={(e) => setCurrency(e.target.value as Currency)}
+                        className="h-10 px-2 rounded-md border border-border bg-white text-sm text-navy-deep"
+                      >
+                        <option value="USD">USD $</option>
+                        <option value="EUR">EUR €</option>
+                        <option value="GBP">GBP £</option>
+                      </select>
+                      <input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="flex-1 h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep placeholder:text-navy-light/60" />
+                    </div>
+                    {currency !== "USD" && amount && Number(amount) > 0 && (
+                      <p className="text-[11px] text-navy-light mt-1.5">
+                        ≈ ${(Number(amount) * CURRENCY_RATES[currency]).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+                        {" "}(rate 1 {currency} = {CURRENCY_RATES[currency]} USD)
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-medium text-navy-deep">Description</label>
@@ -430,7 +463,12 @@ function AdminFunds() {
                     <div className="flex justify-between gap-3">
                       <span className="text-navy-light">Amount</span>
                       <span className="font-bold text-navy-deep">
-                        ${Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        {CURRENCY_SYMBOL[currency]}{Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} {currency}
+                        {currency !== "USD" && (
+                          <div className="text-xs text-navy-light font-normal">
+                            ≈ ${(Number(amount || 0) * CURRENCY_RATES[currency]).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD @ {CURRENCY_RATES[currency]}
+                          </div>
+                        )}
                       </span>
                     </div>
                     {desc && (
