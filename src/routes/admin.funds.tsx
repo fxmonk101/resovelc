@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Wallet, ArrowDownLeft, ArrowUpRight, CreditCard as CardIcon, Search, Equal, ShieldCheck, ShieldAlert, Loader2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { SUPPORTED_CURRENCIES, currencySymbol, formatMoney } from "@/lib/currency";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,8 +41,6 @@ function AdminFunds() {
   const [mode, setMode] = useState<"credit" | "debit" | "set">("credit");
   const [target, setTarget] = useState<string>("balance"); // "balance" or card id
   const [submitting, setSubmitting] = useState(false);
-  const [currency, setCurrency] = useState<string>("USD");
-  const [savingCurrency, setSavingCurrency] = useState(false);
 
   const [roleStatus, setRoleStatus] = useState<"checking" | "ok" | "denied" | "error">("checking");
   const [roleError, setRoleError] = useState<string | null>(null);
@@ -92,29 +89,12 @@ function AdminFunds() {
   const select = async (u: User) => {
     setSelected(u);
     setTarget("balance");
-    const [{ data: c }, { data: t }, { data: p }] = await Promise.all([
+    const [{ data: c }, { data: t }] = await Promise.all([
       supabase.from("credit_cards").select("*").eq("user_id", u.user_id),
       supabase.from("transactions").select("*").eq("user_id", u.user_id).order("created_at", { ascending: false }).limit(20),
-      supabase.from("profiles").select("currency").eq("user_id", u.user_id).maybeSingle(),
     ]);
     setCards((c ?? []) as Card[]);
     setTxns((t ?? []) as Txn[]);
-    setCurrency((p?.currency as string) ?? "USD");
-  };
-
-  const updateCurrency = async (next: string) => {
-    if (!selected) return;
-    const prev = currency;
-    setCurrency(next);
-    setSavingCurrency(true);
-    const { error } = await supabase.from("profiles").update({ currency: next }).eq("user_id", selected.user_id);
-    setSavingCurrency(false);
-    if (error) {
-      setCurrency(prev);
-      toast.error(`Couldn't update currency: ${error.message}`);
-    } else {
-      toast.success(`Account currency set to ${next}`);
-    }
   };
 
   const refreshSelectedUser = async (current: User) => {
@@ -302,25 +282,11 @@ function AdminFunds() {
                   </div>
                   <div className="text-right">
                     <div className="text-xs text-navy-light uppercase tracking-wider">Checking balance</div>
-                    <div className="font-display text-2xl font-bold text-emerald-700">{formatMoney(Number(selected.balance), currency)}</div>
+                    <div className="font-display text-2xl font-bold text-emerald-700">${Number(selected.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                   </div>
                 </div>
 
                 <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2">
-                    <label className="text-xs font-medium text-navy-deep">Account currency</label>
-                    <select
-                      value={currency}
-                      onChange={(e) => updateCurrency(e.target.value)}
-                      disabled={savingCurrency}
-                      className="mt-1 w-full h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep disabled:opacity-60"
-                    >
-                      {SUPPORTED_CURRENCIES.map((c) => (
-                        <option key={c} value={c}>{c} ({currencySymbol(c).trim()})</option>
-                      ))}
-                    </select>
-                    <p className="text-[11px] text-navy-light mt-1">Changing this updates the member's default currency. Funds you post will display in this currency.</p>
-                  </div>
                   <div>
                     <label className="text-xs font-medium text-navy-deep">Target account</label>
                     <select value={target} onChange={(e) => setTarget(e.target.value)} className="mt-1 w-full h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep">
@@ -348,7 +314,7 @@ function AdminFunds() {
                     )}
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-navy-deep">Amount ({currency})</label>
+                    <label className="text-xs font-medium text-navy-deep">Amount (USD)</label>
                     <input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="mt-1 w-full h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep placeholder:text-navy-light/60" />
                   </div>
                   <div>
@@ -405,7 +371,7 @@ function AdminFunds() {
                           <div className="text-xs text-navy-light">{new Date(t.created_at).toLocaleString()} · #{t.reference}</div>
                         </div>
                         <div className={`text-sm font-semibold ${Number(t.amount) >= 0 ? "text-emerald-700" : "text-destructive"}`}>
-                          {Number(t.amount) >= 0 ? "+" : ""}{formatMoney(Math.abs(Number(t.amount)), currency)}
+                          {Number(t.amount) >= 0 ? "+" : ""}${Math.abs(Number(t.amount)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </div>
                       </div>
                     ))}
@@ -464,7 +430,7 @@ function AdminFunds() {
                     <div className="flex justify-between gap-3">
                       <span className="text-navy-light">Amount</span>
                       <span className="font-bold text-navy-deep">
-                        {formatMoney(Number(amount || 0), currency)}
+                        ${Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                     {desc && (

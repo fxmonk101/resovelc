@@ -13,7 +13,6 @@ import { KycCard } from "@/features/dashboard/KycCard";
 import { PendingTransfers } from "@/features/dashboard/PendingTransfers";
 import { TransactionDetailsModal, type TxRow } from "@/features/dashboard/TransactionDetailsModal";
 import { BRAND } from "@/lib/constants";
-import { formatMoney } from "@/lib/currency";
 
 export const Route = createFileRoute("/dashboard/")({
   component: Overview,
@@ -64,7 +63,7 @@ function Overview() {
 
   const masked = profile?.account_number ? `••••${profile.account_number.slice(-4)}` : "••••----";
   const balance = Number(profile?.balance ?? 0);
-  const fmt = (n: number) => formatMoney(n, profile?.currency);
+  const fmt = (n: number) => `${profile?.currency ?? "USD"} ${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   // Show only the real personal banking account so the overview total matches the actual balance.
   const accounts = [
