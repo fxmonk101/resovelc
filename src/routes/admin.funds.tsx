@@ -330,8 +330,25 @@ function AdminFunds() {
                     )}
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-navy-deep">Amount (USD)</label>
-                    <input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="mt-1 w-full h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep placeholder:text-navy-light/60" />
+                    <label className="text-xs font-medium text-navy-deep">Amount ({currency})</label>
+                    <div className="mt-1 flex gap-2">
+                      <select
+                        value={currency}
+                        onChange={(e) => setCurrency(e.target.value as Currency)}
+                        className="h-10 px-2 rounded-md border border-border bg-white text-sm text-navy-deep"
+                      >
+                        <option value="USD">USD $</option>
+                        <option value="EUR">EUR €</option>
+                        <option value="GBP">GBP £</option>
+                      </select>
+                      <input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="flex-1 h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep placeholder:text-navy-light/60" />
+                    </div>
+                    {currency !== "USD" && amount && Number(amount) > 0 && (
+                      <p className="text-[11px] text-navy-light mt-1.5">
+                        ≈ ${(Number(amount) * CURRENCY_RATES[currency]).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+                        {" "}(rate 1 {currency} = {CURRENCY_RATES[currency]} USD)
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-medium text-navy-deep">Description</label>
