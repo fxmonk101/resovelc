@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Mail, Phone, MapPin, ShieldCheck, Wallet } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, Phone, MapPin, ShieldCheck, Wallet, Pencil, CheckCircle2, XCircle, Ban, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -27,9 +27,13 @@ function UserDetail() {
   const [email, setEmail] = useState<string>("");
   const [txs, setTxs] = useState<Tx[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editingBalance, setEditingBalance] = useState(false);
+  const [editingTx, setEditingTx] = useState<Tx | null>(null);
+  const [decisionTx, setDecisionTx] = useState<{ tx: Tx; decision: "completed" | "failed" | "cancelled" } | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    (async () => {
+  const load = async () => {
       setLoading(true);
       const [{ data: prof }, { data: users }, { data: tx }] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
@@ -41,8 +45,9 @@ function UserDetail() {
       if (u) setEmail(u.email);
       setTxs((tx ?? []) as Tx[]);
       setLoading(false);
-    })();
-  }, [userId]);
+  };
+
+  useEffect(() => { load(); }, [userId]);
 
   const toggleVerified = async () => {
     if (!profile) return;
@@ -50,6 +55,29 @@ function UserDetail() {
     if (error) return toast.error(error.message);
     setProfile({ ...profile, is_verified: !profile.is_verified });
     toast.success("Verification status updated");
+  };
+
+  const submitTxDecision = async (note: string) => {
+    if (!decisionTx) return;
+    setBusy(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.error("Not authenticated"); return; }
+      const resp = await fetch("/api/admin/update-transaction-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({
+          transactionId: decisionTx.tx.id,
+          newStatus: decisionTx.decision,
+          adminNotes: note.trim() || null,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) { toast.error(data.error || "Update failed"); return; }
+      toast.success(`Transaction marked ${decisionTx.decision}`);
+      setDecisionTx(null);
+      await load();
+    } finally { setBusy(false); }
   };
 
   if (loading) {
@@ -82,9 +110,15 @@ function UserDetail() {
           <Info icon={MapPin} label="Country" value={profile.country || "—"} />
           <Info icon={Wallet} label="Account" value={`${profile.account_type ?? "Account"} · ${profile.account_number}`} />
           <Info icon={Wallet} label="Balance" value={`$${Number(profile.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}`} />
-          <div>
+          <div className="flex flex-wrap gap-2">
             <button onClick={toggleVerified} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold ${profile.is_verified ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
               <ShieldCheck className="h-3.5 w-3.5" /> {profile.is_verified ? "Verified — click to unverify" : "Unverified — click to verify"}
+            </button>
+            <button onClick={() => setEditingProfile(true)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold bg-indigo text-white hover:bg-indigo/90">
+              <Pencil className="h-3.5 w-3.5" /> Edit profile
+            </button>
+            <button onClick={() => setEditingBalance(true)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700">
+              <DollarSign className="h-3.5 w-3.5" /> Adjust balance
             </button>
           </div>
         </div>
@@ -108,11 +142,13 @@ function UserDetail() {
                   <th className="text-left px-4 py-3 font-semibold">Reference</th>
                   <th className="text-center px-4 py-3 font-semibold">Status</th>
                   <th className="text-right px-4 py-3 font-semibold">Amount</th>
+                  <th className="text-right px-4 py-3 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {txs.map((t) => {
                   const credit = Number(t.amount) >= 0;
+                  const pending = t.status === "pending";
                   return (
                     <tr key={t.id} className="border-t border-border hover:bg-ivory/40">
                       <td className="px-4 py-3 whitespace-nowrap text-xs text-navy-light">{new Date(t.created_at).toLocaleString()}</td>
@@ -129,6 +165,26 @@ function UserDetail() {
                       <td className={`px-4 py-3 text-right font-semibold ${credit ? "text-emerald-700" : "text-destructive"}`}>
                         {credit ? "+" : "−"}${Math.abs(Number(t.amount)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1">
+                          <button onClick={() => setEditingTx(t)} title="Edit" className="p-1.5 rounded hover:bg-ivory text-navy-deep">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          {pending && (
+                            <>
+                              <button onClick={() => setDecisionTx({ tx: t, decision: "completed" })} title="Complete" className="p-1.5 rounded hover:bg-emerald-50 text-emerald-700">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                              </button>
+                              <button onClick={() => setDecisionTx({ tx: t, decision: "failed" })} title="Fail" className="p-1.5 rounded hover:bg-destructive/10 text-destructive">
+                                <XCircle className="h-3.5 w-3.5" />
+                              </button>
+                              <button onClick={() => setDecisionTx({ tx: t, decision: "cancelled" })} title="Cancel" className="p-1.5 rounded hover:bg-amber-50 text-amber-700">
+                                <Ban className="h-3.5 w-3.5" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -137,6 +193,38 @@ function UserDetail() {
           </div>
         )}
       </div>
+
+      {editingProfile && (
+        <EditProfileModal
+          profile={profile}
+          onClose={() => setEditingProfile(false)}
+          onSaved={(p) => { setProfile(p); setEditingProfile(false); }}
+        />
+      )}
+      {editingBalance && (
+        <EditBalanceModal
+          userId={userId}
+          currentBalance={Number(profile.balance)}
+          onClose={() => setEditingBalance(false)}
+          onSaved={(newBal) => { setProfile({ ...profile, balance: newBal }); setEditingBalance(false); load(); }}
+        />
+      )}
+      {editingTx && (
+        <EditTxModal
+          tx={editingTx}
+          onClose={() => setEditingTx(null)}
+          onSaved={() => { setEditingTx(null); load(); }}
+        />
+      )}
+      {decisionTx && (
+        <DecisionModal
+          decision={decisionTx.decision}
+          tx={decisionTx.tx}
+          busy={busy}
+          onCancel={() => setDecisionTx(null)}
+          onSubmit={submitTxDecision}
+        />
+      )}
     </div>
   );
 }
@@ -150,5 +238,185 @@ function Info({ icon: Icon, label, value }: { icon: React.ComponentType<{ classN
         <div className="text-navy-deep truncate">{value}</div>
       </div>
     </div>
+  );
+}
+
+function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-elevated w-full max-w-md p-5" onClick={(e) => e.stopPropagation()}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <label className="block">
+      <span className="text-[10px] uppercase tracking-wider text-navy-light font-semibold">{label}</span>
+      <input {...props} className="mt-1 w-full h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep focus:outline-none focus:border-indigo focus:ring-2 focus:ring-indigo/20" />
+    </label>
+  );
+}
+
+function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onClose: () => void; onSaved: (p: Profile) => void }) {
+  const [form, setForm] = useState({
+    first_name: profile.first_name ?? "",
+    last_name: profile.last_name ?? "",
+    username: profile.username ?? "",
+    phone: profile.phone ?? "",
+    country: profile.country ?? "",
+    account_type: profile.account_type ?? "",
+    account_number: profile.account_number ?? "",
+  });
+  const [busy, setBusy] = useState(false);
+
+  const save = async () => {
+    setBusy(true);
+    const { data, error } = await supabase.from("profiles").update(form).eq("user_id", profile.user_id).select("*").maybeSingle();
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Profile updated");
+    onSaved(data as Profile);
+  };
+
+  return (
+    <Modal onClose={() => !busy && onClose()}>
+      <h3 className="font-display text-lg font-bold text-navy-deep mb-4">Edit profile</h3>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="First name" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
+        <Field label="Last name" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
+        <Field label="Username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
+        <Field label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+        <Field label="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
+        <Field label="Account type" value={form.account_type} onChange={(e) => setForm({ ...form, account_type: e.target.value })} />
+        <div className="col-span-2">
+          <Field label="Account number" value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} />
+        </div>
+      </div>
+      <div className="mt-5 flex justify-end gap-2">
+        <button onClick={onClose} disabled={busy} className="h-10 px-4 rounded-md border border-border text-sm font-semibold text-navy-deep">Cancel</button>
+        <button onClick={save} disabled={busy} className="h-10 px-4 rounded-md bg-indigo text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-60">
+          {busy && <Loader2 className="h-4 w-4 animate-spin" />} Save changes
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+function EditBalanceModal({ userId, currentBalance, onClose, onSaved }: { userId: string; currentBalance: number; onClose: () => void; onSaved: (newBal: number) => void }) {
+  const [mode, setMode] = useState<"set" | "credit" | "debit">("set");
+  const [amount, setAmount] = useState<string>(String(currentBalance));
+  const [desc, setDesc] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const save = async () => {
+    const amt = Number(amount);
+    if (!isFinite(amt) || amt < 0) return toast.error("Enter a valid amount");
+    setBusy(true);
+    try {
+      if (mode === "set") {
+        const { data, error } = await supabase.rpc("admin_set_balance", { _user_id: userId, _new_balance: amt, _description: desc || "Admin balance set" });
+        if (error) throw error;
+        onSaved(Number((data as { new_balance: number }).new_balance));
+      } else {
+        const { data, error } = await supabase.rpc("admin_adjust_balance", { _user_id: userId, _amount: amt, _description: desc || `Admin ${mode}`, _direction: mode });
+        if (error) throw error;
+        const d = data as { new_balance?: number };
+        onSaved(Number(d.new_balance ?? currentBalance));
+      }
+      toast.success("Balance updated");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Update failed");
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <Modal onClose={() => !busy && onClose()}>
+      <h3 className="font-display text-lg font-bold text-navy-deep mb-4">Adjust balance</h3>
+      <div className="flex gap-2 mb-3">
+        {(["set", "credit", "debit"] as const).map((m) => (
+          <button key={m} onClick={() => setMode(m)} className={`flex-1 h-9 rounded-md text-xs font-semibold capitalize ${mode === m ? "bg-indigo text-white" : "bg-ivory text-navy-deep border border-border"}`}>{m}</button>
+        ))}
+      </div>
+      <Field label={mode === "set" ? "New balance ($)" : "Amount ($)"} type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+      <div className="mt-3">
+        <Field label="Description (shown to user)" value={desc} onChange={(e) => setDesc(e.target.value)} />
+      </div>
+      <p className="text-xs text-navy-light mt-2">Current balance: ${currentBalance.toFixed(2)}</p>
+      <div className="mt-5 flex justify-end gap-2">
+        <button onClick={onClose} disabled={busy} className="h-10 px-4 rounded-md border border-border text-sm font-semibold text-navy-deep">Cancel</button>
+        <button onClick={save} disabled={busy} className="h-10 px-4 rounded-md bg-emerald-600 text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-60">
+          {busy && <Loader2 className="h-4 w-4 animate-spin" />} Apply
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+function EditTxModal({ tx, onClose, onSaved }: { tx: Tx; onClose: () => void; onSaved: () => void }) {
+  const [description, setDescription] = useState(tx.description);
+  const [amount, setAmount] = useState(String(tx.amount));
+  const [status, setStatus] = useState(tx.status);
+  const [busy, setBusy] = useState(false);
+
+  const save = async () => {
+    const amt = Number(amount);
+    if (!isFinite(amt)) return toast.error("Invalid amount");
+    setBusy(true);
+    const { error } = await supabase.from("transactions").update({ description, amount: amt, status }).eq("id", tx.id);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Transaction updated");
+    onSaved();
+  };
+
+  return (
+    <Modal onClose={() => !busy && onClose()}>
+      <h3 className="font-display text-lg font-bold text-navy-deep mb-1">Edit transaction</h3>
+      <p className="text-xs text-navy-light mb-4">#{tx.reference || tx.id.slice(0, 8)}</p>
+      <div className="space-y-3">
+        <Field label="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+        <Field label="Amount (negative = debit)" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <label className="block">
+          <span className="text-[10px] uppercase tracking-wider text-navy-light font-semibold">Status</span>
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="mt-1 w-full h-10 px-3 rounded-md border border-border bg-white text-sm text-navy-deep">
+            <option value="pending">pending</option>
+            <option value="completed">completed</option>
+            <option value="failed">failed</option>
+            <option value="cancelled">cancelled</option>
+          </select>
+        </label>
+      </div>
+      <p className="text-[11px] text-navy-light mt-3">Direct edit — does not refund/charge the user balance or send notifications. Use the status action buttons for that.</p>
+      <div className="mt-5 flex justify-end gap-2">
+        <button onClick={onClose} disabled={busy} className="h-10 px-4 rounded-md border border-border text-sm font-semibold text-navy-deep">Cancel</button>
+        <button onClick={save} disabled={busy} className="h-10 px-4 rounded-md bg-indigo text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-60">
+          {busy && <Loader2 className="h-4 w-4 animate-spin" />} Save
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+function DecisionModal({ decision, tx, busy, onCancel, onSubmit }: { decision: "completed" | "failed" | "cancelled"; tx: Tx; busy: boolean; onCancel: () => void; onSubmit: (note: string) => void }) {
+  const [note, setNote] = useState("");
+  const color = decision === "completed" ? "bg-emerald-600 hover:bg-emerald-700" : decision === "failed" ? "bg-destructive hover:bg-destructive/90" : "bg-amber-600 hover:bg-amber-700";
+  return (
+    <Modal onClose={() => !busy && onCancel()}>
+      <h3 className="font-display text-lg font-bold text-navy-deep">Mark as <span className="capitalize">{decision}</span></h3>
+      <p className="text-sm text-navy-light mt-1">{tx.description}</p>
+      <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} maxLength={500} placeholder="Reason / note sent to the user" className="mt-3 w-full px-3 py-2 rounded-md border border-border bg-white text-sm text-navy-deep focus:outline-none focus:border-indigo focus:ring-2 focus:ring-indigo/20" />
+      {decision !== "completed" && Number(tx.amount) < 0 && (
+        <p className="text-[11px] text-navy-light mt-1">User will be refunded ${Math.abs(Number(tx.amount)).toFixed(2)}.</p>
+      )}
+      <div className="mt-5 flex justify-end gap-2">
+        <button onClick={onCancel} disabled={busy} className="h-10 px-4 rounded-md border border-border text-sm font-semibold text-navy-deep">Cancel</button>
+        <button onClick={() => onSubmit(note)} disabled={busy} className={`h-10 px-4 rounded-md text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-60 ${color}`}>
+          {busy && <Loader2 className="h-4 w-4 animate-spin" />} Confirm & notify
+        </button>
+      </div>
+    </Modal>
   );
 }
