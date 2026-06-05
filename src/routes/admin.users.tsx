@@ -92,7 +92,7 @@ function AdminUsers() {
               ) : filtered.map((r) => (
                 <tr key={r.user_id} className="border-t border-border hover:bg-ivory/40">
                   <td className="px-4 py-3">
-                    <Link to="/admin/users/$userId" params={{ userId: r.user_id }} className="font-semibold text-navy-deep flex items-center gap-2 hover:text-indigo">
+                    <Link to="/admin/user/$userId" params={{ userId: r.user_id }} className="font-semibold text-navy-deep flex items-center gap-2 hover:text-indigo">
                       {r.first_name} {r.last_name}
                       {r.is_admin && <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-gold-500/15 text-gold-700 px-1.5 py-0.5 rounded"><ShieldCheck className="h-3 w-3" />Admin</span>}
                     </Link>
@@ -110,7 +110,7 @@ function AdminUsers() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">
-                      <Link to="/admin/users/$userId" params={{ userId: r.user_id }} className="text-xs font-medium text-navy-deep hover:underline">
+                      <Link to="/admin/user/$userId" params={{ userId: r.user_id }} className="text-xs font-medium text-navy-deep hover:underline">
                         View
                       </Link>
                       <button
