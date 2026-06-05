@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Search, ShieldCheck, CheckCircle2, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -92,10 +92,10 @@ function AdminUsers() {
               ) : filtered.map((r) => (
                 <tr key={r.user_id} className="border-t border-border hover:bg-ivory/40">
                   <td className="px-4 py-3">
-                    <div className="font-semibold text-navy-deep flex items-center gap-2">
+                    <Link to="/admin/users/$userId" params={{ userId: r.user_id }} className="font-semibold text-navy-deep flex items-center gap-2 hover:text-indigo">
                       {r.first_name} {r.last_name}
                       {r.is_admin && <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-gold-500/15 text-gold-700 px-1.5 py-0.5 rounded"><ShieldCheck className="h-3 w-3" />Admin</span>}
-                    </div>
+                    </Link>
                     <div className="text-xs text-navy-light">{r.email}</div>
                   </td>
                   <td className="px-4 py-3 font-mono text-xs text-navy">••••{r.account_number?.slice(-4)}</td>
@@ -109,12 +109,17 @@ function AdminUsers() {
                       : <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700"><XCircle className="h-3.5 w-3.5" />Unverified</span>}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => toggleVerified(r.user_id, r.is_verified)}
-                      className="text-xs font-medium text-indigo hover:underline"
-                    >
-                      {r.is_verified ? "Unverify" : "Verify"}
-                    </button>
+                    <div className="flex items-center justify-end gap-3">
+                      <Link to="/admin/users/$userId" params={{ userId: r.user_id }} className="text-xs font-medium text-navy-deep hover:underline">
+                        View
+                      </Link>
+                      <button
+                        onClick={() => toggleVerified(r.user_id, r.is_verified)}
+                        className="text-xs font-medium text-indigo hover:underline"
+                      >
+                        {r.is_verified ? "Unverify" : "Verify"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
