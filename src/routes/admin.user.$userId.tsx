@@ -4,7 +4,7 @@ import { ArrowLeft, Loader2, Mail, Phone, MapPin, ShieldCheck, Wallet } from "lu
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin/users/$userId")({
+export const Route = createFileRoute("/admin/user/$userId")({
   head: () => ({ meta: [{ title: "User details — Admin" }] }),
   component: UserDetail,
 });
