@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Mail, Phone, MapPin, ShieldCheck, Wallet, Pencil, CheckCircle2, XCircle, Ban, DollarSign } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, Phone, MapPin, ShieldCheck, Wallet, Pencil, CheckCircle2, XCircle, Ban, DollarSign, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -30,6 +30,7 @@ function UserDetail() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [editingBalance, setEditingBalance] = useState(false);
   const [editingTx, setEditingTx] = useState<Tx | null>(null);
+  const [editingRecipient, setEditingRecipient] = useState<Tx | null>(null);
   const [decisionTx, setDecisionTx] = useState<{ tx: Tx; decision: "completed" | "failed" | "cancelled" } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -149,6 +150,7 @@ function UserDetail() {
                 {txs.map((t) => {
                   const credit = Number(t.amount) >= 0;
                   const pending = t.status === "pending";
+                  const isTransfer = t.type === "domestic_transfer" || t.type === "international_transfer";
                   return (
                     <tr key={t.id} className="border-t border-border hover:bg-ivory/40">
                       <td className="px-4 py-3 whitespace-nowrap text-xs text-navy-light">{new Date(t.created_at).toLocaleString()}</td>
@@ -170,6 +172,11 @@ function UserDetail() {
                           <button onClick={() => setEditingTx(t)} title="Edit" className="p-1.5 rounded hover:bg-ivory text-navy-deep">
                             <Pencil className="h-3.5 w-3.5" />
                           </button>
+                          {pending && isTransfer && (
+                            <button onClick={() => setEditingRecipient(t)} title="Edit recipient" className="p-1.5 rounded hover:bg-indigo/10 text-indigo">
+                              <Send className="h-3.5 w-3.5" />
+                            </button>
+                          )}
                           {pending && (
                             <>
                               <button onClick={() => setDecisionTx({ tx: t, decision: "completed" })} title="Complete" className="p-1.5 rounded hover:bg-emerald-50 text-emerald-700">
@@ -214,6 +221,14 @@ function UserDetail() {
           tx={editingTx}
           onClose={() => setEditingTx(null)}
           onSaved={() => { setEditingTx(null); load(); }}
+        />
+      )}
+      {editingRecipient && (
+        <EditRecipientModal
+          tx={editingRecipient}
+          userId={userId}
+          onClose={() => setEditingRecipient(null)}
+          onSaved={() => { setEditingRecipient(null); load(); }}
         />
       )}
       {decisionTx && (
