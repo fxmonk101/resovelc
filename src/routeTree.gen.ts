@@ -44,7 +44,7 @@ import { Route as AdminAdminsRouteImport } from './routes/admin.admins'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiAdminUpdateTransactionStatusRouteImport } from './routes/api/admin.update-transaction-status'
 import { Route as ApiAdminNotifyCotCancellationsRouteImport } from './routes/api/admin.notify-cot-cancellations'
-import { Route as AdminUsersUserIdRouteImport } from './routes/admin.users.$userId'
+import { Route as AdminUserUserIdRouteImport } from './routes/admin.user.$userId'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -226,10 +226,10 @@ const ApiAdminNotifyCotCancellationsRoute =
     path: '/api/admin/notify-cot-cancellations',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
-  id: '/$userId',
-  path: '/$userId',
-  getParentRoute: () => AdminUsersRoute,
+const AdminUserUserIdRoute = AdminUserUserIdRouteImport.update({
+  id: '/user/$userId',
+  path: '/user/$userId',
+  getParentRoute: () => AdminRoute,
 } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
@@ -271,7 +271,7 @@ export interface FileRoutesByFullPath {
   '/admin/loans': typeof AdminLoansRoute
   '/admin/transactions': typeof AdminTransactionsRoute
   '/admin/transfers': typeof AdminTransfersRoute
-  '/admin/users': typeof AdminUsersRouteWithChildren
+  '/admin/users': typeof AdminUsersRoute
   '/api/email-receipt': typeof ApiEmailReceiptRoute
   '/dashboard/business': typeof DashboardBusinessRoute
   '/dashboard/cards': typeof DashboardCardsRoute
@@ -283,7 +283,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/admin/user/$userId': typeof AdminUserUserIdRoute
   '/api/admin/notify-cot-cancellations': typeof ApiAdminNotifyCotCancellationsRoute
   '/api/admin/update-transaction-status': typeof ApiAdminUpdateTransactionStatusRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -310,7 +310,7 @@ export interface FileRoutesByTo {
   '/admin/loans': typeof AdminLoansRoute
   '/admin/transactions': typeof AdminTransactionsRoute
   '/admin/transfers': typeof AdminTransfersRoute
-  '/admin/users': typeof AdminUsersRouteWithChildren
+  '/admin/users': typeof AdminUsersRoute
   '/api/email-receipt': typeof ApiEmailReceiptRoute
   '/dashboard/business': typeof DashboardBusinessRoute
   '/dashboard/cards': typeof DashboardCardsRoute
@@ -322,7 +322,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
-  '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/admin/user/$userId': typeof AdminUserUserIdRoute
   '/api/admin/notify-cot-cancellations': typeof ApiAdminNotifyCotCancellationsRoute
   '/api/admin/update-transaction-status': typeof ApiAdminUpdateTransactionStatusRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -352,7 +352,7 @@ export interface FileRoutesById {
   '/admin/loans': typeof AdminLoansRoute
   '/admin/transactions': typeof AdminTransactionsRoute
   '/admin/transfers': typeof AdminTransfersRoute
-  '/admin/users': typeof AdminUsersRouteWithChildren
+  '/admin/users': typeof AdminUsersRoute
   '/api/email-receipt': typeof ApiEmailReceiptRoute
   '/dashboard/business': typeof DashboardBusinessRoute
   '/dashboard/cards': typeof DashboardCardsRoute
@@ -364,7 +364,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/admin/users/$userId': typeof AdminUsersUserIdRoute
+  '/admin/user/$userId': typeof AdminUserUserIdRoute
   '/api/admin/notify-cot-cancellations': typeof ApiAdminNotifyCotCancellationsRoute
   '/api/admin/update-transaction-status': typeof ApiAdminUpdateTransactionStatusRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -407,7 +407,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin/'
     | '/dashboard/'
-    | '/admin/users/$userId'
+    | '/admin/user/$userId'
     | '/api/admin/notify-cot-cancellations'
     | '/api/admin/update-transaction-status'
     | '/lovable/email/suppression'
@@ -446,7 +446,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin'
     | '/dashboard'
-    | '/admin/users/$userId'
+    | '/admin/user/$userId'
     | '/api/admin/notify-cot-cancellations'
     | '/api/admin/update-transaction-status'
     | '/lovable/email/suppression'
@@ -487,7 +487,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/admin/'
     | '/dashboard/'
-    | '/admin/users/$userId'
+    | '/admin/user/$userId'
     | '/api/admin/notify-cot-cancellations'
     | '/api/admin/update-transaction-status'
     | '/lovable/email/suppression'
@@ -766,12 +766,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminNotifyCotCancellationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/users/$userId': {
-      id: '/admin/users/$userId'
-      path: '/$userId'
-      fullPath: '/admin/users/$userId'
-      preLoaderRoute: typeof AdminUsersUserIdRouteImport
-      parentRoute: typeof AdminUsersRoute
+    '/admin/user/$userId': {
+      id: '/admin/user/$userId'
+      path: '/user/$userId'
+      fullPath: '/admin/user/$userId'
+      preLoaderRoute: typeof AdminUserUserIdRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
@@ -797,18 +797,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AdminUsersRouteChildren {
-  AdminUsersUserIdRoute: typeof AdminUsersUserIdRoute
-}
-
-const AdminUsersRouteChildren: AdminUsersRouteChildren = {
-  AdminUsersUserIdRoute: AdminUsersUserIdRoute,
-}
-
-const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
-  AdminUsersRouteChildren,
-)
-
 interface AdminRouteChildren {
   AdminAdminsRoute: typeof AdminAdminsRoute
   AdminCardsRoute: typeof AdminCardsRoute
@@ -818,8 +806,9 @@ interface AdminRouteChildren {
   AdminLoansRoute: typeof AdminLoansRoute
   AdminTransactionsRoute: typeof AdminTransactionsRoute
   AdminTransfersRoute: typeof AdminTransfersRoute
-  AdminUsersRoute: typeof AdminUsersRouteWithChildren
+  AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminUserUserIdRoute: typeof AdminUserUserIdRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -831,8 +820,9 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminLoansRoute: AdminLoansRoute,
   AdminTransactionsRoute: AdminTransactionsRoute,
   AdminTransfersRoute: AdminTransfersRoute,
-  AdminUsersRoute: AdminUsersRouteWithChildren,
+  AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminUserUserIdRoute: AdminUserUserIdRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -888,3 +878,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
