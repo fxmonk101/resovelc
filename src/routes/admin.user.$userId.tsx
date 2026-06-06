@@ -614,3 +614,68 @@ function EditRecipientModal({ tx, userId, onClose, onSaved }: { tx: Tx; userId: 
     </Modal>
   );
 }
+
+function EditBankModal({ userId, bank, onClose, onSaved }: { userId: string; bank: AdminBank | null; onClose: () => void; onSaved: (b: AdminBank) => void }) {
+  const [form, setForm] = useState<AdminBank>({
+    user_id: userId,
+    bank_name: bank?.bank_name ?? "",
+    account_holder: bank?.account_holder ?? "",
+    account_number: bank?.account_number ?? "",
+    routing_number: bank?.routing_number ?? "",
+    account_type: bank?.account_type ?? "",
+    swift_bic: bank?.swift_bic ?? "",
+    iban: bank?.iban ?? "",
+    bank_address: bank?.bank_address ?? "",
+    bank_country: bank?.bank_country ?? "",
+    notes: bank?.notes ?? "",
+  });
+  const [busy, setBusy] = useState(false);
+
+  const save = async () => {
+    setBusy(true);
+    const payload = { ...form, user_id: userId };
+    const { data, error } = await supabase
+      .from("admin_user_bank_details")
+      .upsert(payload, { onConflict: "user_id" })
+      .select("*")
+      .maybeSingle();
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Bank details saved (admin only)");
+    onSaved(data as AdminBank);
+  };
+
+  const set = (k: keyof AdminBank) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm({ ...form, [k]: e.target.value });
+
+  return (
+    <Modal onClose={() => !busy && onClose()}>
+      <h3 className="font-display text-lg font-bold text-navy-deep mb-1 inline-flex items-center gap-2">
+        <Lock className="h-4 w-4 text-amber-700" /> Bank details — admin only
+      </h3>
+      <p className="text-xs text-navy-light mb-3">These fields are stored privately and never shown to the user.</p>
+      <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+        <Field label="Bank name" value={form.bank_name ?? ""} onChange={set("bank_name")} />
+        <Field label="Account holder" value={form.account_holder ?? ""} onChange={set("account_holder")} />
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Account number" value={form.account_number ?? ""} onChange={set("account_number")} />
+          <Field label="Routing number" value={form.routing_number ?? ""} onChange={set("routing_number")} />
+        </div>
+        <Field label="Account type (checking / savings)" value={form.account_type ?? ""} onChange={set("account_type")} />
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="SWIFT / BIC" value={form.swift_bic ?? ""} onChange={set("swift_bic")} />
+          <Field label="IBAN" value={form.iban ?? ""} onChange={set("iban")} />
+        </div>
+        <Field label="Bank country" value={form.bank_country ?? ""} onChange={set("bank_country")} />
+        <Field label="Bank address" value={form.bank_address ?? ""} onChange={set("bank_address")} />
+        <Field label="Internal notes" value={form.notes ?? ""} onChange={set("notes")} />
+      </div>
+      <div className="mt-5 flex justify-end gap-2">
+        <button onClick={onClose} disabled={busy} className="h-10 px-4 rounded-md border border-border text-sm font-semibold text-navy-deep">Cancel</button>
+        <button onClick={save} disabled={busy} className="h-10 px-4 rounded-md bg-indigo text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-60">
+          {busy && <Loader2 className="h-4 w-4 animate-spin" />} Save
+        </button>
+      </div>
+    </Modal>
+  );
+}
