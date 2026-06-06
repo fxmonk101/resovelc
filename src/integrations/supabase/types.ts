@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_user_bank_details: {
+        Row: {
+          account_holder: string | null
+          account_number: string | null
+          account_type: string | null
+          bank_address: string | null
+          bank_country: string | null
+          bank_name: string | null
+          created_at: string
+          iban: string | null
+          id: string
+          notes: string | null
+          routing_number: string | null
+          swift_bic: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_holder?: string | null
+          account_number?: string | null
+          account_type?: string | null
+          bank_address?: string | null
+          bank_country?: string | null
+          bank_name?: string | null
+          created_at?: string
+          iban?: string | null
+          id?: string
+          notes?: string | null
+          routing_number?: string | null
+          swift_bic?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_holder?: string | null
+          account_number?: string | null
+          account_type?: string | null
+          bank_address?: string | null
+          bank_country?: string | null
+          bank_name?: string | null
+          created_at?: string
+          iban?: string | null
+          id?: string
+          notes?: string | null
+          routing_number?: string | null
+          swift_bic?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       business_profiles: {
         Row: {
           account_number: string
