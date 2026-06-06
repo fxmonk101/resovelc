@@ -220,6 +220,35 @@ function UserDetail() {
         )}
       </div>
 
+      <div className="rounded-xl border border-border bg-white overflow-hidden">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h3 className="font-display text-lg font-bold text-navy-deep inline-flex items-center gap-2">
+              <Landmark className="h-5 w-5 text-indigo" /> Bank details
+              <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded bg-amber-100 text-amber-700">
+                <Lock className="h-3 w-3" /> Admin only
+              </span>
+            </h3>
+            <p className="text-xs text-navy-light mt-0.5">Visible to admins only — not shown to the user.</p>
+          </div>
+          <button onClick={() => setEditingBank(true)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold bg-indigo text-white hover:bg-indigo/90">
+            <Pencil className="h-3.5 w-3.5" /> {bank ? "Edit bank details" : "Add bank details"}
+          </button>
+        </div>
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <Info icon={Landmark} label="Bank name" value={bank?.bank_name || "—"} />
+          <Info icon={Wallet} label="Account holder" value={bank?.account_holder || "—"} />
+          <Info icon={Wallet} label="Account number" value={bank?.account_number || "—"} />
+          <Info icon={Wallet} label="Routing number" value={bank?.routing_number || "—"} />
+          <Info icon={Wallet} label="Account type" value={bank?.account_type || "—"} />
+          <Info icon={Wallet} label="SWIFT / BIC" value={bank?.swift_bic || "—"} />
+          <Info icon={Wallet} label="IBAN" value={bank?.iban || "—"} />
+          <Info icon={MapPin} label="Bank country" value={bank?.bank_country || "—"} />
+          <Info icon={MapPin} label="Bank address" value={bank?.bank_address || "—"} />
+          <Info icon={Pencil} label="Internal notes" value={bank?.notes || "—"} />
+        </div>
+      </div>
+
       {editingProfile && (
         <EditProfileModal
           profile={profile}
@@ -257,6 +286,14 @@ function UserDetail() {
           busy={busy}
           onCancel={() => setDecisionTx(null)}
           onSubmit={submitTxDecision}
+        />
+      )}
+      {editingBank && (
+        <EditBankModal
+          userId={userId}
+          bank={bank}
+          onClose={() => setEditingBank(false)}
+          onSaved={(b) => { setBank(b); setEditingBank(false); }}
         />
       )}
     </div>
