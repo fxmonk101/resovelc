@@ -191,8 +191,8 @@ function UserDetail() {
                           <button onClick={() => setEditingTx(t)} title="Edit" className="p-1.5 rounded hover:bg-ivory text-navy-deep">
                             <Pencil className="h-3.5 w-3.5" />
                           </button>
-                          {pending && isTransfer && (
-                            <button onClick={() => setEditingRecipient(t)} title="Edit recipient" className="p-1.5 rounded hover:bg-indigo/10 text-indigo">
+                          {isTransfer && (
+                            <button onClick={() => setEditingRecipient(t)} title="Edit external bank / recipient" className="p-1.5 rounded hover:bg-indigo/10 text-indigo">
                               <Send className="h-3.5 w-3.5" />
                             </button>
                           )}
@@ -338,8 +338,6 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
     username: profile.username ?? "",
     phone: profile.phone ?? "",
     country: profile.country ?? "",
-    account_type: profile.account_type ?? "",
-    account_number: profile.account_number ?? "",
   });
   const [busy, setBusy] = useState(false);
 
@@ -361,11 +359,11 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
         <Field label="Username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
         <Field label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
         <Field label="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
-        <Field label="Account type" value={form.account_type} onChange={(e) => setForm({ ...form, account_type: e.target.value })} />
-        <div className="col-span-2">
-          <Field label="Account number" value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} />
-        </div>
       </div>
+      <p className="text-xs text-navy-light mt-3">
+        Account number, routing number, and other bank fields are admin-only and managed in the
+        <strong> Bank details</strong> section below — changes there are not visible to the user.
+      </p>
       <div className="mt-5 flex justify-end gap-2">
         <button onClick={onClose} disabled={busy} className="h-10 px-4 rounded-md border border-border text-sm font-semibold text-navy-deep">Cancel</button>
         <button onClick={save} disabled={busy} className="h-10 px-4 rounded-md bg-indigo text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-60">
