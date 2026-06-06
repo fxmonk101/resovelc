@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Mail, Phone, MapPin, ShieldCheck, Wallet, Pencil, CheckCircle2, XCircle, Ban, DollarSign, Send } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, Phone, MapPin, ShieldCheck, Wallet, Pencil, CheckCircle2, XCircle, Ban, DollarSign, Send, Landmark, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -21,6 +21,21 @@ type Tx = {
   reference: string; status: string; created_at: string;
 };
 
+type AdminBank = {
+  id?: string;
+  user_id: string;
+  bank_name: string | null;
+  account_holder: string | null;
+  account_number: string | null;
+  routing_number: string | null;
+  account_type: string | null;
+  swift_bic: string | null;
+  iban: string | null;
+  bank_address: string | null;
+  bank_country: string | null;
+  notes: string | null;
+};
+
 function UserDetail() {
   const { userId } = Route.useParams();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -33,18 +48,22 @@ function UserDetail() {
   const [editingRecipient, setEditingRecipient] = useState<Tx | null>(null);
   const [decisionTx, setDecisionTx] = useState<{ tx: Tx; decision: "completed" | "failed" | "cancelled" } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [bank, setBank] = useState<AdminBank | null>(null);
+  const [editingBank, setEditingBank] = useState(false);
 
   const load = async () => {
       setLoading(true);
-      const [{ data: prof }, { data: users }, { data: tx }] = await Promise.all([
+      const [{ data: prof }, { data: users }, { data: tx }, { data: bk }] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
         supabase.rpc("admin_list_users"),
         supabase.from("transactions").select("id,type,amount,description,reference,status,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(200),
+        supabase.from("admin_user_bank_details").select("*").eq("user_id", userId).maybeSingle(),
       ]);
       if (prof) setProfile(prof as Profile);
       const u = ((users ?? []) as Array<{ user_id: string; email: string }>).find((x) => x.user_id === userId);
       if (u) setEmail(u.email);
       setTxs((tx ?? []) as Tx[]);
+      setBank((bk as AdminBank) ?? null);
       setLoading(false);
   };
 
