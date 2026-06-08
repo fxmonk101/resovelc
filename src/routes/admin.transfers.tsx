@@ -70,21 +70,17 @@ function AdminTransfers() {
     if (!/^[0-9]{5,20}$/.test(editDom.account_number)) return toast.error("Account number must be 5–20 digits");
     if (!["checking", "savings"].includes(editDom.account_type)) return toast.error("Account type must be checking or savings");
     setSaving(true);
-    const { error } = await supabase.rpc("admin_set_pending_transfer_edits", {
-      _kind: "domestic",
-      _id: editDom.id,
-      _edits: {
-        recipient_name: editDom.recipient_name,
-        bank_name: editDom.bank_name,
-        routing_number: editDom.routing_number,
-        account_number: editDom.account_number,
-        account_type: editDom.account_type,
-        memo: editDom.memo,
-      },
-    });
+    const { error } = await supabase.from("domestic_transfers").update({
+      recipient_name: editDom.recipient_name,
+      bank_name: editDom.bank_name,
+      routing_number: editDom.routing_number,
+      account_number: editDom.account_number,
+      account_type: editDom.account_type,
+      memo: editDom.memo,
+    }).eq("id", editDom.id);
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Saved. Applies to client when you mark transfer completed/failed.");
+    toast.success("Transfer recipient updated");
     setEditDom(null);
     load();
   };
@@ -92,22 +88,18 @@ function AdminTransfers() {
   const saveIntl = async () => {
     if (!editIntl) return;
     setSaving(true);
-    const { error } = await supabase.rpc("admin_set_pending_transfer_edits", {
-      _kind: "international",
-      _id: editIntl.id,
-      _edits: {
-        recipient_name: editIntl.recipient_name,
-        recipient_bank: editIntl.recipient_bank,
-        swift_bic: editIntl.swift_bic,
-        iban_or_account: editIntl.iban_or_account,
-        recipient_country: editIntl.recipient_country,
-        recipient_address: editIntl.recipient_address,
-        purpose: editIntl.purpose,
-      },
-    });
+    const { error } = await supabase.from("international_transfers").update({
+      recipient_name: editIntl.recipient_name,
+      recipient_bank: editIntl.recipient_bank,
+      swift_bic: editIntl.swift_bic,
+      iban_or_account: editIntl.iban_or_account,
+      recipient_country: editIntl.recipient_country,
+      recipient_address: editIntl.recipient_address,
+      purpose: editIntl.purpose,
+    }).eq("id", editIntl.id);
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Saved. Applies to client when you mark transfer completed/failed.");
+    toast.success("International transfer recipient updated");
     setEditIntl(null);
     load();
   };

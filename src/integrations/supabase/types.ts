@@ -263,7 +263,6 @@ export type Database = {
           created_at: string
           id: string
           memo: string | null
-          pending_admin_edits: Json | null
           recipient_name: string
           reference: string
           routing_number: string
@@ -280,7 +279,6 @@ export type Database = {
           created_at?: string
           id?: string
           memo?: string | null
-          pending_admin_edits?: Json | null
           recipient_name: string
           reference?: string
           routing_number: string
@@ -297,7 +295,6 @@ export type Database = {
           created_at?: string
           id?: string
           memo?: string | null
-          pending_admin_edits?: Json | null
           recipient_name?: string
           reference?: string
           routing_number?: string
@@ -455,7 +452,6 @@ export type Database = {
           fee: number
           iban_or_account: string
           id: string
-          pending_admin_edits: Json | null
           purpose: string | null
           recipient_address: string | null
           recipient_bank: string
@@ -476,7 +472,6 @@ export type Database = {
           fee?: number
           iban_or_account: string
           id?: string
-          pending_admin_edits?: Json | null
           purpose?: string | null
           recipient_address?: string | null
           recipient_bank: string
@@ -497,7 +492,6 @@ export type Database = {
           fee?: number
           iban_or_account?: string
           id?: string
-          pending_admin_edits?: Json | null
           purpose?: string | null
           recipient_address?: string | null
           recipient_bank?: string
@@ -864,10 +858,6 @@ export type Database = {
       admin_set_balance: {
         Args: { _description: string; _new_balance: number; _user_id: string }
         Returns: Json
-      }
-      admin_set_pending_transfer_edits: {
-        Args: { _edits: Json; _id: string; _kind: string }
-        Returns: undefined
       }
       admin_settle_transfer: {
         Args: {
