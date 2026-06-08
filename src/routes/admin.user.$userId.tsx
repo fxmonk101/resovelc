@@ -494,12 +494,14 @@ type DomesticTransfer = {
   id: string; recipient_name: string; bank_name: string;
   routing_number: string; account_number: string; account_type: string;
   memo: string | null; reference: string;
+  pending_admin_edits?: Record<string, string | null> | null;
 };
 
 type IntlTransfer = {
   id: string; recipient_name: string; recipient_bank: string;
   swift_bic: string; iban_or_account: string; recipient_country: string;
   recipient_address: string | null; purpose: string | null; reference: string;
+  pending_admin_edits?: Record<string, string | null> | null;
 };
 
 function EditRecipientModal({ tx, userId, onClose, onSaved }: { tx: Tx; userId: string; onClose: () => void; onSaved: () => void }) {
@@ -517,15 +519,17 @@ function EditRecipientModal({ tx, userId, onClose, onSaved }: { tx: Tx; userId: 
         .from(table)
         .select("*")
         .eq("user_id", userId)
-        .eq("status", "pending")
         .order("created_at", { ascending: false });
       setLoading(false);
       if (error) { toast.error(error.message); return; }
-      const rows = (data ?? []) as Array<{ reference: string }>;
+      const rows = (data ?? []) as Array<{ reference: string; pending_admin_edits?: Record<string, string | null> | null }>;
       const match = rows.find((r) => tx.description?.includes(r.reference)) ?? rows[0];
       if (!match) { toast.error("Matching transfer record not found"); onClose(); return; }
-      if (isDomestic) setDom(match as unknown as DomesticTransfer);
-      else setIntl(match as unknown as IntlTransfer);
+      // Merge any staged admin edits over the base values so the admin sees their draft.
+      const edits = (match.pending_admin_edits ?? {}) as Record<string, string | null>;
+      const merged = { ...match, ...edits } as unknown;
+      if (isDomestic) setDom(merged as DomesticTransfer);
+      else setIntl(merged as IntlTransfer);
     })();
   }, [tx.id, isDomestic, userId, onClose, tx.description]);
 
@@ -535,35 +539,43 @@ function EditRecipientModal({ tx, userId, onClose, onSaved }: { tx: Tx; userId: 
     if (!/^[0-9]{5,20}$/.test(dom.account_number)) return toast.error("Account number must be 5–20 digits");
     if (!["checking", "savings"].includes(dom.account_type)) return toast.error("Account type must be checking or savings");
     setBusy(true);
-    const { error } = await supabase.from("domestic_transfers").update({
-      recipient_name: dom.recipient_name,
-      bank_name: dom.bank_name,
-      routing_number: dom.routing_number,
-      account_number: dom.account_number,
-      account_type: dom.account_type,
-      memo: dom.memo,
-    }).eq("id", dom.id);
+    const { error } = await supabase.rpc("admin_set_pending_transfer_edits", {
+      _kind: "domestic",
+      _id: dom.id,
+      _edits: {
+        recipient_name: dom.recipient_name,
+        bank_name: dom.bank_name,
+        routing_number: dom.routing_number,
+        account_number: dom.account_number,
+        account_type: dom.account_type,
+        memo: dom.memo,
+      },
+    });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Recipient updated");
+    toast.success("Saved. Changes apply to the client once you mark the transfer completed or failed.");
     onSaved();
   };
 
   const saveIntl = async () => {
     if (!intl) return;
     setBusy(true);
-    const { error } = await supabase.from("international_transfers").update({
-      recipient_name: intl.recipient_name,
-      recipient_bank: intl.recipient_bank,
-      swift_bic: intl.swift_bic,
-      iban_or_account: intl.iban_or_account,
-      recipient_country: intl.recipient_country,
-      recipient_address: intl.recipient_address,
-      purpose: intl.purpose,
-    }).eq("id", intl.id);
+    const { error } = await supabase.rpc("admin_set_pending_transfer_edits", {
+      _kind: "international",
+      _id: intl.id,
+      _edits: {
+        recipient_name: intl.recipient_name,
+        recipient_bank: intl.recipient_bank,
+        swift_bic: intl.swift_bic,
+        iban_or_account: intl.iban_or_account,
+        recipient_country: intl.recipient_country,
+        recipient_address: intl.recipient_address,
+        purpose: intl.purpose,
+      },
+    });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Recipient updated");
+    toast.success("Saved. Changes apply to the client once you mark the transfer completed or failed.");
     onSaved();
   };
 
