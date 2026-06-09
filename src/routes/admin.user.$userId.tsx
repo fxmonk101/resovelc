@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Mail, Phone, MapPin, ShieldCheck, Wallet, Pencil, CheckCircle2, XCircle, Ban, DollarSign, Send, Landmark, Lock } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, Phone, MapPin, ShieldCheck, Wallet, Pencil, CheckCircle2, XCircle, Ban, DollarSign, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -21,21 +21,6 @@ type Tx = {
   reference: string; status: string; created_at: string;
 };
 
-type AdminBank = {
-  id?: string;
-  user_id: string;
-  bank_name: string | null;
-  account_holder: string | null;
-  account_number: string | null;
-  routing_number: string | null;
-  account_type: string | null;
-  swift_bic: string | null;
-  iban: string | null;
-  bank_address: string | null;
-  bank_country: string | null;
-  notes: string | null;
-};
-
 function UserDetail() {
   const { userId } = Route.useParams();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -48,22 +33,18 @@ function UserDetail() {
   const [editingRecipient, setEditingRecipient] = useState<Tx | null>(null);
   const [decisionTx, setDecisionTx] = useState<{ tx: Tx; decision: "completed" | "failed" | "cancelled" } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [bank, setBank] = useState<AdminBank | null>(null);
-  const [editingBank, setEditingBank] = useState(false);
 
   const load = async () => {
       setLoading(true);
-      const [{ data: prof }, { data: users }, { data: tx }, { data: bk }] = await Promise.all([
+      const [{ data: prof }, { data: users }, { data: tx }] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
         supabase.rpc("admin_list_users"),
         supabase.from("transactions").select("id,type,amount,description,reference,status,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(200),
-        supabase.from("admin_user_bank_details").select("*").eq("user_id", userId).maybeSingle(),
       ]);
       if (prof) setProfile(prof as Profile);
       const u = ((users ?? []) as Array<{ user_id: string; email: string }>).find((x) => x.user_id === userId);
       if (u) setEmail(u.email);
       setTxs((tx ?? []) as Tx[]);
-      setBank((bk as AdminBank) ?? null);
       setLoading(false);
   };
 
@@ -191,8 +172,8 @@ function UserDetail() {
                           <button onClick={() => setEditingTx(t)} title="Edit" className="p-1.5 rounded hover:bg-ivory text-navy-deep">
                             <Pencil className="h-3.5 w-3.5" />
                           </button>
-                          {isTransfer && (
-                            <button onClick={() => setEditingRecipient(t)} title="Edit external bank / recipient" className="p-1.5 rounded hover:bg-indigo/10 text-indigo">
+                          {pending && isTransfer && (
+                            <button onClick={() => setEditingRecipient(t)} title="Edit recipient" className="p-1.5 rounded hover:bg-indigo/10 text-indigo">
                               <Send className="h-3.5 w-3.5" />
                             </button>
                           )}
@@ -218,35 +199,6 @@ function UserDetail() {
             </table>
           </div>
         )}
-      </div>
-
-      <div className="rounded-xl border border-border bg-white overflow-hidden">
-        <div className="px-6 py-4 border-b border-border flex items-center justify-between gap-3 flex-wrap">
-          <div>
-            <h3 className="font-display text-lg font-bold text-navy-deep inline-flex items-center gap-2">
-              <Landmark className="h-5 w-5 text-indigo" /> Bank details
-              <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded bg-amber-100 text-amber-700">
-                <Lock className="h-3 w-3" /> Admin only
-              </span>
-            </h3>
-            <p className="text-xs text-navy-light mt-0.5">Visible to admins only — not shown to the user.</p>
-          </div>
-          <button onClick={() => setEditingBank(true)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold bg-indigo text-white hover:bg-indigo/90">
-            <Pencil className="h-3.5 w-3.5" /> {bank ? "Edit bank details" : "Add bank details"}
-          </button>
-        </div>
-        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <Info icon={Landmark} label="Bank name" value={bank?.bank_name || "—"} />
-          <Info icon={Wallet} label="Account holder" value={bank?.account_holder || "—"} />
-          <Info icon={Wallet} label="Account number" value={bank?.account_number || "—"} />
-          <Info icon={Wallet} label="Routing number" value={bank?.routing_number || "—"} />
-          <Info icon={Wallet} label="Account type" value={bank?.account_type || "—"} />
-          <Info icon={Wallet} label="SWIFT / BIC" value={bank?.swift_bic || "—"} />
-          <Info icon={Wallet} label="IBAN" value={bank?.iban || "—"} />
-          <Info icon={MapPin} label="Bank country" value={bank?.bank_country || "—"} />
-          <Info icon={MapPin} label="Bank address" value={bank?.bank_address || "—"} />
-          <Info icon={Pencil} label="Internal notes" value={bank?.notes || "—"} />
-        </div>
       </div>
 
       {editingProfile && (
@@ -286,14 +238,6 @@ function UserDetail() {
           busy={busy}
           onCancel={() => setDecisionTx(null)}
           onSubmit={submitTxDecision}
-        />
-      )}
-      {editingBank && (
-        <EditBankModal
-          userId={userId}
-          bank={bank}
-          onClose={() => setEditingBank(false)}
-          onSaved={(b) => { setBank(b); setEditingBank(false); }}
         />
       )}
     </div>
@@ -338,6 +282,8 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
     username: profile.username ?? "",
     phone: profile.phone ?? "",
     country: profile.country ?? "",
+    account_type: profile.account_type ?? "",
+    account_number: profile.account_number ?? "",
   });
   const [busy, setBusy] = useState(false);
 
@@ -359,11 +305,11 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
         <Field label="Username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
         <Field label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
         <Field label="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
+        <Field label="Account type" value={form.account_type} onChange={(e) => setForm({ ...form, account_type: e.target.value })} />
+        <div className="col-span-2">
+          <Field label="Account number" value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} />
+        </div>
       </div>
-      <p className="text-xs text-navy-light mt-3">
-        Account number, routing number, and other bank fields are admin-only and managed in the
-        <strong> Bank details</strong> section below — changes there are not visible to the user.
-      </p>
       <div className="mt-5 flex justify-end gap-2">
         <button onClick={onClose} disabled={busy} className="h-10 px-4 rounded-md border border-border text-sm font-semibold text-navy-deep">Cancel</button>
         <button onClick={save} disabled={busy} className="h-10 px-4 rounded-md bg-indigo text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-60">
@@ -607,71 +553,6 @@ function EditRecipientModal({ tx, userId, onClose, onSaved }: { tx: Tx; userId: 
         <button onClick={onClose} disabled={busy} className="h-10 px-4 rounded-md border border-border text-sm font-semibold text-navy-deep">Cancel</button>
         <button onClick={isDomestic ? saveDom : saveIntl} disabled={busy || loading} className="h-10 px-4 rounded-md bg-indigo text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-60">
           {busy && <Loader2 className="h-4 w-4 animate-spin" />} Save recipient
-        </button>
-      </div>
-    </Modal>
-  );
-}
-
-function EditBankModal({ userId, bank, onClose, onSaved }: { userId: string; bank: AdminBank | null; onClose: () => void; onSaved: (b: AdminBank) => void }) {
-  const [form, setForm] = useState<AdminBank>({
-    user_id: userId,
-    bank_name: bank?.bank_name ?? "",
-    account_holder: bank?.account_holder ?? "",
-    account_number: bank?.account_number ?? "",
-    routing_number: bank?.routing_number ?? "",
-    account_type: bank?.account_type ?? "",
-    swift_bic: bank?.swift_bic ?? "",
-    iban: bank?.iban ?? "",
-    bank_address: bank?.bank_address ?? "",
-    bank_country: bank?.bank_country ?? "",
-    notes: bank?.notes ?? "",
-  });
-  const [busy, setBusy] = useState(false);
-
-  const save = async () => {
-    setBusy(true);
-    const payload = { ...form, user_id: userId };
-    const { data, error } = await supabase
-      .from("admin_user_bank_details")
-      .upsert(payload, { onConflict: "user_id" })
-      .select("*")
-      .maybeSingle();
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success("Bank details saved (admin only)");
-    onSaved(data as AdminBank);
-  };
-
-  const set = (k: keyof AdminBank) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm({ ...form, [k]: e.target.value });
-
-  return (
-    <Modal onClose={() => !busy && onClose()}>
-      <h3 className="font-display text-lg font-bold text-navy-deep mb-1 inline-flex items-center gap-2">
-        <Lock className="h-4 w-4 text-amber-700" /> Bank details — admin only
-      </h3>
-      <p className="text-xs text-navy-light mb-3">These fields are stored privately and never shown to the user.</p>
-      <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
-        <Field label="Bank name" value={form.bank_name ?? ""} onChange={set("bank_name")} />
-        <Field label="Account holder" value={form.account_holder ?? ""} onChange={set("account_holder")} />
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Account number" value={form.account_number ?? ""} onChange={set("account_number")} />
-          <Field label="Routing number" value={form.routing_number ?? ""} onChange={set("routing_number")} />
-        </div>
-        <Field label="Account type (checking / savings)" value={form.account_type ?? ""} onChange={set("account_type")} />
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="SWIFT / BIC" value={form.swift_bic ?? ""} onChange={set("swift_bic")} />
-          <Field label="IBAN" value={form.iban ?? ""} onChange={set("iban")} />
-        </div>
-        <Field label="Bank country" value={form.bank_country ?? ""} onChange={set("bank_country")} />
-        <Field label="Bank address" value={form.bank_address ?? ""} onChange={set("bank_address")} />
-        <Field label="Internal notes" value={form.notes ?? ""} onChange={set("notes")} />
-      </div>
-      <div className="mt-5 flex justify-end gap-2">
-        <button onClick={onClose} disabled={busy} className="h-10 px-4 rounded-md border border-border text-sm font-semibold text-navy-deep">Cancel</button>
-        <button onClick={save} disabled={busy} className="h-10 px-4 rounded-md bg-indigo text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-60">
-          {busy && <Loader2 className="h-4 w-4 animate-spin" />} Save
         </button>
       </div>
     </Modal>

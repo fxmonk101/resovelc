@@ -14,57 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      admin_user_bank_details: {
-        Row: {
-          account_holder: string | null
-          account_number: string | null
-          account_type: string | null
-          bank_address: string | null
-          bank_country: string | null
-          bank_name: string | null
-          created_at: string
-          iban: string | null
-          id: string
-          notes: string | null
-          routing_number: string | null
-          swift_bic: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          account_holder?: string | null
-          account_number?: string | null
-          account_type?: string | null
-          bank_address?: string | null
-          bank_country?: string | null
-          bank_name?: string | null
-          created_at?: string
-          iban?: string | null
-          id?: string
-          notes?: string | null
-          routing_number?: string | null
-          swift_bic?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          account_holder?: string | null
-          account_number?: string | null
-          account_type?: string | null
-          bank_address?: string | null
-          bank_country?: string | null
-          bank_name?: string | null
-          created_at?: string
-          iban?: string | null
-          id?: string
-          notes?: string | null
-          routing_number?: string | null
-          swift_bic?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       business_profiles: {
         Row: {
           account_number: string
@@ -263,7 +212,6 @@ export type Database = {
           created_at: string
           id: string
           memo: string | null
-          pending_admin_edits: Json | null
           recipient_name: string
           reference: string
           routing_number: string
@@ -280,7 +228,6 @@ export type Database = {
           created_at?: string
           id?: string
           memo?: string | null
-          pending_admin_edits?: Json | null
           recipient_name: string
           reference?: string
           routing_number: string
@@ -297,7 +244,6 @@ export type Database = {
           created_at?: string
           id?: string
           memo?: string | null
-          pending_admin_edits?: Json | null
           recipient_name?: string
           reference?: string
           routing_number?: string
@@ -455,7 +401,6 @@ export type Database = {
           fee: number
           iban_or_account: string
           id: string
-          pending_admin_edits: Json | null
           purpose: string | null
           recipient_address: string | null
           recipient_bank: string
@@ -476,7 +421,6 @@ export type Database = {
           fee?: number
           iban_or_account: string
           id?: string
-          pending_admin_edits?: Json | null
           purpose?: string | null
           recipient_address?: string | null
           recipient_bank: string
@@ -497,7 +441,6 @@ export type Database = {
           fee?: number
           iban_or_account?: string
           id?: string
-          pending_admin_edits?: Json | null
           purpose?: string | null
           recipient_address?: string | null
           recipient_bank?: string
@@ -864,10 +807,6 @@ export type Database = {
       admin_set_balance: {
         Args: { _description: string; _new_balance: number; _user_id: string }
         Returns: Json
-      }
-      admin_set_pending_transfer_edits: {
-        Args: { _edits: Json; _id: string; _kind: string }
-        Returns: undefined
       }
       admin_settle_transfer: {
         Args: {
