@@ -93,8 +93,7 @@ function DepositForm({ onClose, onDone }: { onClose: () => void; onDone: () => v
 }
 
 function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
-  const [kind, setKind] = useState<"internal" | "external">("internal");
-  const [to, setTo] = useState("");
+  const [kind, setKind] = useState<"external">("external");
   const [amount, setAmount] = useState("");
   const [memo, setMemo] = useState("");
   const [recipientName, setRecipientName] = useState("");
@@ -110,7 +109,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
     recipient: string;
     bank?: string;
     accountMasked?: string;
-    kind: "internal" | "external";
+    kind: "external";
   }>(null);
   const [emailOpen, setEmailOpen] = useState(false);
   const [emailTo, setEmailTo] = useState("");
@@ -120,49 +119,31 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true); setErr("");
-    if (kind === "internal") {
-      const { error } = await supabase.rpc("user_transfer_funds", {
-        _to_account: to.trim(),
-        _amount: Number(amount),
-        _memo: memo,
-      });
-      setBusy(false);
-      if (error) return setErr(error.message);
-      setReceipt({
-        reference: `RC-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
-        amount: Number(amount),
-        recipient: to.trim(),
-        accountMasked: `••••${to.trim().slice(-4)}`,
-        kind: "internal",
-      });
-      onDone();
-      return;
-    } else {
-      if (!/^\d{9}$/.test(routing.trim())) { setBusy(false); return setErr("Routing number must be exactly 9 digits"); }
-      if (!/^\d{5,20}$/.test(extAccount.trim())) { setBusy(false); return setErr("Account number must be 5–20 digits"); }
-      const { data, error } = await supabase.rpc("user_submit_domestic_transfer", {
-        _recipient_name: recipientName.trim(),
-        _bank_name: bankName.trim(),
-        _routing_number: routing.trim(),
-        _account_number: extAccount.trim(),
-        _account_type: accountType,
-        _amount: Number(amount),
-        _memo: memo,
-      });
-      setBusy(false);
-      if (error) return setErr(error.message);
-      const ref = (data as { reference?: string } | null)?.reference ?? "DT-PENDING";
-      setReceipt({
-        reference: ref,
-        amount: Number(amount),
-        recipient: recipientName.trim(),
-        bank: bankName.trim(),
-        accountMasked: `••••${extAccount.trim().slice(-4)}`,
-        kind: "external",
-      });
-      onDone();
-      return;
-    }
+    
+    if (!/^\d{9}$/.test(routing.trim())) { setBusy(false); return setErr("Routing number must be exactly 9 digits"); }
+    if (!/^\d{5,20}$/.test(extAccount.trim())) { setBusy(false); return setErr("Account number must be 5–20 digits"); }
+    
+    const { data, error } = await supabase.rpc("user_submit_domestic_transfer", {
+      _recipient_name: recipientName.trim(),
+      _bank_name: bankName.trim(),
+      _routing_number: routing.trim(),
+      _account_number: extAccount.trim(),
+      _account_type: accountType,
+      _amount: Number(amount),
+      _memo: memo,
+    });
+    setBusy(false);
+    if (error) return setErr(error.message);
+    const ref = (data as { reference?: string } | null)?.reference ?? "DT-PENDING";
+    setReceipt({
+      reference: ref,
+      amount: Number(amount),
+      recipient: recipientName.trim(),
+      bank: bankName.trim(),
+      accountMasked: `••••${extAccount.trim().slice(-4)}`,
+      kind: "external",
+    });
+    onDone();
   };
 
   if (receipt) {
@@ -205,7 +186,6 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
       const doc = new jsPDF({ unit: "pt", format: "letter" });
       const W = doc.internal.pageSize.getWidth();
       const now = new Date();
-      // Header band
       doc.setFillColor(30, 41, 82);
       doc.rect(0, 0, W, 90, "F");
       doc.setTextColor(255, 255, 255);
@@ -217,20 +197,15 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
       doc.text("Transfer confirmation receipt", 40, 65);
       doc.text(now.toLocaleString(), W - 40, 65, { align: "right" });
 
-      // Status badge
       doc.setTextColor(20, 20, 20);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.text(receipt.kind === "external" ? "Transfer submitted" : "Transfer completed", 40, 130);
+      doc.text("Transfer submitted", 40, 130);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(11);
       doc.setTextColor(90, 90, 90);
-      const sub = receipt.kind === "external"
-        ? "Funds typically arrive in 12–24 hours."
-        : "Your internal transfer was processed successfully.";
-      doc.text(sub, 40, 150);
+      doc.text("Funds typically arrive in 12–24 hours.", 40, 150);
 
-      // Reference box
       doc.setDrawColor(220, 220, 220);
       doc.setFillColor(248, 247, 242);
       doc.roundedRect(40, 175, W - 80, 60, 6, 6, "FD");
@@ -242,14 +217,13 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
       doc.setTextColor(20, 20, 20);
       doc.text(receipt.reference, 56, 220);
 
-      // Detail table
       const rows: [string, string][] = [
         ["Amount", `$${receipt.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`],
         ["Recipient", receipt.recipient],
         ...(receipt.bank ? [["Bank", receipt.bank] as [string, string]] : []),
         ...(receipt.accountMasked ? [["Account", receipt.accountMasked] as [string, string]] : []),
-        ["Type", receipt.kind === "external" ? "External (US bank / credit union)" : "Internal Resolva account"],
-        ["Status", receipt.kind === "external" ? "Pending" : "Completed"],
+        ["Type", "External (US bank / credit union)"],
+        ["Status", "Pending"],
         ["Date", now.toLocaleString()],
       ];
       let y = 270;
@@ -269,16 +243,11 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
         y += 24;
       });
 
-      // Footer
       doc.setDrawColor(220, 220, 220);
       doc.line(40, y + 10, W - 40, y + 10);
       doc.setFontSize(9);
       doc.setTextColor(140, 140, 140);
-      doc.text(
-        "Keep this receipt for your records. For questions, contact Resolva Credix support.",
-        40,
-        y + 30,
-      );
+      doc.text("Keep this receipt for your records. For questions, contact Resolva Credix support.", 40, y + 30);
 
       doc.save(`Resolva-Receipt-${receipt.reference}.pdf`);
     };
@@ -286,39 +255,21 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
     return (
       <Shell title="Transfer submitted" subtitle="Keep this reference for your records" onClose={onClose}>
         <div className="space-y-5">
-          {receipt.kind === "external" ? (
-            <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              <div className="flex items-center gap-2 font-semibold">
-                <span className="inline-block h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                Pending — funds will arrive in 12–24 hours
-              </div>
-              <p className="mt-1 text-xs leading-relaxed">
-                The amount has been debited from your account and your transfer
-                is being processed. If the transfer cannot be completed, the
-                full amount is automatically refunded to your account. You can
-                edit or cancel this transfer from Recent transactions while it
-                remains pending.
-              </p>
+          <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <div className="flex items-center gap-2 font-semibold">
+              <span className="inline-block h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+              Pending — funds will arrive in 12–24 hours
             </div>
-          ) : (
-            <div className="flex items-center gap-3 rounded-lg bg-success/10 border border-success/30 px-4 py-3">
-              <CheckCircle2 className="h-6 w-6 text-success shrink-0" />
-              <div className="text-sm text-navy-deep">
-                Your transfer to the member account was completed successfully.
-              </div>
-            </div>
-          )}
+            <p className="mt-1 text-xs leading-relaxed">
+              The amount has been debited from your account and your transfer is being processed. If the transfer cannot be completed, the full amount is automatically refunded to your account. You can edit or cancel this transfer from Recent transactions while it remains pending.
+            </p>
+          </div>
 
           <div className="rounded-lg border border-border bg-cream/40 p-4">
             <div className="text-xs font-semibold text-navy-deep uppercase tracking-wide">Reference ID</div>
             <div className="mt-1 flex items-center justify-between gap-2">
               <div className="font-mono text-lg font-bold text-navy-deep">{receipt.reference}</div>
-              <button
-                type="button"
-                onClick={() => navigator.clipboard?.writeText(receipt.reference)}
-                className="inline-flex items-center gap-1.5 text-xs text-indigo hover:text-indigo-dark font-semibold"
-                aria-label="Copy reference"
-              >
+              <button type="button" onClick={() => navigator.clipboard?.writeText(receipt.reference)} className="inline-flex items-center gap-1.5 text-xs text-indigo hover:text-indigo-dark font-semibold" aria-label="Copy reference">
                 <Copy className="h-3.5 w-3.5" /> Copy
               </button>
             </div>
@@ -347,30 +298,18 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
             )}
             <div className="flex justify-between px-4 py-2.5 bg-white">
               <dt className="text-navy-light">Status</dt>
-              <dd className={`font-semibold ${receipt.kind === "external" ? "text-amber-700" : "text-navy-deep"}`}>{receipt.kind === "external" ? "Pending · 12–24h" : "Completed"}</dd>
+              <dd className="font-semibold text-amber-700">Pending · 12–24h</dd>
             </div>
           </dl>
 
           <div className="flex flex-col sm:flex-row gap-2">
-            <button
-              type="button"
-              onClick={downloadPdf}
-              className="flex-1 inline-flex items-center justify-center gap-2 bg-navy-deep hover:bg-navy text-white font-semibold py-2.5 rounded-lg transition"
-            >
+            <button type="button" onClick={downloadPdf} className="flex-1 inline-flex items-center justify-center gap-2 bg-navy-deep hover:bg-navy text-white font-semibold py-2.5 rounded-lg transition">
               <Download className="h-4 w-4" /> Download PDF
             </button>
-            <button
-              type="button"
-              onClick={() => setEmailOpen((v) => !v)}
-              className="flex-1 inline-flex items-center justify-center gap-2 bg-cream hover:bg-cream-dark border border-border text-navy-deep font-semibold py-2.5 rounded-lg transition"
-            >
+            <button type="button" onClick={() => setEmailOpen((v) => !v)} className="flex-1 inline-flex items-center justify-center gap-2 bg-cream hover:bg-cream-dark border border-border text-navy-deep font-semibold py-2.5 rounded-lg transition">
               <Mail className="h-4 w-4" /> Email receipt
             </button>
-            <Link
-              to="/dashboard"
-              onClick={onClose}
-              className="flex-1 inline-flex items-center justify-center gap-2 bg-indigo hover:bg-indigo-dark text-white font-semibold py-2.5 rounded-lg transition"
-            >
+            <Link to="/dashboard" onClick={onClose} className="flex-1 inline-flex items-center justify-center gap-2 bg-indigo hover:bg-indigo-dark text-white font-semibold py-2.5 rounded-lg transition">
               View transfer status <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -378,22 +317,10 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
           {emailOpen && (
             <div className="rounded-lg border border-border bg-white p-4 space-y-3">
               <Field label="Send receipt to email">
-                <input
-                  type="email"
-                  value={emailTo}
-                  onChange={(e) => setEmailTo(e.target.value)}
-                  placeholder="you@example.com"
-                  className={inputCls}
-                  autoFocus
-                />
+                <input type="email" value={emailTo} onChange={(e) => setEmailTo(e.target.value)} placeholder="you@example.com" className={inputCls} autoFocus />
               </Field>
               <Status error={emailMsg.err} success={emailMsg.ok} />
-              <button
-                type="button"
-                onClick={sendEmail}
-                disabled={emailBusy}
-                className="w-full inline-flex items-center justify-center gap-2 bg-indigo hover:bg-indigo-dark text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-60"
-              >
+              <button type="button" onClick={sendEmail} disabled={emailBusy} className="w-full inline-flex items-center justify-center gap-2 bg-indigo hover:bg-indigo-dark text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-60">
                 {emailBusy && <Loader2 className="h-4 w-4 animate-spin" />}
                 <Mail className="h-4 w-4" /> Send receipt
               </button>
@@ -405,51 +332,33 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
   }
 
   return (
-    <Shell title="Transfer money" subtitle="Send funds to another member account" onClose={onClose}>
+    <Shell title="Transfer money" subtitle="Send funds to an external bank account" onClose={onClose}>
       <form onSubmit={submit} className="space-y-3 sm:space-y-4">
-        <Field label="Transfer to">
-          <select value={kind} onChange={(e) => setKind(e.target.value as "internal" | "external")} className={inputCls}>
-            <option value="internal">Internal Resolva account</option>
-            <option value="external">External US bank / credit union</option>
-          </select>
-        </Field>
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive flex items-start gap-2">
+          <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+          <p className="text-xs">Local transfers to other member accounts are not available. Please use external bank transfers or contact support.</p>
+        </div>
 
-        {kind === "internal" ? (
-          <Field label="Member account number">
-            <input
-              required
-              value={to}
-              onChange={(e) => setTo(e.target.value.replace(/\D/g, ""))}
-              inputMode="numeric"
-              maxLength={20}
-              className={inputCls}
-              placeholder="Enter recipient account number"
-            />
+        <Field label="Recipient full name">
+          <input required value={recipientName} onChange={(e) => setRecipientName(e.target.value)} maxLength={120} className={inputCls} placeholder="Jane Doe" />
+        </Field>
+        <Field label="Bank or credit union name">
+          <input required value={bankName} onChange={(e) => setBankName(e.target.value)} maxLength={120} className={inputCls} placeholder="e.g. Navy Federal Credit Union" />
+        </Field>
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <Field label="Routing number (ABA)">
+            <input required value={routing} onChange={(e) => setRouting(e.target.value.replace(/\D/g, ""))} inputMode="numeric" maxLength={9} pattern="\d{9}" className={inputCls} placeholder="123456789" />
           </Field>
-        ) : (
-          <>
-            <Field label="Recipient full name">
-              <input required value={recipientName} onChange={(e) => setRecipientName(e.target.value)} maxLength={120} className={inputCls} placeholder="Jane Doe" />
-            </Field>
-            <Field label="Bank or credit union name">
-              <input required value={bankName} onChange={(e) => setBankName(e.target.value)} maxLength={120} className={inputCls} placeholder="e.g. Navy Federal Credit Union" />
-            </Field>
-            <div className="grid grid-cols-2 gap-2 sm:gap-3">
-              <Field label="Routing number (ABA)">
-                <input required value={routing} onChange={(e) => setRouting(e.target.value.replace(/\D/g, ""))} inputMode="numeric" maxLength={9} pattern="\d{9}" className={inputCls} placeholder="9 digits" />
-              </Field>
-              <Field label="Account type">
-                <select value={accountType} onChange={(e) => setAccountType(e.target.value as "checking" | "savings")} className={inputCls}>
-                  <option value="checking">Checking</option>
-                  <option value="savings">Savings</option>
-                </select>
-              </Field>
-            </div>
-            <Field label="Account number">
-              <input required value={extAccount} onChange={(e) => setExtAccount(e.target.value.replace(/\D/g, ""))} inputMode="numeric" maxLength={20} className={inputCls} placeholder="Up to 20 digits" />
-            </Field>
-          </>
-        )}
+          <Field label="Account type">
+            <select value={accountType} onChange={(e) => setAccountType(e.target.value as "checking" | "savings")} className={inputCls}>
+              <option value="checking">Checking</option>
+              <option value="savings">Savings</option>
+            </select>
+          </Field>
+        </div>
+        <Field label="Account number">
+          <input required value={extAccount} onChange={(e) => setExtAccount(e.target.value.replace(/\D/g, ""))} inputMode="numeric" maxLength={20} className={inputCls} placeholder="Up to 20 digits" />
+        </Field>
 
         <Field label="Amount (USD)">
           <input type="number" min="1" step="0.01" required value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} placeholder="0.00" />
@@ -459,7 +368,7 @@ function TransferForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
         </Field>
         <Status error={err} />
         <button disabled={busy} className="w-full bg-indigo hover:bg-indigo-dark text-white font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-60">
-          {busy && <Loader2 className="h-4 w-4 animate-spin" />} {kind === "internal" ? "Send transfer" : "Submit external transfer"}
+          {busy && <Loader2 className="h-4 w-4 animate-spin" />} Submit external transfer
         </button>
       </form>
     </Shell>
