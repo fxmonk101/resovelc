@@ -62,22 +62,26 @@ function UserDetail() {
     if (!decisionTx) return;
     setBusy(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { toast.error("Not authenticated"); return; }
-      const resp = await fetch("/api/admin/update-transaction-status", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({
-          transactionId: decisionTx.tx.id,
-          newStatus: decisionTx.decision,
-          adminNotes: note.trim() || null,
-        }),
+      const decision = decisionTx.decision;
+      let rpcFn = "admin_complete_pending_transaction";
+      
+      if (decision === "failed") {
+        rpcFn = "admin_fail_pending_transaction";
+      } else if (decision === "cancelled") {
+        rpcFn = "admin_cancel_pending_transaction";
+      }
+
+      const { error } = await supabase.rpc(rpcFn, {
+        _transaction_id: decisionTx.tx.id,
+        _admin_notes: note.trim() || null,
       });
-      const data = await resp.json();
-      if (!resp.ok) { toast.error(data.error || "Update failed"); return; }
-      toast.success(`Transaction marked ${decisionTx.decision}`);
+
+      if (error) throw error;
+      toast.success(`Transaction marked ${decision}`);
       setDecisionTx(null);
       await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Update failed");
     } finally { setBusy(false); }
   };
 
@@ -289,16 +293,30 @@ function EditProfileModal({ profile, onClose, onSaved }: { profile: Profile; onC
 
   const save = async () => {
     setBusy(true);
-    const { data, error } = await supabase.from("profiles").update(form).eq("user_id", profile.user_id).select("*").maybeSingle();
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success("Profile updated");
-    onSaved(data as Profile);
+    try {
+      const { data, error } = await supabase.rpc("admin_modify_user_profile", {
+        _user_id: profile.user_id,
+        _first_name: form.first_name || null,
+        _last_name: form.last_name || null,
+        _username: form.username || null,
+        _phone: form.phone || null,
+        _country: form.country || null,
+        _account_type: form.account_type || null,
+        _account_number: form.account_number || null,
+      });
+      if (error) throw error;
+      toast.success("Profile updated without validation");
+      onSaved({ ...profile, ...form });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
     <Modal onClose={() => !busy && onClose()}>
-      <h3 className="font-display text-lg font-bold text-navy-deep mb-4">Edit profile</h3>
+      <h3 className="font-display text-lg font-bold text-navy-deep mb-4">Edit profile (admin unrestricted)</h3>
       <div className="grid grid-cols-2 gap-3">
         <Field label="First name" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
         <Field label="Last name" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
@@ -352,7 +370,9 @@ function EditBalanceModal({ userId, currentBalance, onClose, onSaved }: { userId
       <h3 className="font-display text-lg font-bold text-navy-deep mb-4">Adjust balance</h3>
       <div className="flex gap-2 mb-3">
         {(["set", "credit", "debit"] as const).map((m) => (
-          <button key={m} onClick={() => setMode(m)} className={`flex-1 h-9 rounded-md text-xs font-semibold capitalize ${mode === m ? "bg-indigo text-white" : "bg-ivory text-navy-deep border border-border"}`}>{m}</button>
+          <button key={m} onClick={() => setMode(m)} className={`flex-1 h-9 rounded-md text-xs font-semibold capitalize ${mode === m ? "bg-indigo text-white" : "bg-ivory text-navy-deep border border-border"}`}>
+            {m}
+          </button>
         ))}
       </div>
       <Field label={mode === "set" ? "New balance ($)" : "Amount ($)"} type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
@@ -422,14 +442,14 @@ function DecisionModal({ decision, tx, busy, onCancel, onSubmit }: { decision: "
     <Modal onClose={() => !busy && onCancel()}>
       <h3 className="font-display text-lg font-bold text-navy-deep">Mark as <span className="capitalize">{decision}</span></h3>
       <p className="text-sm text-navy-light mt-1">{tx.description}</p>
-      <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} maxLength={500} placeholder="Reason / note sent to the user" className="mt-3 w-full px-3 py-2 rounded-md border border-border bg-white text-sm text-navy-deep focus:outline-none focus:border-indigo focus:ring-2 focus:ring-indigo/20" />
+      <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} maxLength={500} placeholder="Reason / note" className="mt-3 w-full px-3 py-2 rounded-md border border-border text-sm" />
       {decision !== "completed" && Number(tx.amount) < 0 && (
         <p className="text-[11px] text-navy-light mt-1">User will be refunded ${Math.abs(Number(tx.amount)).toFixed(2)}.</p>
       )}
       <div className="mt-5 flex justify-end gap-2">
         <button onClick={onCancel} disabled={busy} className="h-10 px-4 rounded-md border border-border text-sm font-semibold text-navy-deep">Cancel</button>
         <button onClick={() => onSubmit(note)} disabled={busy} className={`h-10 px-4 rounded-md text-white text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-60 ${color}`}>
-          {busy && <Loader2 className="h-4 w-4 animate-spin" />} Confirm & notify
+          {busy && <Loader2 className="h-4 w-4 animate-spin" />} Confirm & update
         </button>
       </div>
     </Modal>
@@ -477,45 +497,54 @@ function EditRecipientModal({ tx, userId, onClose, onSaved }: { tx: Tx; userId: 
 
   const saveDom = async () => {
     if (!dom) return;
-    if (!/^[0-9]{9}$/.test(dom.routing_number)) return toast.error("Routing number must be 9 digits");
-    if (!/^[0-9]{5,20}$/.test(dom.account_number)) return toast.error("Account number must be 5–20 digits");
-    if (!["checking", "savings"].includes(dom.account_type)) return toast.error("Account type must be checking or savings");
     setBusy(true);
-    const { error } = await supabase.from("domestic_transfers").update({
-      recipient_name: dom.recipient_name,
-      bank_name: dom.bank_name,
-      routing_number: dom.routing_number,
-      account_number: dom.account_number,
-      account_type: dom.account_type,
-      memo: dom.memo,
-    }).eq("id", dom.id);
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success("Recipient updated");
-    onSaved();
+    try {
+      const { error } = await supabase.rpc("admin_modify_transfer_recipient", {
+        _transfer_id: dom.id,
+        _kind: "domestic",
+        _recipient_name: dom.recipient_name,
+        _bank_name: dom.bank_name,
+        _routing_number: dom.routing_number,
+        _account_number: dom.account_number,
+        _account_type: dom.account_type,
+      });
+      if (error) throw error;
+      toast.success("Recipient updated without validation");
+      onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const saveIntl = async () => {
     if (!intl) return;
     setBusy(true);
-    const { error } = await supabase.from("international_transfers").update({
-      recipient_name: intl.recipient_name,
-      recipient_bank: intl.recipient_bank,
-      swift_bic: intl.swift_bic,
-      iban_or_account: intl.iban_or_account,
-      recipient_country: intl.recipient_country,
-      recipient_address: intl.recipient_address,
-      purpose: intl.purpose,
-    }).eq("id", intl.id);
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success("Recipient updated");
-    onSaved();
+    try {
+      const { error } = await supabase.rpc("admin_modify_transfer_recipient", {
+        _transfer_id: intl.id,
+        _kind: "international",
+        _recipient_name: intl.recipient_name,
+        _recipient_bank: intl.recipient_bank,
+        _swift_bic: intl.swift_bic,
+        _iban_or_account: intl.iban_or_account,
+        _recipient_country: intl.recipient_country,
+        _recipient_address: intl.recipient_address,
+      });
+      if (error) throw error;
+      toast.success("Recipient updated without validation");
+      onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
     <Modal onClose={() => !busy && onClose()}>
-      <h3 className="font-display text-lg font-bold text-navy-deep mb-1">Edit recipient</h3>
+      <h3 className="font-display text-lg font-bold text-navy-deep mb-1">Edit recipient (admin unrestricted)</h3>
       <p className="text-xs text-navy-light mb-4">{isDomestic ? "Domestic transfer" : "International wire"} · {tx.description}</p>
       {loading ? (
         <div className="py-10 text-center text-navy-light flex items-center justify-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Loading transfer…</div>
